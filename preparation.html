@@ -165,7 +165,7 @@
       <!-- CSV Import -->
       <div class="csv-bar">
         <label class="csv-btn" for="csv-input">📂 Import CSV</label>
-        <input type="file" id="csv-input" accept=".csv" onchange="importCSV(this)">
+        <input type="file" id="csv-input" accept=".csv,.txt">
         <span id="csv-filename">Pilih file .csv dari HP</span>
       </div>
 
@@ -318,6 +318,7 @@
       `;
       tbody.appendChild(tr);
       attachRowListeners(n);
+      attachTotListeners(n);
       updateTotalSample();
     }
 
@@ -348,6 +349,15 @@
 
     // Urutan kolom Sample_ID dalam satu baris
     const SID_ORDER = ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
+
+    // Mapping sid → tot
+    const SID_TO_TOT = {
+      'a10_sid': 'a10_tot',
+      'a2_sid':  'a2_tot',
+      'a06_sid': 'a06_tot',
+      'm06_sid': 'm06_tot',
+      'p03_sid': 'p03_tot'
+    };
 
     // Auto-fill Sample_ID setelah kolom trigger diisi
     function autoFillSampleIDs(rowNum, triggerField) {
@@ -388,77 +398,108 @@
       SID_ORDER.forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (!el) return;
-        el.addEventListener('change', () => {
-          if (el.value.trim()) autoFillSampleIDs(n, field);
-          else clearAutoAfter(n, field);
-        });
+
+        // Auto-fill Sample_ID berikutnya
         el.addEventListener('input', () => {
           if (el.dataset.auto === 'true') el.dataset.auto = 'false';
         });
-      });
-    }
-      const a10El = document.querySelector(`[name="a10_sid_${rowNum}"]`);
-      if (!a10El) return;
-      const base = a10El.value.trim();
-      if (!base) return;
 
-      // Ambil prefix (non-angka di akhir) dan 6 angka terakhir
-      const match = base.match(/^(.*?)(\d{1,6})$/);
-      if (!match) return;
-      const prefix = match[1];
-      const num6   = parseInt(match[2]);
-
-      const siblings = [
-        `a2_sid_${rowNum}`,
-        `a06_sid_${rowNum}`,
-        `m06_sid_${rowNum}`,
-        `p03_sid_${rowNum}`
-      ];
-
-      siblings.forEach((name, idx) => {
-        const el = document.querySelector(`[name="${name}"]`);
-        if (!el) return;
-        if (el.value === '' || el.dataset.auto === 'true') {
-          const newNum = String(num6 + idx + 1).padStart(match[2].length, '0');
-          el.value = prefix + newNum;
-          el.dataset.auto = 'true';
-        }
-      });
-    }
-
-    // Pasang event listener ke input samp_no dan a10_sid setelah baris dibuat
-    function attachRowListeners(n) {
-      // Saat from_cum berubah → recalc sampling no
-      const fcEl = document.getElementById('from_cum_' + n);
-      if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
-
-      // Saat samp_no dihapus manual → hapus flag auto
-      const snEl = document.querySelector(`[name="samp_no_${n}"]`);
-      if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
-
-      // Saat a10_sid diisi → auto-fill sibling
-      const a10El = document.querySelector(`[name="a10_sid_${n}"]`);
-      if (a10El) {
-        a10El.addEventListener('change', () => autoFillSampleIDs(n));
-        a10El.addEventListener('input', () => {
-          if (a10El.value === '') {
-            // Hapus semua sibling yang auto
-            [`a2_sid_${n}`,`a06_sid_${n}`,`m06_sid_${n}`,`p03_sid_${n}`].forEach(name => {
-              const el = document.querySelector(`[name="${name}"]`);
-              if (el && el.dataset.auto === 'true') { el.value = ''; el.dataset.auto = 'false'; }
-            });
+        // Barcode scan → isi kolom Total sebarisnya
+        // Barcode scanner biasanya kirim karakter cepat lalu Enter/Tab
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === 'Tab') {
+            const totField = SID_TO_TOT[field];
+            if (totField) {
+              const totEl = document.querySelector(`[name="${totField}_${n}"]`);
+              if (totEl && totEl.value === '' && el.value.trim()) {
+                totEl.value = el.value.trim();
+                totEl.dataset.auto = 'true';
+              }
+            }
           }
         });
-      }
 
-      // Sibling sid: jika diedit manual → hapus flag auto
-      [`a2_sid_${n}`,`a06_sid_${n}`,`m06_sid_${n}`,`p03_sid_${n}`].forEach(name => {
-        const el = document.querySelector(`[name="${name}"]`);
-        if (el) el.addEventListener('input', () => { el.dataset.auto = 'false'; });
+        // Fallback: change event (beberapa scanner langsung trigger change)
+        el.addEventListener('change', () => {
+          if (el.value.trim()) {
+            autoFillSampleIDs(n, field);
+            // Isi Total hanya untuk kolom ini saja (bukan auto-fill)
+            const totField = SID_TO_TOT[field];
+            if (totField) {
+              const totEl = document.querySelector(`[name="${totField}_${n}"]`);
+              if (totEl && (totEl.value === '' || totEl.dataset.auto === 'true')) {
+                totEl.value = el.value.trim();
+                totEl.dataset.auto = 'true';
+                calcRec(n); // trigger kalkulasi Rec
+              }
+            }
+          } else {
+            clearAutoAfter(n, field);
+            // Kosongkan Total kolom ini jika auto
+            const totField = SID_TO_TOT[field];
+            if (totField) {
+              const totEl = document.querySelector(`[name="${totField}_${n}"]`);
+              if (totEl && totEl.dataset.auto === 'true') { totEl.value = ''; totEl.dataset.auto = 'false'; calcRec(n); }
+            }
+          }
+        });
       });
     }
 
-    // ===== MERGE LOGIC =====
+    // ===== KALKULASI REC =====
+    function calcRec(rowNum) {
+      const get = (name) => {
+        const el = document.querySelector(`[name="${name}_${rowNum}"]`);
+        return el ? (parseFloat(el.value) || 0) : 0;
+      };
+      const set = (name, val) => {
+        const el = document.querySelector(`[name="${name}_${rowNum}"]`);
+        if (el && (el.value === '' || el.dataset.autoRec === 'true')) {
+          el.value = val !== '' ? val : '';
+          el.dataset.autoRec = val !== '' ? 'true' : 'false';
+        }
+      };
+
+      const t10  = get('a10_tot');
+      const t2   = get('a2_tot');
+      const t06  = get('a06_tot');
+      const sum3 = t10 + t2 + t06;
+
+      if (sum3 === 0) return; // belum ada data
+
+      const mult = sum3 > 1000 ? 1000 : 500;
+
+      // Hitung Rec untuk semua fraksi
+      const tots = {
+        a10_rec: t10,
+        a2_rec:  t2,
+        a06_rec: t06,
+        m06_rec: get('m06_tot'),
+        p03_rec: get('p03_tot')
+      };
+
+      Object.entries(tots).forEach(([recField, totVal]) => {
+        const rec = totVal > 0 ? parseFloat((totVal / sum3 * mult).toFixed(2)) : '';
+        set(recField, rec);
+      });
+    }
+
+    // Pasang listener pada kolom Total untuk trigger kalkulasi Rec
+    function attachTotListeners(n) {
+      ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(field => {
+        const el = document.querySelector(`[name="${field}_${n}"]`);
+        if (!el) return;
+        el.addEventListener('change', () => calcRec(n));
+        el.addEventListener('input',  () => {
+          if (el.dataset.autoRec === 'true') el.dataset.autoRec = 'false';
+        });
+      });
+      // Rec fields: jika diedit manual → hapus flag autoRec
+      ['a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'].forEach(field => {
+        const el = document.querySelector(`[name="${field}_${n}"]`);
+        if (el) el.addEventListener('input', () => { el.dataset.autoRec = 'false'; });
+      });
+    }
     // selectedRows = set nomor baris yang dipilih untuk digabung dengan mergeSourceRow
     let selectedRows = new Set();
 
@@ -608,75 +649,105 @@
       applyBtn.style.cssText = 'background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;';
       applyBtn.onclick = applyMerge;
       banner.insertBefore(applyBtn, banner.querySelector('button'));
+
+      // Pasang event listener file input CSV
+      const csvInput = document.getElementById('csv-input');
+      if (csvInput) {
+        csvInput.addEventListener('change', function() { importCSV(this); });
+      }
     });
 
     // ===== IMPORT CSV =====
     function importCSV(input) {
-      const file = input.files[0];
-      if (!file) return;
-      document.getElementById('csv-filename').textContent = file.name;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const text = e.target.result;
-        const lines = text.trim().split(/\r?\n/);
-        if (lines.length < 2) { showToast('CSV kosong atau format salah', 'error'); return; }
+      try {
+        const file = input.files[0];
+        if (!file) return;
+        document.getElementById('csv-filename').textContent = file.name;
 
-        // Deteksi separator: coba titik koma dulu, lalu tab, lalu koma
-        let sep = ',';
-        if (lines[0].includes('\t')) sep = '\t';
-        else if (lines[0].split(';').length > lines[0].split(',').length) sep = ';';
+        const reader = new FileReader();
+        reader.onerror = function() { showToast('Gagal membaca file', 'error'); };
+        reader.onload = function(e) {
+          try {
+            const text = e.target.result;
+            if (!text || !text.trim()) { showToast('File kosong', 'error'); return; }
 
-        const rawHeaders = lines[0].split(sep);
-        const headers = rawHeaders.map(h => h.trim().toLowerCase().replace(/[^a-z0-9]/g, ''));
+            const lines = text.trim().split(/\r?\n/);
+            if (lines.length < 2) { showToast('CSV harus punya header + minimal 1 baris data', 'error'); return; }
 
-        // Debug: tampilkan header yang terdeteksi
-        console.log('CSV headers raw:', rawHeaders);
-        console.log('CSV headers normalized:', headers);
-        console.log('Separator:', sep === '\t' ? 'TAB' : sep);
+            // Deteksi separator otomatis
+            const firstLine = lines[0];
+            const tabCount   = (firstLine.match(/\t/g)  || []).length;
+            const semiCount  = (firstLine.match(/;/g)   || []).length;
+            const commaCount = (firstLine.match(/,/g)   || []).length;
+            let sep = ',';
+            if (tabCount > commaCount && tabCount > semiCount) sep = '\t';
+            else if (semiCount > commaCount) sep = ';';
 
-        const findCol = (...names) => {
-          for (const name of names) {
-            const idx = headers.findIndex(h => h.includes(name));
-            if (idx >= 0) return idx;
+            const rawHeaders = lines[0].split(sep).map(function(h){ return h.trim().replace(/^"|"$/g,''); });
+            const headers    = rawHeaders.map(function(h){ return h.toLowerCase().replace(/[^a-z0-9]/g,''); });
+
+            console.log('[importCSV] sep:', sep==='\t'?'TAB':sep, '| headers:', headers);
+
+            // findCol: exact match dulu, lalu startsWith, lalu includes
+            function findCol() {
+              var names = Array.prototype.slice.call(arguments);
+              for (var i=0; i<names.length; i++) {
+                var idx = headers.indexOf(names[i]);
+                if (idx >= 0) return idx;
+              }
+              for (var i=0; i<names.length; i++) {
+                var idx = headers.findIndex(function(h){ return h.startsWith(names[i]); });
+                if (idx >= 0) return idx;
+              }
+              return -1;
+            }
+
+            var iFrom  = findCol('from','depthfrom','dari','start');
+            var iTo    = findCol('to','depthto','sampai','end');
+            var iLen   = findCol('length','len','panjang','interval');
+            var iRec   = findCol('recoverylength','recovery','recov');
+            var iGrain = findCol('grainsize','grain','litho','lithology','jenis');
+
+            console.log('[importCSV] From:'+iFrom+' To:'+iTo+' Len:'+iLen+' Rec:'+iRec+' Grain:'+iGrain);
+
+            if (iFrom < 0 || iTo < 0) {
+              showToast('Kolom From/To tidak ditemukan. Header: ' + rawHeaders.slice(0,6).join(' | '), 'error');
+              return;
+            }
+
+            document.getElementById('prep-tbody').innerHTML = '';
+            rowCount = 0;
+
+            var imported = 0;
+            lines.slice(1).forEach(function(line) {
+              if (!line.trim()) return;
+              var cols = line.split(sep).map(function(c){ return c.trim().replace(/^"|"$/g,'').replace(',','.'); });
+              if (!cols[iFrom] && !cols[iTo]) return;
+              var fv = parseFloat(cols[iFrom]) || 0;
+              var tv = parseFloat(cols[iTo])   || 0;
+              addRow({
+                from:       cols[iFrom] || '',
+                to:         cols[iTo]   || '',
+                length:     iLen   >= 0 ? (cols[iLen]  || '') : (tv - fv).toFixed(2),
+                recovery:   iRec   >= 0 ? (cols[iRec]  || '') : '',
+                grain_size: iGrain >= 0 ? (cols[iGrain]|| '').trim().toUpperCase() : ''
+              });
+              imported++;
+            });
+
+            // Reset input agar bisa import file yang sama lagi
+            input.value = '';
+            showToast('✓ ' + imported + ' baris diimport dari CSV');
+          } catch(err) {
+            console.error('[importCSV] parse error:', err);
+            showToast('Error parsing CSV: ' + err.message, 'error');
           }
-          return -1;
         };
-
-        const iFrom  = findCol('from','depthfrom','start','dari');
-        const iTo    = findCol('to','depthto','end','ke','sampai');
-        const iLen   = findCol('length','len','panjang','interval');
-        const iRec   = findCol('recovery','rec','recov');
-        const iGrain = findCol('grain','grainsize','litho','lithology','jenis');
-
-        console.log('Col indices — From:', iFrom, 'To:', iTo, 'Len:', iLen, 'Rec:', iRec, 'Grain:', iGrain);
-
-        if (iFrom < 0 || iTo < 0) {
-          showToast(`Kolom From/To tidak ditemukan. Header: ${rawHeaders.slice(0,5).join(' | ')}`, 'error');
-          return;
-        }
-
-        document.getElementById('prep-tbody').innerHTML = '';
-        rowCount = 0;
-
-        let imported = 0;
-        lines.slice(1).forEach(line => {
-          if (!line.trim()) return;
-          const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g, '').replace(',', '.'));
-          const fv = parseFloat(cols[iFrom] || 0);
-          const tv = parseFloat(cols[iTo]   || 0);
-          addRow({
-            from:       cols[iFrom] || '',
-            to:         cols[iTo]   || '',
-            length:     iLen   >= 0 ? cols[iLen]  : (!isNaN(tv - fv) ? (tv - fv).toFixed(2) : ''),
-            recovery:   iRec   >= 0 ? cols[iRec].trim()  : '',
-            grain_size: iGrain >= 0 ? cols[iGrain].trim().toUpperCase() : ''
-          });
-          imported++;
-        });
-
-        showToast(`✓ ${imported} baris diimport dari CSV`);
-      };
-      reader.readAsText(file);
+        reader.readAsText(file, 'UTF-8');
+      } catch(err) {
+        console.error('[importCSV] error:', err);
+        showToast('Error: ' + err.message, 'error');
+      }
     }
 
     // ===== SAVE =====
@@ -696,7 +767,8 @@
         if (el.name) data[el.name] = el.value;
       });
       if (window._editRecordId) {
-        DB.update('preparation', window._editRecordId, data);
+        DB.delete('preparation', window._editRecordId);
+        DB.save('preparation', data);
         window._editRecordId = null;
         showToast('Data diperbarui!');
       } else {
