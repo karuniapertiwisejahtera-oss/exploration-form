@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Silica Form</title>
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="theme-color" content="#1a6b4a">
+  <style>
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal-box { background:white; border-radius:20px; padding:28px 24px; width:85%; max-width:320px; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.2); animation:popIn 0.2s ease; }
+    @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal-icon { font-size:40px; margin-bottom:8px; }
+    .modal-title { font-size:16px; font-weight:700; color:#1a2e22; margin-bottom:4px; }
+    .modal-subtitle { font-size:12px; color:#888; margin-bottom:20px; }
+    .modal-has-data { background:#f0f9f4; border:1px solid #a8d5b5; border-radius:10px; padding:8px 12px; font-size:11px; color:#1a6b4a; margin-bottom:16px; font-weight:600; }
+    .modal-btns { display:flex; gap:10px; }
+    .modal-btn { flex:1; padding:13px 8px; border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; transition:opacity 0.15s,transform 0.1s; }
+    .modal-btn:active { transform:scale(0.97); }
+    .modal-btn-new { background:#e8f5e9; color:#1a6b4a; border:2px solid #a8d5b5; }
+    .modal-btn-continue { background:#1a6b4a; color:white; }
+    .modal-btn-continue:disabled { background:#ccc; cursor:not-allowed; }
+    .modal-close { margin-top:14px; background:none; border:none; font-size:12px; color:#aaa; cursor:pointer; }
+
+    /* DATA VIEW */
+    #dataview-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:2000; align-items:flex-start; justify-content:center; padding-top:30px; overflow-y:auto; }
+    #dataview-box { background:white; border-radius:16px; width:92%; max-width:440px; max-height:82vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.25); margin-bottom:30px; }
+    .dv-header { position:sticky; top:0; background:white; padding:14px 16px 10px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; border-radius:16px 16px 0 0; }
+    .dv-record { border:1.5px solid #e8f5e9; border-radius:10px; margin:10px 12px; overflow:hidden; }
+    .dv-record-header { background:#1a6b4a; color:white; padding:8px 12px; font-size:12px; font-weight:700; display:flex; justify-content:space-between; }
+    .dv-record-body { padding:8px 12px; }
+    .dv-field { display:flex; gap:8px; padding:3px 0; border-bottom:1px solid #f5f5f5; font-size:12px; }
+    .dv-field-label { color:#888; min-width:110px; flex-shrink:0; }
+    .dv-field-value { color:#1a2e22; font-weight:500; word-break:break-all; }
+    .dv-actions { padding:6px 12px; background:#fafafa; display:flex; gap:6px; justify-content:flex-end; }
+    .btn-edit { background:#e8f5e9; color:#1a6b4a; border:none; padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:600; }
+    .btn-del  { background:#fdecea; color:#c62828; border:none; padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:600; }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <button class="btn-back" onclick="goTo('index.html')">←</button>
+    <h1>Silica Form</h1>
+  </div>
+
+  <div class="menu-container">
+    <div class="menu-grid">
+      <div class="menu-card" onclick="openModal('actual-run.html','actual_run','Actual Run','⏱️')">
+        <div class="menu-icon">⏱️</div><span>Actual run</span>
+      </div>
+      <div class="menu-card" onclick="openModal('core-loss.html','core_loss','Core Loss','🪨')">
+        <div class="menu-icon">🪨</div><span>Core loss</span>
+      </div>
+      <div class="menu-card" onclick="openModal('daily-sheet.html','daily_sheet','Daily Sheet Control','📋')">
+        <div class="menu-icon">📋</div><span>Daily Sheet Control</span>
+      </div>
+      <div class="menu-card" onclick="openModal('inspection.html','inspection','Inspection & Behavior','🔍')">
+        <div class="menu-icon">🔍</div><span>Inspection &amp; Behavior</span>
+      </div>
+      <div class="menu-card full-width" onclick="openModal('p5m.html','p5m','P5M','⛑️')">
+        <div class="menu-icon">⛑️</div><span>P5M</span>
+      </div>
+      <div class="menu-card" onclick="openModal('logging.html','logging','Logging','📝')">
+        <div class="menu-icon">📝</div><span>Logging</span>
+      </div>
+      <div class="menu-card" onclick="openModal('preparation.html','preparation','Preparation','🧪')">
+        <div class="menu-icon">🧪</div><span>Preparation</span>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;background:white;border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+      <p style="font-size:12px;color:#666;margin-bottom:10px;font-weight:600;">📁 Data Tersimpan</p>
+      <div id="summary-list" style="font-size:12px;color:#888;">Memuat...</div>
+      <button onclick="exportAllData()" style="margin-top:10px;width:100%;background:#1a73e8;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+        ☁️ Upload Semua ke Google Drive
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL NEW/CONTINUE -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+    <div class="modal-box">
+      <div class="modal-icon" id="modal-icon"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-subtitle">Pilih mode pengisian form</div>
+      <div class="modal-has-data" id="modal-data-info" style="display:none;"></div>
+      <div class="modal-btns">
+        <button class="modal-btn modal-btn-new" onclick="goNew()">📄 New</button>
+        <button class="modal-btn modal-btn-continue" id="btn-continue" onclick="goContinue()">▶ Continue</button>
+      </div>
+      <button class="modal-close" onclick="closeModal()">Batal</button>
+    </div>
+  </div>
+
+  <!-- DATA VIEW MODAL -->
+  <div id="dataview-overlay" onclick="closeDataViewOutside(event)">
+    <div id="dataview-box">
+      <div class="dv-header">
+        <div id="dv-title" style="font-weight:700;font-size:15px;color:#1a2e22;"></div>
+        <button onclick="closeDataView()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;line-height:1;">✕</button>
+      </div>
+      <div id="dv-content" style="padding-bottom:12px;"></div>
+    </div>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    if (!isLoggedIn()) window.location.href = 'login.html';
+
+    const FORMS = [
+      { key:'actual_run',  label:'Actual Run',            url:'actual-run.html' },
+      { key:'core_loss',   label:'Core Loss',             url:'core-loss.html' },
+      { key:'daily_sheet', label:'Daily Sheet',           url:'daily-sheet.html' },
+      { key:'inspection',  label:'Inspection & Behavior', url:'inspection.html' },
+      { key:'p5m',         label:'P5M',                   url:'p5m.html' },
+      { key:'logging',     label:'Logging',               url:'logging.html' },
+      { key:'preparation', label:'Preparation',           url:'preparation.html' }
+    ];
+
+    let _targetUrl = '', _storageKey = '';
+
+    // ===== MODAL NEW/CONTINUE =====
+    function openModal(url, key, label, icon) {
+      _targetUrl  = url; _storageKey = key;
+      document.getElementById('modal-icon').textContent  = icon;
+      document.getElementById('modal-title').textContent = label;
+      const records = DB.getAll(key);
+      const infoEl  = document.getElementById('modal-data-info');
+      const contBtn = document.getElementById('btn-continue');
+      if (records.length > 0) {
+        const ts = new Date(records[records.length-1].timestamp).toLocaleString('id-ID');
+        infoEl.textContent = `${records.length} data · Terakhir: ${ts}`;
+        infoEl.style.display = 'block'; contBtn.disabled = false;
+      } else { infoEl.style.display = 'none'; contBtn.disabled = true; }
+      document.getElementById('modal-overlay').classList.add('show');
+    }
+    function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+    function closeModalOutside(e) { if (e.target===document.getElementById('modal-overlay')) closeModal(); }
+    function goNew() {
+      sessionStorage.setItem('form_mode','new'); sessionStorage.setItem('form_key',_storageKey);
+      closeModal(); goTo(_targetUrl);
+    }
+    function goContinue() {
+      sessionStorage.setItem('form_mode','continue'); sessionStorage.setItem('form_key',_storageKey);
+      closeModal(); goTo(_targetUrl);
+    }
+
+    // ===== DATA VIEW =====
+    function viewData(key, label) {
+      const records = DB.getAll(key);
+      if (!records.length) return;
+      const form = FORMS.find(f => f.key === key);
+      document.getElementById('dv-title').textContent = '📋 ' + label + ' (' + records.length + ' record)';
+      const SKIP = ['id','timestamp','ttd_driller','ttd_geos','row_count'];
+      let html = '';
+      records.forEach((rec, idx) => {
+        const ts = new Date(rec.timestamp).toLocaleString('id-ID');
+        html += `<div class="dv-record">
+          <div class="dv-record-header">
+            <span>Record #${idx+1}</span>
+            <span style="opacity:0.8;font-weight:400;">${ts}</span>
+          </div>
+          <div class="dv-record-body">`;
+        Object.entries(rec).forEach(([k,v]) => {
+          if (SKIP.includes(k) || v === '' || v === null || v === undefined) return;
+          const lbl = k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+          html += `<div class="dv-field"><span class="dv-field-label">${lbl}</span><span class="dv-field-value">${v}</span></div>`;
+        });
+        if (rec.ttd_driller && rec.ttd_driller.startsWith('data:image'))
+          html += `<div class="dv-field"><span class="dv-field-label">TTD Driller</span><img src="${rec.ttd_driller}" style="height:28px;border:1px solid #eee;border-radius:4px;"></div>`;
+        if (rec.ttd_geos && rec.ttd_geos.startsWith('data:image'))
+          html += `<div class="dv-field"><span class="dv-field-label">TTD Geos Lap</span><img src="${rec.ttd_geos}" style="height:28px;border:1px solid #eee;border-radius:4px;"></div>`;
+        html += `</div>
+          <div class="dv-actions">
+            <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
+            <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
+          </div>
+        </div>`;
+      });
+      document.getElementById('dv-content').innerHTML = html;
+      document.getElementById('dataview-overlay').style.display = 'flex';
+    }
+
+    function closeDataView() { document.getElementById('dataview-overlay').style.display = 'none'; }
+    function closeDataViewOutside(e) { if (e.target===document.getElementById('dataview-overlay')) closeDataView(); }
+
+    function editRecord(key, id, url) {
+      sessionStorage.setItem('form_mode', 'edit');
+      sessionStorage.setItem('form_key', key);
+      sessionStorage.setItem('edit_record_id', String(id));
+      closeDataView();
+      goTo(url);
+    }
+
+    function deleteRecord(key, id, label) {
+      if (!confirm('Hapus record ini?')) return;
+      DB.delete(key, id);
+      loadSummary();
+      const remaining = DB.getAll(key);
+      if (remaining.length === 0) closeDataView();
+      else viewData(key, label);
+    }
+
+    // ===== SUMMARY =====
+    function loadSummary() {
+      const el = document.getElementById('summary-list');
+      el.innerHTML = FORMS.map(f => {
+        const count = DB.getAll(f.key).length;
+        const clickable = count > 0;
+        return `<div onclick="${clickable ? `viewData('${f.key}','${f.label}')` : ''}"
+          style="display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid #f0f0f0;
+          cursor:${clickable?'pointer':'default'};border-radius:6px;"
+          onmouseover="this.style.background='${clickable?'#f0f9f4':''}'"
+          onmouseout="this.style.background=''">
+          <span style="color:${clickable?'#1a2e22':'#bbb'}">${f.label}</span>
+          <span style="color:${clickable?'#1a6b4a':'#ccc'};font-weight:600;">${count} record${clickable?' 👁':''}</span>
+        </div>`;
+      }).join('');
+    }
+
+    async function exportAllData() {
+      const allData = {};
+      FORMS.forEach(f => { allData[f.key] = DB.getAll(f.key); });
+      const json = JSON.stringify(allData, null, 2);
+      await uploadToDrive(`exploration_all_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+
+    loadSummary();
+  </script>
+</body>
+</html>

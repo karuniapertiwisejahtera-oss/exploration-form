@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Logging Form</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .log-row {
+      background: #fafafa;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .log-row-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .log-row-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .btn-del-row {
+      background: #fee;
+      border: 1px solid #fcc;
+      color: #c00;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <h1>Logging Form</h1>
+  </div>
+
+  <div class="form-container">
+    <form id="logging-form">
+      <!-- Header -->
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Hole ID</label>
+            <input type="text" name="hole_id" placeholder="Hole ID">
+          </div>
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input type="date" name="tanggal">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Geologist</label>
+            <input type="text" name="geologist" placeholder="Nama Geologist">
+          </div>
+          <div class="form-group">
+            <label>Proyek</label>
+            <input type="text" name="proyek" placeholder="Nama Proyek">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Koordinat X</label>
+            <input type="number" name="coord_x" placeholder="0.000" step="0.001">
+          </div>
+          <div class="form-group">
+            <label>Koordinat Y</label>
+            <input type="number" name="coord_y" placeholder="0.000" step="0.001">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Elevasi (m)</label>
+            <input type="number" name="elevasi" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Azimuth (°)</label>
+            <input type="number" name="azimuth" placeholder="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- Log Entries -->
+      <div class="form-section">
+        <div class="form-section-title">Data Log Geologi</div>
+        <div id="log-entries"></div>
+        <button type="button" onclick="addLogEntry()" style="width:100%;background:var(--teal);color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;">
+          + Tambah Interval
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
+    <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
+    <button class="btn btn-upload" onclick="uploadData()">☁️ Upload</button>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    let entryCount = 0;
+
+    function addLogEntry() {
+      entryCount++;
+      const container = document.getElementById('log-entries');
+      const div = document.createElement('div');
+      div.className = 'log-row';
+      div.id = `entry-${entryCount}`;
+      div.innerHTML = `
+        <div class="log-row-header">
+          <span class="log-row-num">Interval #${entryCount}</span>
+          <button type="button" class="btn-del-row" onclick="removeEntry(${entryCount})">🗑 Hapus</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dari (m)</label>
+            <input type="number" name="log_${entryCount}_dari" placeholder="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Ke (m)</label>
+            <input type="number" name="log_${entryCount}_ke" placeholder="0" step="0.1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Litologi</label>
+            <select name="log_${entryCount}_litologi">
+              <option value="">Pilih</option>
+              <option>Tanah Penutup</option>
+              <option>Lempung</option>
+              <option>Pasir</option>
+              <option>Kerikil</option>
+              <option>Batupasir</option>
+              <option>Batulempung</option>
+              <option>Batugamping</option>
+              <option>Granit</option>
+              <option>Basalt</option>
+              <option>Silika</option>
+              <option>Lainnya</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Warna</label>
+            <input type="text" name="log_${entryCount}_warna" placeholder="Warna batuan">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>RQD (%)</label>
+            <input type="number" name="log_${entryCount}_rqd" placeholder="0" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label>Recovery (%)</label>
+            <input type="number" name="log_${entryCount}_recovery" placeholder="0" min="0" max="100">
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Deskripsi</label>
+            <textarea name="log_${entryCount}_deskripsi" placeholder="Deskripsi litologi, struktur, mineralisasi..."></textarea>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    }
+
+    function removeEntry(n) {
+      const el = document.getElementById(`entry-${n}`);
+      if (el) el.remove();
+    }
+
+    function saveData() {
+      const data = getFormData('logging-form');
+      data.entry_count = entryCount;
+      DB.save('logging', data);
+      showToast('Data Logging tersimpan!');
+    }
+
+    function clearData() {
+      clearForm('logging-form');
+      document.getElementById('log-entries').innerHTML = '';
+      entryCount = 0;
+      showToast('Form dikosongkan');
+    }
+
+    async function uploadData() {
+      saveData();
+      const json = JSON.stringify(DB.getAll('logging'), null, 2);
+      await uploadToDrive(`logging_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+
+    // Default 2 interval
+    addLogEntry(); addLogEntry();
+  </script>
+</body>
+</html>

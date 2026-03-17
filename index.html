@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Exploration Form</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a6b4a">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e0e0e0;
+      height: 100%;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .phone-wrap {
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      background: #fff;
+      text-align: center;
+      padding: 14px 16px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    /* HERO SECTION */
+    .hero {
+      position: relative;
+      width: 100%;
+      background: radial-gradient(ellipse at 50% 30%, #2d6e4a 0%, #1c4a30 40%, #0f2d1c 100%);
+      padding: 28px 20px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* bintang-bintang */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px),
+        radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px);
+      background-size: 80px 80px, 120px 120px, 60px 60px;
+      background-position: 10px 10px, 40px 30px, 25px 55px;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      color: #fff;
+      font-size: 24px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.3;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      margin-bottom: 20px;
+      z-index: 2;
+    }
+
+    /* globe container */
+    .globe-container {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      z-index: 2;
+    }
+
+    .globe-container img {
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
+    }
+
+    /* ikon mengambang */
+    .fi {
+      position: absolute;
+      font-size: 26px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+      z-index: 3;
+    }
+    .fi-compass  { top: 20px;  left: 0px;   font-size: 32px; }
+    .fi-compass2 { top: 70px;  left: -4px;  font-size: 20px; opacity: 0.75; }
+    .fi-map      { top: 14px;  right: 2px;  font-size: 28px; }
+    .fi-pin1     { top: 0px;   left: 44%;   font-size: 20px; }
+    .fi-pin2     { top: 8px;   left: 32%;   font-size: 16px; }
+    .fi-pin3     { top: 4px;   right: 30%;  font-size: 15px; }
+    .fi-magnify  { bottom: 16px; right: 10px; font-size: 30px; }
+    .fi-crystal  { bottom: 10px; left: 2px;  font-size: 24px; }
+    .fi-map2     { bottom: 18px; left: 26%;  font-size: 22px; }
+    .fi-hammer   { bottom: 6px;  right: -2px; font-size: 20px; opacity: 0.85; }
+    .fi-chart    { top: 36%;   right: -2px; font-size: 18px; }
+    .fi-pie      { top: 50%;   right: -4px; font-size: 16px; opacity: 0.8; }
+
+    /* nav arrows */
+    .nav-arrow {
+      position: absolute;
+      bottom: 14px;
+      background: rgba(255,255,255,0.2);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      color: white;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      font-size: 17px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+    }
+    .nav-arrow.left  { left: 14px; }
+    .nav-arrow.right { right: 14px; }
+
+    /* BOTTOM */
+    .bottom-section {
+      flex: 1;
+      background: #fff;
+      padding: 20px 28px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .bottom-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1a2e22;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .bottom-desc {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      line-height: 1.75;
+      max-width: 290px;
+    }
+
+    .btn-start {
+      margin-top: 12px;
+      background: #1a3d8f;
+      color: white;
+      border: none;
+      padding: 16px 0;
+      width: 100%;
+      border-radius: 32px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+      box-shadow: 0 6px 22px rgba(26,61,143,0.35);
+      transition: transform 0.15s;
+    }
+    .btn-start:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+  <div class="phone-wrap">
+
+    <div class="top-bar">Exploration Form</div>
+
+    <div class="hero">
+      <div class="hero-title">Welcome to<br>Exploration Form</div>
+
+      <div class="globe-container">
+        <img src="hero-globe.png.png" alt="Globe">
+        <span class="fi fi-compass">🧭</span>
+        <span class="fi fi-compass2">🧭</span>
+        <span class="fi fi-map">🗺️</span>
+        <span class="fi fi-pin1">📍</span>
+        <span class="fi fi-pin2">📍</span>
+        <span class="fi fi-pin3">📌</span>
+        <span class="fi fi-magnify">🔍</span>
+        <span class="fi fi-crystal">💎</span>
+        <span class="fi fi-map2">🗺️</span>
+        <span class="fi fi-hammer">⛏️</span>
+        <span class="fi fi-chart">📊</span>
+        <span class="fi fi-pie">📈</span>
+      </div>
+
+      <button class="nav-arrow left">&#8249;</button>
+      <button class="nav-arrow right">&#8250;</button>
+    </div>
+
+    <div class="bottom-section">
+      <h2 class="bottom-title">Welcome to<br>Exploration Form</h2>
+      <p class="bottom-desc">Explore. Collect. Learn. Dive into a world of seamless field data and discovery. Start your journey today!</p>
+      <a href="login.html" class="btn-start">GET STARTED</a>
+    </div>
+
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Login - Exploration Form</title>
+  <meta name="theme-color" content="#1a6b4a">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(160deg, #0f2d1c 0%, #1a6b4a 60%, #2d8a5e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 380px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+    }
+    .card-header {
+      background: linear-gradient(135deg, #1a6b4a, #2d8a5e);
+      padding: 28px 24px 20px;
+      text-align: center;
+      color: white;
+    }
+    .card-header .logo { font-size: 40px; margin-bottom: 8px; }
+    .card-header h1 { font-size: 18px; font-weight: 700; }
+    .card-header p  { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #999;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .tab.active { color: #1a6b4a; border-bottom-color: #1a6b4a; }
+    .card-body { padding: 24px; }
+    .form-panel { display: none; }
+    .form-panel.active { display: block; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    .form-group input {
+      width: 100%;
+      border: 1.5px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 14px;
+      color: #333;
+      transition: border-color 0.2s;
+      background: #fafafa;
+    }
+    .form-group input:focus { outline: none; border-color: #1a6b4a; background: white; }
+    .btn-submit {
+      width: 100%;
+      background: #1a6b4a;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: opacity 0.2s;
+    }
+    .btn-submit:hover { opacity: 0.9; }
+    .btn-submit:disabled { background: #ccc; cursor: not-allowed; }
+    .msg {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+      display: none;
+    }
+    .msg.error   { background: #fdecea; color: #c62828; display: block; }
+    .msg.success { background: #e8f5e9; color: #2e7d32; display: block; }
+    .drive-status {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #795548;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div class="logo">🌍</div>
+      <h1>Exploration Form</h1>
+      <p>Field Data Collection System</p>
+    </div>
+
+    <div id="drive-init-status" class="drive-status" style="margin:12px 12px 0;">
+      ⏳ Menghubungkan ke Google...
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">Login</div>
+      <div class="tab" onclick="switchTab('register')">Daftar</div>
+    </div>
+
+    <div class="card-body">
+      <!-- LOGIN -->
+      <div class="form-panel active" id="panel-login">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="nama@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="btn-submit" id="btn-login" onclick="doLogin()">Masuk</button>
+        <div class="msg" id="login-msg"></div>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="form-panel" id="panel-register">
+        <div class="form-group">
+          <label>Nama Lengkap</label>
+          <input type="text" id="reg-nama" placeholder="Nama lengkap">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="nama@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="reg-pass" placeholder="Min. 6 karakter">
+        </div>
+        <div class="form-group">
+          <label>Konfirmasi Password</label>
+          <input type="password" id="reg-pass2" placeholder="Ulangi password">
+        </div>
+        <button class="btn-submit" id="btn-register" onclick="doRegister()">Daftar Sekarang</button>
+        <div class="msg" id="register-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client"></script>
+  <script src="js/drive.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Cek jika sudah login
+    if (isLoggedIn()) window.location.href = 'silica-form.html';
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+      document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+      document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+    }
+
+    function showMsg(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = 'msg ' + type;
+    }
+
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId);
+      btn.disabled = loading;
+      btn.innerHTML = loading ? '<span class="spinner"></span>Memproses...' : btn.dataset.label;
+    }
+
+    // Simpan label asli
+    document.getElementById('btn-login').dataset.label    = 'Masuk';
+    document.getElementById('btn-register').dataset.label = 'Daftar Sekarang';
+
+    async function doLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass  = document.getElementById('login-pass').value;
+      if (!email || !pass) { showMsg('login-msg', 'Isi semua field.', 'error'); return; }
+
+      setLoading('btn-login', true);
+      if (typeof resetAccessToken === 'function') resetAccessToken();
+      // Pastikan OAuth token ada SEBELUM masuk ke logic (harus dipanggil langsung dari click)
+      const token = await getAccessToken();
+      if (!token) { setLoading('btn-login', false); showMsg('login-msg', 'Gagal terhubung ke Google. Coba lagi.', 'error'); return; }
+
+      const res = await loginUser(email, pass);
+      setLoading('btn-login', false);
+
+      if (res.ok) {
+        showMsg('login-msg', 'Login berhasil! Mengalihkan...', 'success');
+        setTimeout(() => window.location.href = 'silica-form.html', 800);
+      } else {
+        showMsg('login-msg', res.msg, 'error');
+      }
+    }
+
+    async function doRegister() {
+      const nama  = document.getElementById('reg-nama').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const pass  = document.getElementById('reg-pass').value;
+      const pass2 = document.getElementById('reg-pass2').value;
+
+      if (!nama || !email || !pass) { showMsg('register-msg', 'Isi semua field.', 'error'); return; }
+      if (pass.length < 6)          { showMsg('register-msg', 'Password min. 6 karakter.', 'error'); return; }
+      if (pass !== pass2)           { showMsg('register-msg', 'Password tidak cocok.', 'error'); return; }
+
+      setLoading('btn-register', true);
+      // Pastikan OAuth token ada SEBELUM masuk ke logic (harus dipanggil langsung dari click)
+      const token = await getAccessToken();
+      if (!token) { setLoading('btn-register', false); showMsg('register-msg', 'Gagal terhubung ke Google. Coba lagi.', 'error'); return; }
+
+      const res = await registerUser(nama, email, pass);
+      setLoading('btn-register', false);
+
+      if (res.ok) {
+        showMsg('register-msg', res.msg, 'success');
+        setTimeout(() => switchTab('login'), 1500);
+      } else {
+        showMsg('register-msg', res.msg, 'error');
+      }
+    }
+
+    // Update status Drive
+    window.addEventListener('drive-ready', () => {
+      document.getElementById('drive-init-status').style.background = '#e8f5e9';
+      document.getElementById('drive-init-status').style.color = '#2e7d32';
+      document.getElementById('drive-init-status').style.borderColor = '#a5d6a7';
+      document.getElementById('drive-init-status').textContent = '✓ Terhubung ke Google';
+    });
+
+    // Timeout: jika 5 detik belum ready, tampilkan info
+    setTimeout(() => {
+      const el = document.getElementById('drive-init-status');
+      if (el && el.textContent.includes('⏳')) {
+        el.textContent = 'ℹ️ Login untuk terhubung ke Google Drive & Sheets';
+      }
+    }, 5000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Inspection & Behavior</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-item label { flex: 1; font-size: 13px; color: #333; }
+    .check-status {
+      display: flex;
+      gap: 6px;
+    }
+    .check-status button {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1.5px solid #ddd;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      background: white;
+      color: #666;
+      transition: all 0.2s;
+    }
+    .check-status button.ok { border-color: #2ecc71; color: #2ecc71; }
+    .check-status button.ok.active { background: #2ecc71; color: white; }
+    .check-status button.ng { border-color: #e74c3c; color: #e74c3c; }
+    .check-status button.ng.active { background: #e74c3c; color: white; }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <h1>Inspection &amp; Behavior</h1>
+  </div>
+
+  <div class="form-container">
+    <form id="inspection-form">
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input type="date" name="tanggal">
+          </div>
+          <div class="form-group">
+            <label>Shift</label>
+            <select name="shift">
+              <option value="">Pilih</option>
+              <option>Pagi</option>
+              <option>Malam</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Inspektor</label>
+            <input type="text" name="inspektor" placeholder="Nama Inspektor">
+          </div>
+          <div class="form-group">
+            <label>Lokasi</label>
+            <input type="text" name="lokasi" placeholder="Lokasi">
+          </div>
+        </div>
+      </div>
+
+      <!-- Checklist Mesin -->
+      <div class="form-section">
+        <div class="form-section-title">Inspeksi Mesin</div>
+        <div id="machine-checks"></div>
+      </div>
+
+      <!-- Checklist K3 -->
+      <div class="form-section">
+        <div class="form-section-title">Keselamatan Kerja (K3)</div>
+        <div id="safety-checks"></div>
+      </div>
+
+      <!-- Behavior -->
+      <div class="form-section">
+        <div class="form-section-title">Perilaku Pekerja</div>
+        <div id="behavior-checks"></div>
+      </div>
+
+      <!-- Catatan -->
+      <div class="form-section">
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Temuan / Catatan</label>
+            <textarea name="catatan" placeholder="Tuliskan temuan atau catatan inspeksi..." rows="4"></textarea>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Tindakan Perbaikan</label>
+            <textarea name="tindakan" placeholder="Tindakan perbaikan yang diperlukan..." rows="3"></textarea>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
+    <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
+    <button class="btn btn-upload" onclick="uploadData()">☁️ Upload</button>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    const machineItems = [
+      'Kondisi mesin bor', 'Sistem hidrolik', 'Sistem pendingin',
+      'Kondisi bit/mata bor', 'Sistem pelumasan', 'Panel kontrol',
+      'Selang & fitting', 'Kondisi rod/stang bor'
+    ];
+    const safetyItems = [
+      'APD lengkap dipakai', 'Area kerja bersih', 'Rambu K3 terpasang',
+      'APAR tersedia', 'P3K tersedia', 'Jalur evakuasi bebas'
+    ];
+    const behaviorItems = [
+      'Briefing dilakukan', 'SOP diikuti', 'Komunikasi baik',
+      'Tidak menggunakan HP saat kerja', 'Istirahat sesuai jadwal'
+    ];
+
+    const checkState = {};
+
+    function buildChecklist(containerId, items, prefix) {
+      const container = document.getElementById(containerId);
+      items.forEach((item, i) => {
+        const key = `${prefix}_${i}`;
+        checkState[key] = '';
+        const div = document.createElement('div');
+        div.className = 'check-item';
+        div.innerHTML = `
+          <label>${item}</label>
+          <div class="check-status">
+            <button type="button" class="ok" id="${key}_ok" onclick="setCheck('${key}','OK')">OK</button>
+            <button type="button" class="ng" id="${key}_ng" onclick="setCheck('${key}','NG')">NG</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function setCheck(key, val) {
+      checkState[key] = val;
+      const okBtn = document.getElementById(`${key}_ok`);
+      const ngBtn = document.getElementById(`${key}_ng`);
+      okBtn.classList.toggle('active', val === 'OK');
+      ngBtn.classList.toggle('active', val === 'NG');
+    }
+
+    function saveData() {
+      const data = getFormData('inspection-form');
+      Object.assign(data, checkState);
+      DB.save('inspection', data);
+      showToast('Data Inspeksi tersimpan!');
+    }
+
+    function clearData() {
+      clearForm('inspection-form');
+      Object.keys(checkState).forEach(k => {
+        checkState[k] = '';
+        const ok = document.getElementById(`${k}_ok`);
+        const ng = document.getElementById(`${k}_ng`);
+        if (ok) ok.classList.remove('active');
+        if (ng) ng.classList.remove('active');
+      });
+      showToast('Form dikosongkan');
+    }
+
+    async function uploadData() {
+      saveData();
+      const json = JSON.stringify(DB.getAll('inspection'), null, 2);
+      await uploadToDrive(`inspection_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+
+    buildChecklist('machine-checks', machineItems, 'mesin');
+    buildChecklist('safety-checks', safetyItems, 'k3');
+    buildChecklist('behavior-checks', behaviorItems, 'behavior');
+  </script>
+</body>
+</html>

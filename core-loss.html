@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Core Loss Form</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="page-header">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <h1>Core Loss Form</h1>
+  </div>
+
+  <div class="form-container">
+    <form id="core-loss-form">
+      <!-- Header Info -->
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prospect</label>
+            <input type="text" name="prospect" placeholder="Prospect">
+          </div>
+          <div class="form-group">
+            <label>Block</label>
+            <input type="text" name="block" placeholder="Block">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start</label>
+            <input type="number" name="start" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Stop</label>
+            <input type="number" name="stop" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Weather</label>
+            <select name="weather">
+              <option value="">Pilih</option>
+              <option>Cerah</option>
+              <option>Berawan</option>
+              <option>Hujan</option>
+              <option>Hujan Lebat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cut Slope</label>
+            <input type="text" name="cut_slope" placeholder="Cut Slope">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>EOH</label>
+            <input type="text" name="eoh" placeholder="EOH">
+          </div>
+          <div class="form-group">
+            <label>No Machine</label>
+            <input type="text" name="no_machine" placeholder="No Machine">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Hole No</label>
+            <input type="text" name="hole_no" placeholder="Hole No">
+          </div>
+          <div class="form-group">
+            <label>Contractor</label>
+            <input type="text" name="contractor" placeholder="Contractor">
+          </div>
+        </div>
+      </div>
+
+      <!-- Core Grid 1-40 -->
+      <div class="form-section">
+        <div class="form-section-title">Data Core (1 - 40)</div>
+        <div class="core-grid" id="core-grid"></div>
+      </div>
+
+      <!-- Core Grid 41-80 -->
+      <div class="form-section">
+        <div class="form-section-title">Data Core (41 - 80)</div>
+        <div class="core-grid" id="core-grid-2"></div>
+      </div>
+    </form>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
+    <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
+    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    function buildGrid(containerId, start, end) {
+      const grid = document.getElementById(containerId);
+      for (let i = start; i <= end; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'core-cell';
+        cell.innerHTML = `
+          <div class="cell-num">${i}</div>
+          <input type="number" name="core_${i}" placeholder="-" step="0.01">
+        `;
+        grid.appendChild(cell);
+      }
+    }
+
+    buildGrid('core-grid', 1, 40);
+    buildGrid('core-grid-2', 41, 80);
+
+    function saveData() {
+      const data = getFormData('core-loss-form');
+      DB.save('core_loss', data);
+      showToast('Data Core Loss tersimpan!');
+    }
+
+    async function clearData() {
+      if (confirm('Yakin ingin mengosongkan form?')) {
+        clearForm('core-loss-form');
+        showToast('Form dikosongkan');
+      }
+    }
+
+    async function submitData() {
+      if (!confirm('Submit data? PDF akan diupload ke Google Drive.')) return;
+
+      const data = getFormData('core-loss-form');
+      DB.save('core_loss', data);
+
+      const kode     = (data.hole_no || 'unknown').replace(/\s+/g, '_');
+      const filename = `CL_${kode}.pdf`;
+
+      const ROOT_FOLDER = '1e5xBWUtcF4tAuF93e5p8fcJXWSVtDBcT';
+      const folderId = await pickFolder(ROOT_FOLDER, 'Pilih Folder Tujuan Core Loss');
+      if (!folderId) return;
+
+      showToast('Membuat PDF...');
+      try {
+        const pdf    = generateCoreLossPDF(data);
+        const blob   = pdf.output('blob');
+        const fileId = await uploadFileToFolder(filename, blob, 'application/pdf', folderId);
+        if (fileId) showToast('✓ PDF berhasil diupload ke Google Drive!');
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    function generateCoreLossPDF(data) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const margin = 12;
+      const pageW  = 210;
+      let y = margin;
+
+      // Judul
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('CORE LOSS FORM', pageW / 2, y + 5, { align: 'center' });
+      doc.line(margin + 30, y + 6, pageW - margin - 30, y + 6);
+      y += 14;
+
+      // Header info
+      doc.setFontSize(8);
+      const fields = [
+        ['Prospect', data.prospect], ['Block', data.block],
+        ['Start', data.start],       ['Stop', data.stop],
+        ['Weather', data.weather],   ['Cut Slope', data.cut_slope],
+        ['EOH', data.eoh],           ['No Machine', data.no_machine],
+        ['Hole No', data.hole_no],   ['Contractor', data.contractor],
+      ];
+      fields.forEach(([lbl, val], i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const x   = col === 0 ? margin : pageW / 2 + 2;
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${lbl} :`, x, y + row * 6);
+        doc.setFont('helvetica', 'normal');
+        doc.text(String(val || '—'), x + 28, y + row * 6);
+        doc.setLineWidth(0.2);
+        doc.line(x + 28, y + row * 6 + 0.5, x + 80, y + row * 6 + 0.5);
+      });
+      y += Math.ceil(fields.length / 2) * 6 + 8;
+
+      // Grid core data — 10 kolom x 8 baris per halaman
+      const cellW = (pageW - margin * 2) / 10;
+      const cellH = 8;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+
+      for (let i = 1; i <= 80; i++) {
+        const col = (i - 1) % 10;
+        const row = Math.floor((i - 1) / 10);
+        const x   = margin + col * cellW;
+        const cy  = y + row * cellH;
+
+        if (cy + cellH > 280) { doc.addPage(); y = margin; }
+
+        doc.rect(x, cy, cellW, cellH / 2);
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(i), x + cellW / 2, cy + 3, { align: 'center' });
+
+        doc.rect(x, cy + cellH / 2, cellW, cellH / 2);
+        doc.setFont('helvetica', 'normal');
+        const val = data[`core_${i}`];
+        if (val) doc.text(String(val), x + cellW / 2, cy + cellH / 2 + 3, { align: 'center' });
+      }
+
+      return doc;
+    }
+  </script>
+</body>
+</html>

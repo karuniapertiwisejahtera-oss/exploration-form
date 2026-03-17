@@ -1,0 +1,736 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Actual Run Form</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .run-table-wrap { width: 100%; }
+
+    .run-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+      table-layout: fixed;
+    }
+
+    .run-table th, .run-table td {
+      border: 1px solid #333;
+      padding: 0;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .run-table th {
+      background: #f0f0f0;
+      font-weight: 700;
+      padding: 4px 1px;
+      font-size: 8.5px;
+      line-height: 1.3;
+    }
+
+    /* kolom widths — total ~100% */
+    .run-table col.c-dari    { width: 9%; }
+    .run-table col.c-ke      { width: 9%; }
+    .run-table col.c-act     { width: 10%; }
+    .run-table col.c-swell   { width: 10%; }
+    .run-table col.c-loss    { width: 10%; }
+    .run-table col.c-panjang { width: 11%; }
+    .run-table col.c-total   { width: 10%; }
+    .run-table col.c-ket     { width: 16%; }
+    .run-table col.c-ttd     { width: 15%; }
+
+    .run-table td input {
+      width: 100%;
+      border: none;
+      outline: none;
+      text-align: center;
+      font-size: 9px;
+      padding: 4px 1px;
+      background: transparent;
+      min-width: 0;
+    }
+
+    .run-table td input.auto {
+      background: #f0f9f4;
+      color: #1a6b4a;
+      font-weight: 600;
+    }
+
+    .run-table td input.calc {
+      background: #f5f5f5;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .run-table td input[readonly] { cursor: default; }
+
+    /* header info form */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px 8px;
+      margin-bottom: 10px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .info-row label {
+      font-weight: 700;
+      white-space: nowrap;
+      font-size: 9.5px;
+      flex-shrink: 0;
+    }
+
+    .info-row input {
+      flex: 1;
+      border: none;
+      border-bottom: 1px solid #999;
+      outline: none;
+      font-size: 9.5px;
+      padding: 2px 2px;
+      background: transparent;
+      min-width: 0;
+      width: 0;
+    }
+
+    /* date input lebih compact */
+    .info-row input[type="date"] {
+      font-size: 8.5px;
+      padding: 1px 2px;
+    }
+
+    .page-info {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 6px;
+      font-size: 9.5px;
+      margin-bottom: 8px;
+    }
+
+    .page-info input {
+      width: 28px;
+      border: none;
+      border-bottom: 1px solid #999;
+      text-align: center;
+      font-size: 9.5px;
+      outline: none;
+      padding: 1px 2px;
+    }
+
+    .form-title {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: underline;
+      margin-bottom: 8px;
+      color: #111;
+    }
+
+    .btn-add-row {
+      margin-top: 8px;
+      width: 100%;
+      background: var(--teal, #4db6ac);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* SIGNATURE PAD */
+    .sign-wrap {
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fafafa;
+      position: relative;
+    }
+    .sign-canvas {
+      display: block;
+      width: 100%;
+      height: 50px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    .sign-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding: 2px 6px;
+      background: #f0f0f0;
+      border-top: 1px solid #e0e0e0;
+    }
+    .sign-actions button {
+      background: none;
+      border: none;
+      font-size: 11px;
+      color: #e74c3c;
+      cursor: pointer;
+      padding: 2px 4px;
+      font-weight: 600;
+    }
+    .sign-placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: 11px;
+      color: #bbb;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <h1>Actual Run Form</h1>
+  </div>
+
+  <div class="form-container">
+    <form id="actual-run-form">
+
+      <div class="form-section">
+        <div class="form-title">LOOS CORE FORM DAN ACTUAL RUN FORM</div>
+
+        <!-- Page info -->
+        <div class="page-info">
+          Page : <input type="number" name="page" min="1" value="1"> &nbsp;Of : <input type="number" name="page_of" min="1" value="1">
+        </div>
+
+        <!-- Header info 2 kolom -->
+        <div class="info-grid">
+          <div class="info-row">
+            <label>Kode Ttk Bor :</label>
+            <input type="text" name="kode_ttk_bor" placeholder="—">
+          </div>
+          <div class="info-row">
+            <label>Mesin :</label>
+            <input type="text" name="mesin" placeholder="—">
+          </div>
+          <div class="info-row">
+            <label>No. Lubang :</label>
+            <input type="text" name="no_lubang" placeholder="—">
+          </div>
+          <div class="info-row">
+            <label>Driller :</label>
+            <input type="text" name="driller" placeholder="—">
+          </div>
+          <div class="info-row">
+            <label>Blok :</label>
+            <input type="text" name="blok" placeholder="—">
+          </div>
+          <div class="info-row">
+            <label>Start (dd/mm/yy) :</label>
+            <input type="date" name="start_date">
+          </div>
+          <div class="info-row">
+            <label>Daerah :</label>
+            <input type="text" name="daerah" placeholder="—">
+          </div>
+          <div class="info-row">
+            <label>Complete (dd/mm/yy) :</label>
+            <input type="date" name="complete_date">
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Run -->
+      <div class="form-section">
+        <div class="run-table-wrap">
+          <table class="run-table" id="run-table">
+            <colgroup>
+              <col class="c-dari"><col class="c-ke">
+              <col class="c-act"><col class="c-swell"><col class="c-loss">
+              <col class="c-panjang"><col class="c-total">
+              <col class="c-ket"><col class="c-ttd">
+            </colgroup>
+            <thead>
+              <tr>
+                <th colspan="2">Kemajuan</th>
+                <th rowspan="2">Act. Run<br>(m)</th>
+                <th rowspan="2">Swelling<br>(m)</th>
+                <th rowspan="2">Loss<br>(m)</th>
+                <th rowspan="2">Panjang<br>Rec. (m)</th>
+                <th rowspan="2">Total<br>Rec. (%)</th>
+                <th rowspan="2">Keterangan</th>
+                <th rowspan="2">TTD Oleh<br>Geos Lap.</th>
+              </tr>
+              <tr>
+                <th>Dari</th>
+                <th>Ke</th>
+              </tr>
+            </thead>
+            <tbody id="run-tbody"></tbody>
+          </table>
+        </div>
+        <button type="button" class="btn-add-row" onclick="addRow()">+ Tambah Baris</button>
+      </div>
+
+      <!-- Driller & Geos Lap e-sign -->
+      <div class="form-section">
+        <div class="form-section-title">Tanda Tangan</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Driller</label>
+            <input type="text" name="driller_nama" placeholder="Nama Driller">
+          </div>
+          <div class="form-group">
+            <label>Geos Lap</label>
+            <input type="text" name="geos_nama" placeholder="Nama Geos Lap">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>TTD Driller</label>
+            <div class="sign-wrap" id="sign-driller-wrap">
+              <canvas id="sign-driller" class="sign-canvas" width="160" height="45"></canvas>
+              <div class="sign-actions">
+                <button type="button" onclick="clearSign('driller')">🗑 Hapus</button>
+              </div>
+            </div>
+            <input type="hidden" name="ttd_driller" id="ttd_driller_data">
+          </div>
+          <div class="form-group">
+            <label>TTD Geos Lap</label>
+            <div class="sign-wrap" id="sign-geos-wrap">
+              <canvas id="sign-geos" class="sign-canvas" width="160" height="45"></canvas>
+              <div class="sign-actions">
+                <button type="button" onclick="clearSign('geos')">🗑 Hapus</button>
+              </div>
+            </div>
+            <input type="hidden" name="ttd_geos" id="ttd_geos_data">
+          </div>
+        </div>
+      </div>
+
+      <div class="note-box">""
+        <strong>Note:</strong> Jika terdapat koreksi pada kolom Run_To maka data ini dapat dianggap batal dan dapat dijadikan sebagai justifikasi untuk Re_Drill.
+      </div>
+    </form>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
+    <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
+    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    let rowCount = 0;
+
+    function getPrevKe(n) {
+      if (n <= 1) return 0;
+      const el = document.getElementById(`ke_${n-1}`);
+      return el ? (parseFloat(el.value) || 0) : 0;
+    }
+
+    function calcRow(n) {
+      const dari      = parseFloat(document.getElementById(`dari_${n}`)?.value) || 0;
+      const ke        = parseFloat(document.getElementById(`ke_${n}`)?.value) || 0;
+      const swelling  = parseFloat(document.getElementById(`swelling_${n}`)?.value) || 0;
+      const loss      = parseFloat(document.getElementById(`loss_${n}`)?.value) || 0;
+
+      const actRun    = ke - dari;
+      const panjangRec = actRun + swelling - loss;
+      const totalRec  = actRun !== 0 ? (panjangRec / actRun) * 100 : 0;
+
+      const actEl     = document.getElementById(`act_${n}`);
+      const panjEl    = document.getElementById(`panjang_${n}`);
+      const totalEl   = document.getElementById(`total_${n}`);
+
+      if (actEl)   actEl.value   = actRun > 0    ? actRun.toFixed(2)    : '';
+      if (panjEl)  panjEl.value  = actRun > 0    ? panjangRec.toFixed(2): '';
+      if (totalEl) totalEl.value = actRun > 0    ? totalRec.toFixed(2)  : '';
+
+      // Update "Dari" baris berikutnya
+      const nextDari = document.getElementById(`dari_${n+1}`);
+      if (nextDari && ke > 0) nextDari.value = ke;
+    }
+
+    function addRow() {
+      rowCount++;
+      const n = rowCount;
+      const tbody = document.getElementById('run-tbody');
+      const tr = document.createElement('tr');
+      tr.id = `row_${n}`;
+
+      const dariVal = getPrevKe(n);
+
+      tr.innerHTML = `
+        <td><input type="number" id="dari_${n}" name="dari_${n}" value="${dariVal}" class="auto" readonly step="0.01"></td>
+        <td><input type="number" id="ke_${n}"   name="ke_${n}"   placeholder="" step="0.01" oninput="calcRow(${n})"></td>
+        <td><input type="number" id="act_${n}"  name="act_${n}"  class="calc" readonly placeholder=""></td>
+        <td><input type="number" id="swelling_${n}" name="swelling_${n}" placeholder="" step="0.01" oninput="calcRow(${n})"></td>
+        <td><input type="number" id="loss_${n}" name="loss_${n}" placeholder="" step="0.01" oninput="calcRow(${n})"></td>
+        <td><input type="number" id="panjang_${n}" name="panjang_${n}" class="calc" readonly placeholder=""></td>
+        <td><input type="number" id="total_${n}"   name="total_${n}"   class="calc" readonly placeholder=""></td>
+        <td><input type="text"   name="ket_${n}"   placeholder=""></td>
+        <td><input type="text"   name="ttd_${n}"   placeholder=""></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function saveData() {
+      const data = getFormData('actual-run-form');
+      data.row_count = rowCount;
+      if (window._editRecordId) {
+        // Overwrite record yang sedang diedit
+        DB.delete('actual_run', window._editRecordId);
+        window._editRecordId = null;
+      }
+      DB.save('actual_run', data);
+      showToast('Data tersimpan!');
+    }
+
+    function clearData() {
+      clearForm('actual-run-form');
+      document.getElementById('run-tbody').innerHTML = '';
+      rowCount = 0;
+      addRow();
+      showToast('Form dikosongkan');
+    }
+
+    async function submitData() {
+      if (!confirm('Submit data? PDF akan diupload ke Google Drive.')) return;
+
+      const data = getFormData('actual-run-form');
+      data.row_count = rowCount;
+      data.ttd_driller = document.getElementById('ttd_driller_data').value;
+      data.ttd_geos    = document.getElementById('ttd_geos_data').value;
+      DB.save('actual_run', data);
+
+      const kode     = (data.kode_ttk_bor || 'unknown').replace(/\s+/g, '_');
+      const filename = `Act_Run_${kode}.pdf`;
+      const FOLDER_ID = '18jxhdFCqLAJBpzf3w2OlWOjSNEjPoKfQ';
+
+      showToast('Membuat PDF...');
+      try {
+        const pdf  = generatePDF(data);
+        const blob = pdf.output('blob');
+        const fileId = await uploadFileToFolder(filename, blob, 'application/pdf', FOLDER_ID);
+        if (fileId) showToast('✓ PDF berhasil diupload ke Google Drive!');
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    // ===== GENERATE PDF A4 =====
+    function generatePDF(data) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      const pageW  = 210;
+      const pageH  = 297;
+      const margin = 12;
+      const contentW = pageW - margin * 2;
+
+      // Kolom tabel (mm)
+      const cols = [
+        { label: 'Dari',          w: 16 },
+        { label: 'Ke',            w: 16 },
+        { label: 'Act.Run\n(m)',  w: 20 },
+        { label: 'Swelling\n(m)', w: 20 },
+        { label: 'Loss\n(m)',     w: 18 },
+        { label: 'Panjang\nRec.(m)', w: 22 },
+        { label: 'Total\nRec.(%)',   w: 20 },
+        { label: 'Keterangan',    w: 34 },
+        { label: 'TTD Geos\nLap.',   w: 20 },
+      ];
+
+      const ROWS_PER_PAGE = 25; // baris data per halaman A4
+      const rc = parseInt(data.row_count) || 1;
+      const totalPages = Math.ceil(rc / ROWS_PER_PAGE);
+
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) doc.addPage();
+
+        let y = margin;
+
+        // ---- JUDUL ----
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('LOOS CORE FORM DAN ACTUAL RUN FORM', pageW / 2, y + 5, { align: 'center' });
+        doc.setLineWidth(0.4);
+        doc.line(margin + 20, y + 6, pageW - margin - 20, y + 6);
+
+        // Page X of Y
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Page : ${page + 1}   Of : ${totalPages}`, pageW - margin, y + 5, { align: 'right' });
+        y += 12;
+
+        // ---- HEADER INFO ----
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        const leftLabels  = ['Kode Ttk Bor :', 'No. Lubang :', 'Blok :', 'Daerah :'];
+        const leftValues  = [data.kode_ttk_bor, data.no_lubang, data.blok, data.daerah];
+        const rightLabels = ['Mesin :', 'Driller :', 'Start (dd/mm/yy) :', 'Complete (dd/mm/yy) :'];
+        const rightValues = [data.mesin, data.driller, data.start_date, data.complete_date];
+
+        leftLabels.forEach((lbl, i) => {
+          doc.setFont('helvetica', 'bold');
+          doc.text(lbl, margin, y + i * 6);
+          doc.setFont('helvetica', 'normal');
+          doc.text(leftValues[i] || '—', margin + 28, y + i * 6);
+          doc.setLineWidth(0.2);
+          doc.line(margin + 28, y + i * 6 + 0.5, margin + 80, y + i * 6 + 0.5);
+
+          doc.setFont('helvetica', 'bold');
+          doc.text(rightLabels[i], pageW / 2 + 2, y + i * 6);
+          doc.setFont('helvetica', 'normal');
+          doc.text(rightValues[i] || '—', pageW / 2 + 38, y + i * 6);
+          doc.line(pageW / 2 + 38, y + i * 6 + 0.5, pageW - margin, y + i * 6 + 0.5);
+        });
+        y += 28;
+
+        // ---- TABEL HEADER ----
+        doc.setLineWidth(0.3);
+        const rowH = 7;
+        const hdrH = 12;
+
+        // Gambar header tabel
+        let x = margin;
+        // Baris 1: "Kemajuan" span 2 kolom
+        doc.rect(x, y, cols[0].w + cols[1].w, hdrH / 2);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.text('Kemajuan', x + (cols[0].w + cols[1].w) / 2, y + 3.5, { align: 'center' });
+
+        // Kolom lain span 2 baris
+        let x2 = x + cols[0].w + cols[1].w;
+        for (let c = 2; c < cols.length; c++) {
+          doc.rect(x2, y, cols[c].w, hdrH);
+          const lines = cols[c].label.split('\n');
+          lines.forEach((ln, li) => {
+            doc.text(ln, x2 + cols[c].w / 2, y + 3.5 + li * 4, { align: 'center' });
+          });
+          x2 += cols[c].w;
+        }
+
+        // Baris 2: Dari & Ke
+        doc.rect(x, y + hdrH / 2, cols[0].w, hdrH / 2);
+        doc.text('Dari', x + cols[0].w / 2, y + hdrH / 2 + 3.5, { align: 'center' });
+        doc.rect(x + cols[0].w, y + hdrH / 2, cols[1].w, hdrH / 2);
+        doc.text('Ke', x + cols[0].w + cols[1].w / 2, y + hdrH / 2 + 3.5, { align: 'center' });
+        y += hdrH;
+
+        // ---- BARIS DATA ----
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+
+        const startRow = page * ROWS_PER_PAGE + 1;
+        const endRow   = Math.min(startRow + ROWS_PER_PAGE - 1, rc);
+
+        for (let r = startRow; r <= endRow; r++) {
+          x = margin;
+          const vals = [
+            data[`dari_${r}`]    || '',
+            data[`ke_${r}`]      || '',
+            data[`act_${r}`]     || '',
+            data[`swelling_${r}`]|| '',
+            data[`loss_${r}`]    || '',
+            data[`panjang_${r}`] || '',
+            data[`total_${r}`]   || '',
+            data[`ket_${r}`]     || '',
+            data[`ttd_${r}`]     || '',
+          ];
+          cols.forEach((col, ci) => {
+            doc.rect(x, y, col.w, rowH);
+            if (vals[ci]) doc.text(String(vals[ci]), x + col.w / 2, y + rowH / 2 + 1, { align: 'center' });
+            x += col.w;
+          });
+          y += rowH;
+        }
+
+        // ---- TANDA TANGAN (halaman terakhir saja) ----
+        if (page === totalPages - 1) {
+          y += 8;
+          const signW = 70;
+          const signH = 25;
+
+          // Driller
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
+          doc.text('Driller', margin + signW / 2, y, { align: 'center' });
+          doc.text(data.driller_nama || '', margin + signW / 2, y + 5, { align: 'center' });
+          doc.rect(margin, y + 7, signW, signH);
+
+          // Gambar TTD driller jika ada
+          if (data.ttd_driller && data.ttd_driller.startsWith('data:image')) {
+            try {
+              doc.addImage(data.ttd_driller, 'PNG', margin + 2, y + 8, signW - 4, signH - 2);
+            } catch(e) {}
+          }
+
+          // Geos Lap
+          const gx = margin + signW + 20;
+          doc.text('Geos Lap', gx + signW / 2, y, { align: 'center' });
+          doc.text(data.geos_nama || '', gx + signW / 2, y + 5, { align: 'center' });
+          doc.rect(gx, y + 7, signW, signH);
+
+          if (data.ttd_geos && data.ttd_geos.startsWith('data:image')) {
+            try {
+              doc.addImage(data.ttd_geos, 'PNG', gx + 2, y + 8, signW - 4, signH - 2);
+            } catch(e) {}
+          }
+
+          // Garis bawah nama
+          doc.setLineWidth(0.2);
+          doc.line(margin, y + signH + 10, margin + signW, y + signH + 10);
+          doc.line(gx, y + signH + 10, gx + signW, y + signH + 10);
+        }
+      }
+
+      return doc;
+    }
+
+    // ===== SIGNATURE PAD =====
+    function initSignPad(id) {
+      const canvas = document.getElementById(`sign-${id}`);
+      const ctx = canvas.getContext('2d');
+      // Sesuaikan resolusi canvas dengan ukuran tampil
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width  = rect.width  * ratio;
+        canvas.height = rect.height * ratio;
+        ctx.scale(ratio, ratio);
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+      }
+      resize();
+
+      // Tambah placeholder
+      const wrap = canvas.parentElement;
+      const ph = document.createElement('div');
+      ph.className = 'sign-placeholder';
+      ph.id = `sign-${id}-ph`;
+      ph.textContent = '✍ Tanda tangan di sini';
+      wrap.insertBefore(ph, canvas);
+
+      let drawing = false;
+      let hasDraw = false;
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const src  = e.touches ? e.touches[0] : e;
+        return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+      }
+
+      function start(e) {
+        e.preventDefault();
+        drawing = true;
+        const p = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+      }
+
+      function move(e) {
+        if (!drawing) return;
+        e.preventDefault();
+        const p = getPos(e);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        if (!hasDraw) {
+          hasDraw = true;
+          document.getElementById(`sign-${id}-ph`).style.display = 'none';
+        }
+        // Simpan ke hidden input
+        document.getElementById(`ttd_${id}_data`).value = canvas.toDataURL('image/png');
+      }
+
+      function end() { drawing = false; }
+
+      canvas.addEventListener('mousedown',  start);
+      canvas.addEventListener('mousemove',  move);
+      canvas.addEventListener('mouseup',    end);
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove',  move,  { passive: false });
+      canvas.addEventListener('touchend',   end);
+    }
+
+    function clearSign(id) {
+      const canvas = document.getElementById(`sign-${id}`);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById(`ttd_${id}_data`).value = '';
+      const ph = document.getElementById(`sign-${id}-ph`);
+      if (ph) ph.style.display = 'block';
+    }
+
+    // Init kedua signature pad
+    window.addEventListener('load', () => {
+      initSignPad('driller');
+      initSignPad('geos');
+    });
+
+    // Default 1 baris
+    addRow();
+
+    // Cek mode dari silica-form
+    const formMode = sessionStorage.getItem('form_mode');
+    const editId   = sessionStorage.getItem('edit_record_id');
+    if (formMode === 'edit' && editId) {
+      const allRec = DB.getAll('actual_run');
+      const rec    = allRec.find(r => String(r.id) === editId);
+      if (rec) {
+        fillForm('actual-run-form', rec);
+        const rc2 = parseInt(rec.row_count) || 1;
+        document.getElementById('run-tbody').innerHTML = '';
+        rowCount = 0;
+        for (let i = 0; i < rc2; i++) addRow();
+        for (let i = 1; i <= rc2; i++) {
+          ['ke','swelling','loss','ket','ttd'].forEach(f => {
+            const el = document.getElementById(f+'_'+i);
+            if (el && rec[f+'_'+i] !== undefined) el.value = rec[f+'_'+i];
+          });
+          calcRow(i);
+        }
+        if (rec.ttd_driller) document.getElementById('ttd_driller_data').value = rec.ttd_driller;
+        if (rec.ttd_geos)    document.getElementById('ttd_geos_data').value    = rec.ttd_geos;
+        window._editRecordId = rec.id;
+        showToast('Mode Edit aktif');
+      }
+    } else if (formMode === 'continue') {
+      const saved = DB.getAll('actual_run');
+      if (saved.length > 0) {
+        const last = saved[saved.length - 1];
+        fillForm('actual-run-form', last);
+        // Restore baris tabel dari data tersimpan
+        const rc = parseInt(last.row_count) || 1;
+        document.getElementById('run-tbody').innerHTML = '';
+        rowCount = 0;
+        for (let i = 0; i < rc; i++) addRow();
+        // Isi nilai tiap baris
+        for (let i = 1; i <= rc; i++) {
+          ['ke','swelling','loss','ket','ttd'].forEach(f => {
+            const el = document.getElementById(`${f}_${i}`) || document.querySelector(`[name="${f}_${i}"]`);
+            if (el && last[`${f}_${i}`] !== undefined) el.value = last[`${f}_${i}`];
+          });
+          calcRow(i);
+        }
+        showToast('Data terakhir dimuat');
+      }
+    }
+    sessionStorage.removeItem('form_mode');
+    sessionStorage.removeItem('form_key');
+  </script>
+</body>
+</html>

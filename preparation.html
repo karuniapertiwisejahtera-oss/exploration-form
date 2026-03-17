@@ -1,0 +1,522 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Sample Preparation Form</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ===== WRAPPER SCROLL ===== */
+    .prep-wrap {
+      width: 100%;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: calc(100vh - 240px);
+      position: relative;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    /* ===== TABLE BASE ===== */
+    .prep-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .prep-table th,
+    .prep-table td {
+      border-right: 1px solid #bbb;
+      border-bottom: 1px solid #bbb;
+      padding: 3px 4px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* ===== HEADER ROWS ===== */
+    .prep-table thead th {
+      background: #c5d8f7;
+      font-weight: 700;
+      font-size: 8px;
+      line-height: 1.3;
+      position: sticky;
+      z-index: 3;
+    }
+
+    /* Row 1 top offset = 0 */
+    .prep-table thead tr:nth-child(1) th {
+      top: 0;
+      border-top: 1px solid #bbb;
+    }
+
+    /* Row 2 top offset = tinggi row 1 (26px) */
+    .prep-table thead tr:nth-child(2) th {
+      top: 26px;
+    }
+
+    /* Group header warna beda */
+    .prep-table thead th.group {
+      background: #a8c4f0;
+    }
+
+    /* ===== FREEZE 5 KOLOM KIRI ===== */
+    /* Kolom: From(1), To(2), Length(3), Recovery(4), Grain(5) */
+    .prep-table th.col-freeze,
+    .prep-table td.col-freeze {
+      position: sticky;
+      background: #e8f4fd;
+      z-index: 2;
+    }
+
+    /* Header freeze = z-index lebih tinggi (sticky both axis) */
+    .prep-table thead th.col-freeze {
+      background: #b8d4f0;
+      z-index: 5;
+    }
+
+    /* Left offset tiap kolom freeze */
+    .prep-table .cf1 { left: 0;    min-width: 36px; width: 36px; }
+    .prep-table .cf2 { left: 37px; min-width: 36px; width: 36px; }
+    .prep-table .cf3 { left: 74px; min-width: 38px; width: 38px; }
+    .prep-table .cf4 { left: 113px; min-width: 42px; width: 42px; }
+    .prep-table .cf5 { left: 156px; min-width: 44px; width: 44px; }
+
+    /* Border kanan kolom freeze terakhir lebih tebal */
+    .prep-table .cf5 {
+      border-right: 2px solid #888 !important;
+    }
+
+    /* ===== KOLOM NON-FREEZE ===== */
+    .prep-table th.c-std { min-width: 38px; width: 38px; }
+    .prep-table th.c-wide { min-width: 52px; width: 52px; }
+    .prep-table th.c-sid { min-width: 56px; width: 56px; }
+    .prep-table th.c-rem { min-width: 70px; width: 70px; }
+
+    /* ===== INPUT DALAM TABEL ===== */
+    .prep-table td input,
+    .prep-table td select {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 9px;
+      text-align: center;
+      padding: 1px 2px;
+      background: transparent;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    /* Input auto-fill (dari CSV) */
+    .prep-table td input.auto {
+      color: #1a6b4a;
+      font-weight: 700;
+    }
+
+    /* ===== HEADER INFO ===== */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px 12px;
+      margin-bottom: 10px;
+    }
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+    }
+    .info-row label {
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+      font-size: 10px;
+    }
+    .info-row input {
+      flex: 1;
+      border: none;
+      border-bottom: 1px solid #999;
+      outline: none;
+      font-size: 10px;
+      padding: 2px 3px;
+      background: transparent;
+      min-width: 0;
+      width: 0;
+    }
+
+    /* ===== CSV BAR ===== */
+    .csv-bar {
+      background: #e8f5e9;
+      border: 1.5px dashed #4caf50;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .csv-bar label.csv-btn {
+      background: #1a6b4a;
+      color: white;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .csv-bar label.csv-btn:active { opacity: 0.85; }
+    #csv-filename { font-size: 11px; color: #555; flex: 1; }
+    #csv-input { display: none; }
+
+    /* ===== TAMBAH BARIS BTN ===== */
+    .btn-add-row {
+      margin-top: 8px;
+      width: 100%;
+      background: #4db6ac;
+      color: white;
+      border: none;
+      padding: 9px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <h1>Sample Preparation Form</h1>
+  </div>
+
+  <div class="form-container">
+    <div class="form-section">
+
+      <!-- Header Info -->
+      <div class="info-grid">
+        <div class="info-row"><label>Hole_ID:</label><input type="text" id="h-holeid" name="hole_id"></div>
+        <div class="info-row"><label>Sampler:</label><input type="text" id="h-sampler" name="sampler"></div>
+        <div class="info-row"><label>Sheet/Grid No.:</label><input type="text" id="h-sheet" name="sheet_no"></div>
+        <div class="info-row"><label>Date of Prep.:</label><input type="date" id="h-date" name="date_prep"></div>
+        <div class="info-row"><label>Deposit:</label><input type="text" id="h-deposit" name="deposit"></div>
+        <div class="info-row"><label>Total Depth:</label><input type="number" id="h-depth" name="total_depth" step="0.01"></div>
+        <div class="info-row" style="grid-column:1/-1;justify-content:flex-end;">
+          <label>Total Sample:</label>
+          <input type="text" id="h-total-sample" name="total_sample" style="max-width:70px;" readonly>
+        </div>
+      </div>
+
+      <!-- CSV Import -->
+      <div class="csv-bar">
+        <label class="csv-btn" for="csv-input">📂 Import CSV</label>
+        <input type="file" id="csv-input" accept=".csv" onchange="importCSV(this)">
+        <span id="csv-filename">Pilih file .csv dari HP untuk mengisi kolom From, To, Recovery, Grain Size</span>
+      </div>
+
+      <!-- Tabel -->
+      <div class="prep-wrap">
+        <table class="prep-table" id="prep-table">
+          <thead>
+            <!-- ROW 1: Group headers -->
+            <tr>
+              <th class="col-freeze cf1" rowspan="2">From<br>(m)</th>
+              <th class="col-freeze cf2" rowspan="2">To<br>(m)</th>
+              <th class="col-freeze cf3" rowspan="2">Length<br>(m)</th>
+              <th class="col-freeze cf4" rowspan="2">Recovery<br>(%)</th>
+              <th class="col-freeze cf5" rowspan="2">Grain<br>Size</th>
+              <th class="c-std" rowspan="2">Core<br>Weight</th>
+              <th class="c-std" rowspan="2">Sampling<br>No.</th>
+              <th class="c-std" rowspan="2">Sampling<br>Weight</th>
+              <th class="group c-wide" colspan="3">+10 mm</th>
+              <th class="group c-wide" colspan="3">+2-10 mm</th>
+              <th class="group c-wide" colspan="3">+0.6-2 mm</th>
+              <th class="group c-wide" colspan="3">-0.6 mm</th>
+              <th class="group c-wide" colspan="2">Sample QAQC</th>
+              <th class="c-rem" rowspan="2">Remarks</th>
+            </tr>
+            <!-- ROW 2: Sub-headers -->
+            <tr>
+              <!-- +10mm -->
+              <th class="c-std">Archive</th>
+              <th class="c-wide">Wet(Kg)<br>to lab</th>
+              <th class="c-sid">Sample_ID</th>
+              <!-- +2-10mm -->
+              <th class="c-std">Archive</th>
+              <th class="c-wide">Wet(Kg)<br>to lab</th>
+              <th class="c-sid">Sample_ID</th>
+              <!-- +0.6-2mm -->
+              <th class="c-std">Archive</th>
+              <th class="c-wide">Wet(Kg)<br>to lab</th>
+              <th class="c-sid">Sample_ID</th>
+              <!-- -0.6mm -->
+              <th class="c-std">Archive</th>
+              <th class="c-wide">Wet(Kg)<br>to lab</th>
+              <th class="c-sid">Sample_ID</th>
+              <!-- QAQC -->
+              <th class="c-sid">Sample_ID</th>
+              <th class="c-std">Wet(Kg)</th>
+            </tr>
+          </thead>
+          <tbody id="prep-tbody"></tbody>
+        </table>
+      </div>
+
+      <button type="button" class="btn-add-row" onclick="addRow()">+ Tambah Baris</button>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
+    <button class="btn btn-clear"  onclick="clearData()">✕ Clear</button>
+    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    let rowCount = 0;
+
+    // ===== TAMBAH BARIS =====
+    function addRow(data) {
+      rowCount++;
+      const n = rowCount;
+      const tbody = document.getElementById('prep-tbody');
+      const tr = document.createElement('tr');
+      tr.id = 'prep-row-' + n;
+
+      const v = data || {};
+
+      // Helper: input auto (readonly, hijau)
+      const autoNum = (id, val) =>
+        `<input type="number" id="${id}_${n}" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01" class="auto" readonly>`;
+      const autoTxt = (id, val) =>
+        `<input type="text" id="${id}_${n}" name="${id}_${n}" value="${val || ''}" class="auto" readonly>`;
+
+      // Helper: input editable
+      const num = (id, val) =>
+        `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01">`;
+      const txt = (id, val) =>
+        `<input type="text" name="${id}_${n}" value="${val || ''}">`;
+
+      tr.innerHTML = `
+        <td class="col-freeze cf1">${autoNum('from', v.from)}</td>
+        <td class="col-freeze cf2">${autoNum('to', v.to)}</td>
+        <td class="col-freeze cf3">${autoNum('len', v.length)}</td>
+        <td class="col-freeze cf4">${autoNum('rec', v.recovery)}</td>
+        <td class="col-freeze cf5">${autoTxt('grain', v.grain_size)}</td>
+        <td>${num('core_wt', v.core_wt)}</td>
+        <td>${txt('samp_no', v.samp_no)}</td>
+        <td>${num('samp_wt', v.samp_wt)}</td>
+        <td>${num('a10_arc', v.a10_arc)}</td>
+        <td>${num('a10_lab', v.a10_lab)}</td>
+        <td>${txt('a10_sid', v.a10_sid)}</td>
+        <td>${num('a2_arc',  v.a2_arc)}</td>
+        <td>${num('a2_lab',  v.a2_lab)}</td>
+        <td>${txt('a2_sid',  v.a2_sid)}</td>
+        <td>${num('a06_arc', v.a06_arc)}</td>
+        <td>${num('a06_lab', v.a06_lab)}</td>
+        <td>${txt('a06_sid', v.a06_sid)}</td>
+        <td>${num('m06_arc', v.m06_arc)}</td>
+        <td>${num('m06_lab', v.m06_lab)}</td>
+        <td>${txt('m06_sid', v.m06_sid)}</td>
+        <td>${txt('qaqc_sid', v.qaqc_sid)}</td>
+        <td>${num('qaqc_wt',  v.qaqc_wt)}</td>
+        <td>${txt('remarks',  v.remarks)}</td>
+      `;
+      tbody.appendChild(tr);
+      updateTotalSample();
+    }
+
+    function updateTotalSample() {
+      document.getElementById('h-total-sample').value = rowCount;
+    }
+
+    // ===== IMPORT CSV =====
+    function importCSV(input) {
+      const file = input.files[0];
+      if (!file) return;
+      document.getElementById('csv-filename').textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.trim().split(/\r?\n/);
+        if (lines.length < 2) { showToast('CSV kosong atau format salah', 'error'); return; }
+
+        // Deteksi separator (koma atau titik koma)
+        const sep = lines[0].includes(';') ? ';' : ',';
+
+        // Parse header
+        const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
+
+        const findCol = (...names) => {
+          for (const n of names) {
+            const idx = headers.findIndex(h => h.includes(n));
+            if (idx >= 0) return idx;
+          }
+          return -1;
+        };
+
+        const iFrom     = findCol('from', 'depth_from', 'start');
+        const iTo       = findCol('to', 'depth_to', 'end');
+        const iLen      = findCol('length', 'len', 'panjang');
+        const iRecovery = findCol('recovery', 'rec');
+        const iGrain    = findCol('grain', 'grain_size', 'grainsize');
+
+        if (iFrom < 0 || iTo < 0) {
+          showToast('Kolom From/To tidak ditemukan di CSV', 'error');
+          return;
+        }
+
+        // Bersihkan tabel lama
+        document.getElementById('prep-tbody').innerHTML = '';
+        rowCount = 0;
+
+        // Isi baris dari CSV
+        lines.slice(1).forEach(line => {
+          if (!line.trim()) return;
+          const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+          const fromVal = parseFloat(cols[iFrom] || 0);
+          const toVal   = parseFloat(cols[iTo]   || 0);
+          const lenVal  = iLen >= 0
+            ? cols[iLen]
+            : (toVal - fromVal).toFixed(2);
+
+          addRow({
+            from:       cols[iFrom]     || '',
+            to:         cols[iTo]       || '',
+            length:     lenVal,
+            recovery:   iRecovery >= 0  ? cols[iRecovery] : '',
+            grain_size: iGrain >= 0     ? cols[iGrain]    : ''
+          });
+        });
+
+        showToast(`✓ ${rowCount} baris diimport dari CSV`);
+      };
+      reader.readAsText(file);
+    }
+
+    // ===== SAVE =====
+    function saveData() {
+      const data = {};
+      // Header info
+      ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
+        const el = document.querySelector('[name="' + k + '"]');
+        if (el) data[k] = el.value;
+      });
+      data.row_count = rowCount;
+      // Semua input tabel
+      document.querySelectorAll('#prep-table input, #prep-table select').forEach(el => {
+        if (el.name) data[el.name] = el.value;
+      });
+
+      if (window._editRecordId) {
+        DB.update('preparation', window._editRecordId, data);
+        window._editRecordId = null;
+        showToast('Data diperbarui!');
+      } else {
+        DB.save('preparation', data);
+        showToast('Data tersimpan!');
+      }
+    }
+
+    // ===== CLEAR =====
+    function clearData() {
+      document.querySelectorAll('.info-row input').forEach(el => el.value = '');
+      document.getElementById('prep-tbody').innerHTML = '';
+      document.getElementById('csv-filename').textContent = 'Pilih file .csv dari HP';
+      document.getElementById('csv-input').value = '';
+      rowCount = 0;
+      window._editRecordId = null;
+      addRow();
+      showToast('Form dikosongkan');
+    }
+
+    // ===== SUBMIT =====
+    async function submitData() {
+      if (!confirm('Submit? Data akan diupload ke Google Drive.')) return;
+      saveData();
+      const holeId   = document.getElementById('h-holeid').value || 'unknown';
+      const filename = `Prep_${holeId.replace(/\s+/g, '_')}.json`;
+      const FOLDER   = '1e5xBWUtcF4tAuF93e5p8fcJXWSVtDBcT';
+      const folderId = await pickFolder(FOLDER, 'Pilih Folder Tujuan Preparation');
+      if (!folderId) return;
+      const json   = JSON.stringify(DB.getAll('preparation'), null, 2);
+      const fileId = await uploadFileToFolder(filename, json, 'application/json', folderId);
+      if (fileId) showToast('✓ Data berhasil diupload!');
+    }
+
+    // ===== LOAD MODE EDIT / CONTINUE =====
+    window.addEventListener('load', () => {
+      const mode   = sessionStorage.getItem('form_mode');
+      const editId = sessionStorage.getItem('edit_record_id');
+
+      if (mode === 'edit' && editId) {
+        const rec = DB.getAll('preparation').find(r => String(r.id) === editId);
+        if (rec) {
+          ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
+            const el = document.querySelector('[name="' + k + '"]');
+            if (el && rec[k] !== undefined) el.value = rec[k];
+          });
+          const rc = parseInt(rec.row_count) || 0;
+          for (let i = 1; i <= rc; i++) {
+            addRow({
+              from:       rec['from_' + i],
+              to:         rec['to_' + i],
+              length:     rec['len_' + i],
+              recovery:   rec['rec_' + i],
+              grain_size: rec['grain_' + i],
+              core_wt:    rec['core_wt_' + i],
+              samp_no:    rec['samp_no_' + i],
+              samp_wt:    rec['samp_wt_' + i],
+              a10_arc:    rec['a10_arc_' + i],
+              a10_lab:    rec['a10_lab_' + i],
+              a10_sid:    rec['a10_sid_' + i],
+              a2_arc:     rec['a2_arc_' + i],
+              a2_lab:     rec['a2_lab_' + i],
+              a2_sid:     rec['a2_sid_' + i],
+              a06_arc:    rec['a06_arc_' + i],
+              a06_lab:    rec['a06_lab_' + i],
+              a06_sid:    rec['a06_sid_' + i],
+              m06_arc:    rec['m06_arc_' + i],
+              m06_lab:    rec['m06_lab_' + i],
+              m06_sid:    rec['m06_sid_' + i],
+              qaqc_sid:   rec['qaqc_sid_' + i],
+              qaqc_wt:    rec['qaqc_wt_' + i],
+              remarks:    rec['remarks_' + i]
+            });
+          }
+          window._editRecordId = rec.id;
+          showToast('Mode Edit aktif');
+        }
+      } else if (mode === 'continue') {
+        const saved = DB.getAll('preparation');
+        if (saved.length) {
+          const last = saved[saved.length - 1];
+          ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
+            const el = document.querySelector('[name="' + k + '"]');
+            if (el && last[k] !== undefined) el.value = last[k];
+          });
+          const rc = parseInt(last.row_count) || 0;
+          for (let i = 1; i <= rc; i++) {
+            addRow({
+              from: last['from_' + i], to: last['to_' + i],
+              length: last['len_' + i], recovery: last['rec_' + i],
+              grain_size: last['grain_' + i]
+            });
+          }
+        }
+      } else {
+        addRow(); // default 1 baris kosong
+      }
+
+      sessionStorage.removeItem('form_mode');
+      sessionStorage.removeItem('edit_record_id');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Daily Sheet Control</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .sheet-scroll { overflow-x: auto; }
+    .sheet-table { min-width: 600px; }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <h1>Daily Sheet Control</h1>
+  </div>
+
+  <div class="form-container">
+    <form id="daily-sheet-form">
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input type="date" name="tanggal">
+          </div>
+          <div class="form-group">
+            <label>Shift</label>
+            <select name="shift">
+              <option value="">Pilih</option>
+              <option>Pagi (06:00-18:00)</option>
+              <option>Malam (18:00-06:00)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Hole No</label>
+            <input type="text" name="hole_no" placeholder="Hole No">
+          </div>
+          <div class="form-group">
+            <label>Driller</label>
+            <input type="text" name="driller" placeholder="Nama Driller">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Lokasi</label>
+            <input type="text" name="lokasi" placeholder="Lokasi">
+          </div>
+          <div class="form-group">
+            <label>Mesin</label>
+            <input type="text" name="mesin" placeholder="No Mesin">
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Aktivitas -->
+      <div class="form-section">
+        <div class="form-section-title">Aktivitas Harian</div>
+        <div class="sheet-scroll">
+          <table class="sheet-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Waktu Mulai</th>
+                <th>Waktu Selesai</th>
+                <th>Aktivitas</th>
+                <th>Dari (m)</th>
+                <th>Ke (m)</th>
+                <th>Ket</th>
+              </tr>
+            </thead>
+            <tbody id="activity-body"></tbody>
+          </table>
+        </div>
+        <button type="button" onclick="addRow()" style="margin-top:10px;background:var(--teal);color:white;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;width:100%;">
+          + Tambah Baris
+        </button>
+      </div>
+
+      <!-- Summary -->
+      <div class="form-section">
+        <div class="form-section-title">Ringkasan</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Total Kedalaman (m)</label>
+            <input type="number" name="total_kedalaman" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Total Jam Kerja</label>
+            <input type="number" name="total_jam" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Catatan</label>
+            <textarea name="catatan" placeholder="Catatan harian..."></textarea>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
+    <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
+    <button class="btn btn-upload" onclick="uploadData()">☁️ Upload</button>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    let rowCount = 0;
+
+    function addRow() {
+      rowCount++;
+      const tbody = document.getElementById('activity-body');
+      const tr = document.createElement('tr');
+      tr.id = `row-${rowCount}`;
+      tr.innerHTML = `
+        <td style="text-align:center;font-size:11px;color:#999;">${rowCount}</td>
+        <td><input type="time" name="waktu_mulai_${rowCount}"></td>
+        <td><input type="time" name="waktu_selesai_${rowCount}"></td>
+        <td><input type="text" name="aktivitas_${rowCount}" placeholder="Aktivitas"></td>
+        <td><input type="number" name="dari_${rowCount}" placeholder="0"></td>
+        <td><input type="number" name="ke_${rowCount}" placeholder="0"></td>
+        <td><input type="text" name="ket_${rowCount}" placeholder="-"></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function saveData() {
+      const data = getFormData('daily-sheet-form');
+      data.row_count = rowCount;
+      DB.save('daily_sheet', data);
+      showToast('Daily Sheet tersimpan!');
+    }
+
+    function clearData() {
+      clearForm('daily-sheet-form');
+      document.getElementById('activity-body').innerHTML = '';
+      rowCount = 0;
+      showToast('Form dikosongkan');
+    }
+
+    async function uploadData() {
+      const data = getFormData('daily-sheet-form');
+      data.row_count = rowCount;
+      DB.save('daily_sheet', data);
+      const json = JSON.stringify(DB.getAll('daily_sheet'), null, 2);
+      await uploadToDrive(`daily_sheet_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+
+    // Default 3 baris
+    addRow(); addRow(); addRow();
+  </script>
+</body>
+</html>

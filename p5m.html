@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>P5M Form</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .p5m-card {
+      background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+      border: 1.5px solid #a5d6a7;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .p5m-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .attendance-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .attendance-item {
+      background: white;
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      border: 1.5px solid #ddd;
+    }
+    .attendance-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .attendance-item label {
+      display: block;
+      font-size: 11px;
+      color: #555;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <button class="btn-back" onclick="goBack()">←</button>
+    <h1>P5M Form</h1>
+  </div>
+
+  <div class="form-container">
+    <form id="p5m-form">
+      <!-- Header -->
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input type="date" name="tanggal">
+          </div>
+          <div class="form-group">
+            <label>Shift</label>
+            <select name="shift">
+              <option value="">Pilih</option>
+              <option>Pagi (06:00-18:00)</option>
+              <option>Malam (18:00-06:00)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Lokasi Kerja</label>
+            <input type="text" name="lokasi" placeholder="Lokasi">
+          </div>
+          <div class="form-group">
+            <label>Supervisor</label>
+            <input type="text" name="supervisor" placeholder="Nama Supervisor">
+          </div>
+        </div>
+      </div>
+
+      <!-- 5M: Man -->
+      <div class="p5m-card">
+        <div class="p5m-card-title">👷 Man (Manusia)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Jumlah Hadir</label>
+            <input type="number" name="man_hadir" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Jumlah Rencana</label>
+            <input type="number" name="man_rencana" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Kondisi Fisik Tim</label>
+            <select name="man_kondisi">
+              <option value="">Pilih</option>
+              <option>Fit - Semua siap kerja</option>
+              <option>Ada yang kurang fit</option>
+              <option>Ada yang sakit</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Catatan</label>
+            <textarea name="man_catatan" placeholder="Catatan kondisi tim..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5M: Machine -->
+      <div class="p5m-card">
+        <div class="p5m-card-title">⚙️ Machine (Mesin)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>No Mesin</label>
+            <input type="text" name="machine_no" placeholder="No Mesin">
+          </div>
+          <div class="form-group">
+            <label>Kondisi Mesin</label>
+            <select name="machine_kondisi">
+              <option value="">Pilih</option>
+              <option>Baik</option>
+              <option>Perlu Perawatan</option>
+              <option>Rusak</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Masalah / Kerusakan</label>
+            <textarea name="machine_masalah" placeholder="Deskripsi masalah mesin..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5M: Material -->
+      <div class="p5m-card">
+        <div class="p5m-card-title">🪨 Material</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Stok Bit (pcs)</label>
+            <input type="number" name="material_bit" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Stok Rod (batang)</label>
+            <input type="number" name="material_rod" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Stok Bentonit (kg)</label>
+            <input type="number" name="material_bentonit" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Stok BBM (liter)</label>
+            <input type="number" name="material_bbm" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Material Kurang</label>
+            <textarea name="material_kurang" placeholder="Material yang perlu ditambah..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5M: Method -->
+      <div class="p5m-card">
+        <div class="p5m-card-title">📋 Method (Metode)</div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Metode Pengeboran</label>
+            <select name="method_type">
+              <option value="">Pilih</option>
+              <option>Rotary Drilling</option>
+              <option>Core Drilling</option>
+              <option>Percussion Drilling</option>
+              <option>Reverse Circulation</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>SOP yang Digunakan</label>
+            <input type="text" name="method_sop" placeholder="No SOP">
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Perubahan Metode</label>
+            <textarea name="method_perubahan" placeholder="Jika ada perubahan metode..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5M: Mother Nature / Environment -->
+      <div class="p5m-card">
+        <div class="p5m-card-title">🌿 Mother Nature (Lingkungan)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Cuaca</label>
+            <select name="env_cuaca">
+              <option value="">Pilih</option>
+              <option>Cerah</option>
+              <option>Berawan</option>
+              <option>Hujan Ringan</option>
+              <option>Hujan Lebat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Suhu (°C)</label>
+            <input type="number" name="env_suhu" placeholder="0">
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Kondisi Lingkungan</label>
+            <textarea name="env_kondisi" placeholder="Kondisi lingkungan sekitar..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tanda Tangan -->
+      <div class="form-section">
+        <div class="form-section-title">Persetujuan</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dibuat Oleh</label>
+            <input type="text" name="dibuat_oleh" placeholder="Nama">
+          </div>
+          <div class="form-group">
+            <label>Disetujui Oleh</label>
+            <input type="text" name="disetujui_oleh" placeholder="Nama Supervisor">
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
+    <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
+    <button class="btn btn-upload" onclick="uploadData()">☁️ Upload</button>
+  </div>
+
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    function saveData() {
+      const data = getFormData('p5m-form');
+      DB.save('p5m', data);
+      showToast('Data P5M tersimpan!');
+    }
+    function clearData() {
+      clearForm('p5m-form');
+      showToast('Form dikosongkan');
+    }
+    async function uploadData() {
+      saveData();
+      const json = JSON.stringify(DB.getAll('p5m'), null, 2);
+      await uploadToDrive(`p5m_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+  </script>
+</body>
+</html>
