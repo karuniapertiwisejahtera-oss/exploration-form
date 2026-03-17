@@ -1252,6 +1252,45 @@
     window.addEventListener('load', () => {
       const mode = sessionStorage.getItem('form_mode');
       const editId = sessionStorage.getItem('edit_record_id');
+
+      function restoreRows(rec) {
+        const rc = parseInt(rec.row_count) || 0;
+        for (let i = 1; i <= rc; i++) {
+          addRow({
+            from:        rec['from_'+i],
+            to:          rec['to_'+i],
+            length:      rec['len_'+i],
+            recovery:    rec['rec_'+i],
+            grain_size:  rec['grain_'+i],
+            core_wt:     rec['core_wt_'+i],
+            from_cum:    rec['from_cum_'+i],
+            to_cum:      rec['to_cum_'+i],
+            samp_no:     rec['samp_no_'+i],
+            send_cum:    rec['send_cum_'+i],
+            sample_id:   rec['sample_id_'+i],
+            a10_tot:     rec['a10_tot_'+i],
+            a10_rec:     rec['a10_rec_'+i],
+            a10_sid:     rec['a10_sid_'+i],
+            a2_tot:      rec['a2_tot_'+i],
+            a2_rec:      rec['a2_rec_'+i],
+            a2_sid:      rec['a2_sid_'+i],
+            a06_tot:     rec['a06_tot_'+i],
+            a06_rec:     rec['a06_rec_'+i],
+            a06_sid:     rec['a06_sid_'+i],
+            m06_tot:     rec['m06_tot_'+i],
+            m06_rec:     rec['m06_rec_'+i],
+            m06_sid:     rec['m06_sid_'+i],
+            p03_tot:     rec['p03_tot_'+i],
+            p03_rec:     rec['p03_rec_'+i],
+            p03_sid:     rec['p03_sid_'+i],
+            qaqc_sid:    rec['qaqc_sid_'+i],
+            qaqc_wt:     rec['qaqc_wt_'+i],
+            remarks:     rec['remarks_'+i],
+            merge_group: rec['merge_group_'+i]
+          });
+        }
+      }
+
       if (mode === 'edit' && editId) {
         const rec = DB.getAll('preparation').find(r => String(r.id) === editId);
         if (rec) {
@@ -1259,24 +1298,12 @@
             const el = document.querySelector('[name="'+k+'"]');
             if (el && rec[k] !== undefined) el.value = rec[k];
           });
-          const rc = parseInt(rec.row_count)||0;
-          for (let i = 1; i <= rc; i++) {
-            addRow({
-              from:rec['from_'+i],to:rec['to_'+i],length:rec['len_'+i],
-              recovery:rec['rec_'+i],grain_size:rec['grain_'+i],
-              core_wt:rec['core_wt_'+i],from_cum:rec['from_cum_'+i],to_cum:rec['to_cum_'+i],
-              samp_no:rec['samp_no_'+i],samp_wt:rec['samp_wt_'+i],
-              a10_arc:rec['a10_arc_'+i],a10_lab:rec['a10_lab_'+i],a10_sid:rec['a10_sid_'+i],
-              a2_arc:rec['a2_arc_'+i],a2_lab:rec['a2_lab_'+i],a2_sid:rec['a2_sid_'+i],
-              a06_arc:rec['a06_arc_'+i],a06_lab:rec['a06_lab_'+i],a06_sid:rec['a06_sid_'+i],
-              m06_arc:rec['m06_arc_'+i],m06_lab:rec['m06_lab_'+i],m06_sid:rec['m06_sid_'+i],
-              qaqc_sid:rec['qaqc_sid_'+i],qaqc_wt:rec['qaqc_wt_'+i],remarks:rec['remarks_'+i],
-              merge_group:rec['merge_group_'+i]
-            });
-          }
+          restoreRows(rec);
           window._editRecordId = rec.id;
           showToast('Mode Edit aktif');
           restoreMergeVisibility();
+          recalcSamplingNo();
+          highlightDuplicates();
         }
       } else if (mode === 'continue') {
         const saved = DB.getAll('preparation');
@@ -1286,10 +1313,10 @@
             const el = document.querySelector('[name="'+k+'"]');
             if (el && last[k] !== undefined) el.value = last[k];
           });
-          const rc = parseInt(last.row_count)||0;
-          for (let i = 1; i <= rc; i++) {
-            addRow({from:last['from_'+i],to:last['to_'+i],length:last['len_'+i],recovery:last['rec_'+i],grain_size:last['grain_'+i]});
-          }
+          restoreRows(last);
+          restoreMergeVisibility();
+          recalcSamplingNo();
+          highlightDuplicates();
         }
       } else { addRow(); }
       sessionStorage.removeItem('form_mode');
