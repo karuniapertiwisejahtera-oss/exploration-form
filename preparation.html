@@ -263,14 +263,17 @@
       tr.dataset.row = n;
 
       const v = data || {};
-      const autoNum = (id, val) =>
-        `<input type="number" id="${id}_${n}" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01" class="auto" readonly>`;
+      const autoNum = (id, val) => {
+        const clean = val !== null && val !== undefined && val !== '' ? parseFloat(String(val).replace(',','.')) : '';
+        return `<input type="number" id="${id}_${n}" name="${id}_${n}" value="${isNaN(clean) ? '' : clean}" step="0.01" class="auto" readonly>`;
+      };
       const autoTxt = (id, val) =>
         `<input type="text" id="${id}_${n}" name="${id}_${n}" value="${val || ''}" class="auto" readonly>`;
       // Grain size dropdown
       const grainOpts = ['','GVL','CS','FS','CLY'];
+      const grainVal = (val) => (val || '').toString().trim().toUpperCase();
       const grainSel = (val) => `<select id="grain_${n}" name="grain_${n}" class="auto" style="color:#1a6b4a;font-weight:700;background:transparent;border:none;outline:none;width:100%;font-size:11px;text-align:center;">
-        ${grainOpts.map(o => `<option value="${o}"${o===(val||'')?'selected':''}>${o}</option>`).join('')}
+        ${grainOpts.map(o => `<option value="${o}"${o===grainVal(val)?'selected':''}>${o}</option>`).join('')}
       </select>`;
       const num = (id, val) =>
         `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01">`;
@@ -493,13 +496,14 @@
         rowCount = 0;
         lines.slice(1).forEach(line => {
           if (!line.trim()) return;
-          const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+          const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g, '').replace(',','.'));
           const fv = parseFloat(cols[iFrom]||0), tv = parseFloat(cols[iTo]||0);
           addRow({
-            from: cols[iFrom]||'', to: cols[iTo]||'',
-            length: iLen >= 0 ? cols[iLen] : (tv-fv).toFixed(2),
-            recovery: iRec >= 0 ? cols[iRec] : '',
-            grain_size: iGrain >= 0 ? cols[iGrain] : ''
+            from:       cols[iFrom] || '',
+            to:         cols[iTo]   || '',
+            length:     iLen >= 0 ? cols[iLen] : (!isNaN(tv-fv) ? (tv-fv).toFixed(2) : ''),
+            recovery:   iRec   >= 0 ? cols[iRec].trim()   : '',
+            grain_size: iGrain >= 0 ? cols[iGrain].trim().toUpperCase() : ''
           });
         });
         showToast(`✓ ${rowCount} baris diimport dari CSV`);
