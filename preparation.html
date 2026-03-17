@@ -79,17 +79,18 @@
     .prep-table .cf5 { left: 222px; min-width: 60px; width: 60px; border-right: 2px solid #888 !important; }
 
     /* Kolom non-freeze */
-    .prep-table th.c-std  { min-width: 50px;  width: 50px; }
-    .prep-table th.c-wide { min-width: 65px;  width: 65px; }
-    .prep-table th.c-sid  { min-width: 75px;  width: 75px; }
+    .prep-table th.c-std  { min-width: 44px;  width: 44px; }
+    .prep-table th.c-wide { min-width: 88px;  width: 88px; } /* colspan=2: 44+44 */
+    .prep-table th.c-sid  { min-width: 80px;  width: 80px; }
     .prep-table th.c-rem  { min-width: 80px;  width: 80px; }
     .prep-table th.c-cum  { min-width: 55px;  width: 55px; background: #fff3e0; }
-    .prep-table th.c-send { min-width: 65px;  width: 65px; background: #e8f5e9; }
+    .prep-table th.c-send { min-width: 55px;  width: 55px; background: #e8f5e9; }
+    /* Lebar data cell ikut header */
+    .prep-table td { min-width: 44px; }
 
-    /* Row 2 offset = tinggi row 1 */
-    .prep-table thead tr:nth-child(2) th { top: 28px; }
-    /* Row 3 offset = tinggi row 1 + row 2 */
-    .prep-table thead tr:nth-child(3) th { top: 56px; }
+    /* Sticky top offset sesuai height 22px per row */
+    .prep-table thead tr:nth-child(2) th { top: 22px; }
+    .prep-table thead tr:nth-child(3) th { top: 44px; }
 
     /* Input dalam tabel */
     .prep-table td input, .prep-table td select {
@@ -742,13 +743,15 @@
               return -1;
             }
 
-            var iFrom  = findCol('from','depthfrom','dari','start');
-            var iTo    = findCol('to','depthto','sampai','end');
-            var iLen   = findCol('length','len','panjang','interval');
-            var iRec   = findCol('recoverylength','recovery','recov');
-            var iGrain = findCol('grainsize','grain','litho','lithology','jenis');
+            var iFrom     = findCol('from','depthfrom','dari','start');
+            var iTo       = findCol('to','depthto','sampai','end');
+            var iLen      = findCol('length','len','panjang','interval');
+            var iRec      = findCol('recoverylength','recoverylength','recovlength','reclength','recovery','recov','rec');
+            var iGrain    = findCol('grainsize','grain','litho','lithology','jenis');
+            var iHoleId   = findCol('holeid','hole_id','holename','hole','bhid','drillhole');
+            var iDeposit  = findCol('deposit','area','lokasi','location');
 
-            console.log('[importCSV] From:'+iFrom+' To:'+iTo+' Len:'+iLen+' Rec:'+iRec+' Grain:'+iGrain);
+            console.log('[importCSV] From:'+iFrom+' To:'+iTo+' Len:'+iLen+' Rec:'+iRec+' Grain:'+iGrain+' HoleID:'+iHoleId+' Deposit:'+iDeposit);
 
             if (iFrom < 0 || iTo < 0) {
               showToast('Kolom From/To tidak ditemukan. Header: ' + rawHeaders.slice(0,6).join(' | '), 'error');
@@ -758,9 +761,31 @@
             document.getElementById('prep-tbody').innerHTML = '';
             rowCount = 0;
 
+            // Kumpulkan semua baris dulu untuk ambil nilai header
+            var dataRows = lines.slice(1).filter(function(l){ return l.trim(); });
+
+            // Auto-fill header info dari baris pertama & terakhir
+            if (dataRows.length > 0) {
+              var firstCols = dataRows[0].split(sep).map(function(c){ return c.trim().replace(/^"|"$/g,''); });
+              var lastCols  = dataRows[dataRows.length-1].split(sep).map(function(c){ return c.trim().replace(/^"|"$/g,''); });
+
+              if (iHoleId >= 0 && firstCols[iHoleId]) {
+                var hEl = document.getElementById('h-holeid');
+                if (hEl && !hEl.value) hEl.value = firstCols[iHoleId];
+              }
+              if (iDeposit >= 0 && firstCols[iDeposit]) {
+                var dEl = document.getElementById('h-deposit');
+                if (dEl && !dEl.value) dEl.value = firstCols[iDeposit];
+              }
+              // Total Depth = nilai To terakhir
+              if (iTo >= 0 && lastCols[iTo]) {
+                var tdEl = document.getElementById('h-depth');
+                if (tdEl && !tdEl.value) tdEl.value = lastCols[iTo].replace(/,/g,'.');
+              }
+            }
+
             var imported = 0;
-            lines.slice(1).forEach(function(line) {
-              if (!line.trim()) return;
+            dataRows.forEach(function(line) {
               var cols = line.split(sep).map(function(c){ return c.trim().replace(/^"|"$/g,'').replace(/,/g,'.'); });
               if (!cols[iFrom] && !cols[iTo]) return;
               var fv = parseFloat(cols[iFrom]) || 0;
