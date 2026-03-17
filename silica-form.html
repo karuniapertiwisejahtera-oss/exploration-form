@@ -156,32 +156,60 @@
       if (!records.length) return;
       const form = FORMS.find(f => f.key === key);
       document.getElementById('dv-title').textContent = '📋 ' + label + ' (' + records.length + ' record)';
-      const SKIP = ['id','timestamp','ttd_driller','ttd_geos','row_count'];
+
       let html = '';
-      records.forEach((rec, idx) => {
-        const ts = new Date(rec.timestamp).toLocaleString('id-ID');
-        html += `<div class="dv-record">
-          <div class="dv-record-header">
-            <span>Record #${idx+1}</span>
-            <span style="opacity:0.8;font-weight:400;">${ts}</span>
-          </div>
-          <div class="dv-record-body">`;
-        Object.entries(rec).forEach(([k,v]) => {
-          if (SKIP.includes(k) || v === '' || v === null || v === undefined) return;
-          const lbl = k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-          html += `<div class="dv-field"><span class="dv-field-label">${lbl}</span><span class="dv-field-value">${v}</span></div>`;
+
+      if (key === 'preparation') {
+        // Card ringkas: hanya Hole ID + tanggal
+        records.forEach((rec, idx) => {
+          const ts  = new Date(rec.timestamp).toLocaleString('id-ID');
+          const hid = rec.hole_id || '—';
+          html += `<div class="dv-record">
+            <div class="dv-record-header">
+              <span>Record #${idx+1}</span>
+              <span style="opacity:0.8;font-weight:400;">${ts}</span>
+            </div>
+            <div class="dv-record-body" style="padding:10px 12px;">
+              <div class="dv-field">
+                <span class="dv-field-label">Hole ID</span>
+                <span class="dv-field-value" style="font-size:14px;font-weight:700;">${hid}</span>
+              </div>
+            </div>
+            <div class="dv-actions">
+              <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
+              <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
+            </div>
+          </div>`;
         });
-        if (rec.ttd_driller && rec.ttd_driller.startsWith('data:image'))
-          html += `<div class="dv-field"><span class="dv-field-label">TTD Driller</span><img src="${rec.ttd_driller}" style="height:28px;border:1px solid #eee;border-radius:4px;"></div>`;
-        if (rec.ttd_geos && rec.ttd_geos.startsWith('data:image'))
-          html += `<div class="dv-field"><span class="dv-field-label">TTD Geos Lap</span><img src="${rec.ttd_geos}" style="height:28px;border:1px solid #eee;border-radius:4px;"></div>`;
-        html += `</div>
-          <div class="dv-actions">
-            <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
-            <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
-          </div>
-        </div>`;
-      });
+      } else {
+        // Data view lengkap untuk form lain
+        const SKIP = ['id','timestamp','ttd_driller','ttd_geos','row_count'];
+        records.forEach((rec, idx) => {
+          const ts = new Date(rec.timestamp).toLocaleString('id-ID');
+          html += `<div class="dv-record">
+            <div class="dv-record-header">
+              <span>Record #${idx+1}</span>
+              <span style="opacity:0.8;font-weight:400;">${ts}</span>
+            </div>
+            <div class="dv-record-body">`;
+          Object.entries(rec).forEach(([k,v]) => {
+            if (SKIP.includes(k) || v === '' || v === null || v === undefined) return;
+            const lbl = k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+            html += `<div class="dv-field"><span class="dv-field-label">${lbl}</span><span class="dv-field-value">${v}</span></div>`;
+          });
+          if (rec.ttd_driller && rec.ttd_driller.startsWith('data:image'))
+            html += `<div class="dv-field"><span class="dv-field-label">TTD Driller</span><img src="${rec.ttd_driller}" style="height:28px;border:1px solid #eee;border-radius:4px;"></div>`;
+          if (rec.ttd_geos && rec.ttd_geos.startsWith('data:image'))
+            html += `<div class="dv-field"><span class="dv-field-label">TTD Geos Lap</span><img src="${rec.ttd_geos}" style="height:28px;border:1px solid #eee;border-radius:4px;"></div>`;
+          html += `</div>
+            <div class="dv-actions">
+              <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
+              <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
+            </div>
+          </div>`;
+        });
+      }
+
       document.getElementById('dv-content').innerHTML = html;
       document.getElementById('dataview-overlay').style.display = 'flex';
     }
