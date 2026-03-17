@@ -6,182 +6,124 @@
   <title>Sample Preparation Form</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* ===== WRAPPER SCROLL ===== */
     .prep-wrap {
-      width: 100%;
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-      max-height: calc(100vh - 240px);
-      position: relative;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      width: 100%; overflow: auto; -webkit-overflow-scrolling: touch;
+      max-height: calc(100vh - 240px); position: relative;
+      border: 1px solid #ccc; border-radius: 6px;
     }
-
-    /* ===== TABLE BASE ===== */
     .prep-table {
-      border-collapse: separate;
-      border-spacing: 0;
-      font-size: 9px;
-      white-space: nowrap;
+      border-collapse: separate; border-spacing: 0;
+      font-size: 11px; white-space: nowrap;
     }
-
-    .prep-table th,
-    .prep-table td {
-      border-right: 1px solid #bbb;
-      border-bottom: 1px solid #bbb;
-      padding: 3px 4px;
-      text-align: center;
-      vertical-align: middle;
+    .prep-table th, .prep-table td {
+      border-right: 1px solid #bbb; border-bottom: 1px solid #bbb;
+      padding: 4px 5px; text-align: center; vertical-align: middle;
     }
-
-    /* ===== HEADER ROWS ===== */
     .prep-table thead th {
-      background: #c5d8f7;
-      font-weight: 700;
-      font-size: 8px;
-      line-height: 1.3;
-      position: sticky;
-      z-index: 3;
+      background: #c5d8f7; font-weight: 700; font-size: 10px;
+      line-height: 1.3; position: sticky; z-index: 3;
+    }
+    .prep-table thead tr:nth-child(1) th { top: 0; border-top: 1px solid #bbb; }
+    .prep-table thead tr:nth-child(2) th { top: 32px; }
+    .prep-table thead th.group { background: #a8c4f0; }
+
+    /* Freeze kolom kiri */
+    .prep-table th.col-freeze, .prep-table td.col-freeze {
+      position: sticky; background: #e8f4fd; z-index: 2;
+    }
+    .prep-table thead th.col-freeze { background: #b8d4f0; z-index: 5; }
+    .prep-table .cf1 { left: 0;     min-width: 52px; width: 52px; }
+    .prep-table .cf2 { left: 53px;  min-width: 52px; width: 52px; }
+    .prep-table .cf3 { left: 106px; min-width: 54px; width: 54px; }
+    .prep-table .cf4 { left: 161px; min-width: 60px; width: 60px; }
+    .prep-table .cf5 { left: 222px; min-width: 60px; width: 60px; border-right: 2px solid #888 !important; }
+
+    /* Kolom non-freeze */
+    .prep-table th.c-std  { min-width: 56px;  width: 56px; }
+    .prep-table th.c-wide { min-width: 70px;  width: 70px; }
+    .prep-table th.c-sid  { min-width: 80px;  width: 80px; }
+    .prep-table th.c-rem  { min-width: 90px;  width: 90px; }
+    .prep-table th.c-cum  { min-width: 60px;  width: 60px; background: #fff3e0; }
+
+    /* Input dalam tabel */
+    .prep-table td input, .prep-table td select {
+      width: 100%; border: none; outline: none; font-size: 11px;
+      text-align: center; padding: 1px 2px; background: transparent;
+      box-sizing: border-box; min-width: 0;
+    }
+    .prep-table td input.auto { color: #1a6b4a; font-weight: 700; }
+
+    /* Kolom Cum */
+    .prep-table td.td-cum { background: #fff8f0; }
+    .prep-table td.td-cum input { color: #e65100; font-weight: 700; }
+
+    /* Baris yang tergabung — garis kiri oranye, hilangkan border antar baris dalam grup */
+    .prep-table tr.row-merged td {
+      border-bottom-color: transparent !important;
+      box-shadow: inset 3px 0 0 #ff9800;
+    }
+    /* Baris terakhir dalam grup — tampilkan border bawah kembali */
+    .prep-table tr.row-merged-last td {
+      border-bottom-color: #bbb !important;
+    }
+    /* Kolom freeze tetap punya background normal */
+    .prep-table tr.row-merged td.col-freeze {
+      box-shadow: inset 3px 0 0 #ff9800;
     }
 
-    /* Row 1 top offset = 0 */
-    .prep-table thead tr:nth-child(1) th {
-      top: 0;
-      border-top: 1px solid #bbb;
+    /* Tombol gabung */
+    .btn-merge {
+      background: #ff9800; color: white; border: none;
+      border-radius: 4px; padding: 2px 5px; font-size: 10px;
+      cursor: pointer; white-space: nowrap;
+    }
+    .btn-merge.active { background: #e65100; }
+
+    /* Mode pilih baris */
+    body.merge-mode .prep-table tbody tr { cursor: pointer; }
+    body.merge-mode .prep-table tbody tr.row-selected-merge td {
+      box-shadow: inset 3px 0 0 #ff9800, inset 0 -2px 0 #ff9800;
+    }
+    body.merge-mode .prep-table tbody tr:not(.row-selected-merge):hover td {
+      background: #fff8f0 !important;
+    }
+    .merge-banner {
+      display: none; background: #ff9800; color: white;
+      padding: 8px 14px; border-radius: 8px; margin-bottom: 8px;
+      font-size: 12px; font-weight: 600; align-items: center; gap: 10px;
+    }
+    .merge-banner.show { display: flex; }
+    .merge-banner button {
+      background: white; color: #e65100; border: none;
+      border-radius: 6px; padding: 4px 10px; font-size: 11px;
+      font-weight: 700; cursor: pointer; margin-left: auto;
     }
 
-    /* Row 2 top offset = tinggi row 1 (26px) */
-    .prep-table thead tr:nth-child(2) th {
-      top: 26px;
-    }
-
-    /* Group header warna beda */
-    .prep-table thead th.group {
-      background: #a8c4f0;
-    }
-
-    /* ===== FREEZE 5 KOLOM KIRI ===== */
-    /* Kolom: From(1), To(2), Length(3), Recovery(4), Grain(5) */
-    .prep-table th.col-freeze,
-    .prep-table td.col-freeze {
-      position: sticky;
-      background: #e8f4fd;
-      z-index: 2;
-    }
-
-    /* Header freeze = z-index lebih tinggi (sticky both axis) */
-    .prep-table thead th.col-freeze {
-      background: #b8d4f0;
-      z-index: 5;
-    }
-
-    /* Left offset tiap kolom freeze */
-    .prep-table .cf1 { left: 0;    min-width: 36px; width: 36px; }
-    .prep-table .cf2 { left: 37px; min-width: 36px; width: 36px; }
-    .prep-table .cf3 { left: 74px; min-width: 38px; width: 38px; }
-    .prep-table .cf4 { left: 113px; min-width: 42px; width: 42px; }
-    .prep-table .cf5 { left: 156px; min-width: 44px; width: 44px; }
-
-    /* Border kanan kolom freeze terakhir lebih tebal */
-    .prep-table .cf5 {
-      border-right: 2px solid #888 !important;
-    }
-
-    /* ===== KOLOM NON-FREEZE ===== */
-    .prep-table th.c-std { min-width: 38px; width: 38px; }
-    .prep-table th.c-wide { min-width: 52px; width: 52px; }
-    .prep-table th.c-sid { min-width: 56px; width: 56px; }
-    .prep-table th.c-rem { min-width: 70px; width: 70px; }
-
-    /* ===== INPUT DALAM TABEL ===== */
-    .prep-table td input,
-    .prep-table td select {
-      width: 100%;
-      border: none;
-      outline: none;
-      font-size: 9px;
-      text-align: center;
-      padding: 1px 2px;
-      background: transparent;
-      box-sizing: border-box;
-      min-width: 0;
-    }
-
-    /* Input auto-fill (dari CSV) */
-    .prep-table td input.auto {
-      color: #1a6b4a;
-      font-weight: 700;
-    }
-
-    /* ===== HEADER INFO ===== */
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px 12px;
-      margin-bottom: 10px;
-    }
-    .info-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-    }
-    .info-row label {
-      font-weight: 700;
-      white-space: nowrap;
-      flex-shrink: 0;
-      font-size: 10px;
-    }
+    /* Info grid */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; margin-bottom: 10px; }
+    .info-row { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 10px; }
     .info-row input {
-      flex: 1;
-      border: none;
-      border-bottom: 1px solid #999;
-      outline: none;
-      font-size: 10px;
-      padding: 2px 3px;
-      background: transparent;
-      min-width: 0;
-      width: 0;
+      flex: 1; border: none; border-bottom: 1px solid #999; outline: none;
+      font-size: 10px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
     }
 
-    /* ===== CSV BAR ===== */
+    /* CSV bar */
     .csv-bar {
-      background: #e8f5e9;
-      border: 1.5px dashed #4caf50;
-      border-radius: 10px;
-      padding: 10px 14px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      background: #e8f5e9; border: 1.5px dashed #4caf50; border-radius: 10px;
+      padding: 10px 14px; margin-bottom: 10px; display: flex; align-items: center;
+      gap: 10px; flex-wrap: wrap;
     }
     .csv-bar label.csv-btn {
-      background: #1a6b4a;
-      color: white;
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
+      background: #1a6b4a; color: white; padding: 7px 14px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
     }
-    .csv-bar label.csv-btn:active { opacity: 0.85; }
     #csv-filename { font-size: 11px; color: #555; flex: 1; }
     #csv-input { display: none; }
-
-    /* ===== TAMBAH BARIS BTN ===== */
     .btn-add-row {
-      margin-top: 8px;
-      width: 100%;
-      background: #4db6ac;
-      color: white;
-      border: none;
-      padding: 9px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
+      margin-top: 8px; width: 100%; background: #4db6ac; color: white;
+      border: none; padding: 9px; border-radius: 8px; font-size: 13px;
+      font-weight: 600; cursor: pointer;
     }
   </style>
 </head>
@@ -208,18 +150,23 @@
         </div>
       </div>
 
+      <!-- Merge Banner -->
+      <div class="merge-banner" id="merge-banner">
+        🔗 Mode Gabung aktif — ketuk baris yang ingin digabung
+        <button onclick="cancelMerge()">✕ Batal</button>
+      </div>
+
       <!-- CSV Import -->
       <div class="csv-bar">
         <label class="csv-btn" for="csv-input">📂 Import CSV</label>
         <input type="file" id="csv-input" accept=".csv" onchange="importCSV(this)">
-        <span id="csv-filename">Pilih file .csv dari HP untuk mengisi kolom From, To, Recovery, Grain Size</span>
+        <span id="csv-filename">Pilih file .csv dari HP</span>
       </div>
 
       <!-- Tabel -->
       <div class="prep-wrap">
         <table class="prep-table" id="prep-table">
           <thead>
-            <!-- ROW 1: Group headers -->
             <tr>
               <th class="col-freeze cf1" rowspan="2">From<br>(m)</th>
               <th class="col-freeze cf2" rowspan="2">To<br>(m)</th>
@@ -227,6 +174,9 @@
               <th class="col-freeze cf4" rowspan="2">Recovery<br>(%)</th>
               <th class="col-freeze cf5" rowspan="2">Grain<br>Size</th>
               <th class="c-std" rowspan="2">Core<br>Weight</th>
+              <th class="c-cum" rowspan="2">From<br>Cum</th>
+              <th class="c-cum" rowspan="2">To<br>Cum</th>
+              <th class="c-std" rowspan="2" style="min-width:40px;width:40px;">Gabung</th>
               <th class="c-std" rowspan="2">Sampling<br>No.</th>
               <th class="c-std" rowspan="2">Sampling<br>Weight</th>
               <th class="group c-wide" colspan="3">+10 mm</th>
@@ -236,27 +186,12 @@
               <th class="group c-wide" colspan="2">Sample QAQC</th>
               <th class="c-rem" rowspan="2">Remarks</th>
             </tr>
-            <!-- ROW 2: Sub-headers -->
             <tr>
-              <!-- +10mm -->
-              <th class="c-std">Archive</th>
-              <th class="c-wide">Wet(Kg)<br>to lab</th>
-              <th class="c-sid">Sample_ID</th>
-              <!-- +2-10mm -->
-              <th class="c-std">Archive</th>
-              <th class="c-wide">Wet(Kg)<br>to lab</th>
-              <th class="c-sid">Sample_ID</th>
-              <!-- +0.6-2mm -->
-              <th class="c-std">Archive</th>
-              <th class="c-wide">Wet(Kg)<br>to lab</th>
-              <th class="c-sid">Sample_ID</th>
-              <!-- -0.6mm -->
-              <th class="c-std">Archive</th>
-              <th class="c-wide">Wet(Kg)<br>to lab</th>
-              <th class="c-sid">Sample_ID</th>
-              <!-- QAQC -->
-              <th class="c-sid">Sample_ID</th>
-              <th class="c-std">Wet(Kg)</th>
+              <th class="c-std">Archive</th><th class="c-wide">Wet(Kg)<br>to lab</th><th class="c-sid">Sample_ID</th>
+              <th class="c-std">Archive</th><th class="c-wide">Wet(Kg)<br>to lab</th><th class="c-sid">Sample_ID</th>
+              <th class="c-std">Archive</th><th class="c-wide">Wet(Kg)<br>to lab</th><th class="c-sid">Sample_ID</th>
+              <th class="c-std">Archive</th><th class="c-wide">Wet(Kg)<br>to lab</th><th class="c-sid">Sample_ID</th>
+              <th class="c-sid">Sample_ID</th><th class="c-std">Wet(Kg)</th>
             </tr>
           </thead>
           <tbody id="prep-tbody"></tbody>
@@ -279,6 +214,7 @@
   <script src="js/drive.js"></script>
   <script>
     let rowCount = 0;
+    let mergeSourceRow = null; // nomor baris yang menekan tombol Gabung
 
     // ===== TAMBAH BARIS =====
     function addRow(data) {
@@ -287,20 +223,21 @@
       const tbody = document.getElementById('prep-tbody');
       const tr = document.createElement('tr');
       tr.id = 'prep-row-' + n;
+      tr.dataset.row = n;
 
       const v = data || {};
-
-      // Helper: input auto (readonly, hijau)
       const autoNum = (id, val) =>
         `<input type="number" id="${id}_${n}" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01" class="auto" readonly>`;
       const autoTxt = (id, val) =>
         `<input type="text" id="${id}_${n}" name="${id}_${n}" value="${val || ''}" class="auto" readonly>`;
-
-      // Helper: input editable
       const num = (id, val) =>
         `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01">`;
       const txt = (id, val) =>
         `<input type="text" name="${id}_${n}" value="${val || ''}">`;
+
+      // Tanda gabung jika ada merge_group
+      if (v.merge_group) tr.classList.add('row-merged');
+      if (v.merge_group) tr.dataset.mergeGroup = v.merge_group;
 
       tr.innerHTML = `
         <td class="col-freeze cf1">${autoNum('from', v.from)}</td>
@@ -309,6 +246,9 @@
         <td class="col-freeze cf4">${autoNum('rec', v.recovery)}</td>
         <td class="col-freeze cf5">${autoTxt('grain', v.grain_size)}</td>
         <td>${num('core_wt', v.core_wt)}</td>
+        <td class="td-cum"><input type="number" name="from_cum_${n}" id="from_cum_${n}" value="${v.from_cum != null ? v.from_cum : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
+        <td class="td-cum"><input type="number" name="to_cum_${n}"   id="to_cum_${n}"   value="${v.to_cum   != null ? v.to_cum   : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
+        <td><button class="btn-merge" onclick="startMerge(${n}, this)" title="Pilih baris untuk digabung">🔗</button></td>
         <td>${txt('samp_no', v.samp_no)}</td>
         <td>${num('samp_wt', v.samp_wt)}</td>
         <td>${num('a10_arc', v.a10_arc)}</td>
@@ -335,66 +275,153 @@
       document.getElementById('h-total-sample').value = rowCount;
     }
 
+    // ===== MERGE LOGIC =====
+    // selectedRows = set nomor baris yang dipilih untuk digabung dengan mergeSourceRow
+    let selectedRows = new Set();
+
+    function startMerge(rowNum, btn) {
+      // Jika sudah ada mode merge aktif, batalkan dulu
+      if (mergeSourceRow !== null) cancelMerge();
+
+      mergeSourceRow = rowNum;
+      selectedRows = new Set([rowNum]); // sumber otomatis terpilih
+
+      document.body.classList.add('merge-mode');
+      document.getElementById('merge-banner').classList.add('show');
+      btn.classList.add('active');
+
+      // Highlight baris sumber
+      const srcTr = document.getElementById('prep-row-' + rowNum);
+      if (srcTr) srcTr.classList.add('row-selected-merge');
+
+      // Pasang listener klik baris
+      document.getElementById('prep-tbody').addEventListener('click', onRowClick);
+    }
+
+    function onRowClick(e) {
+      // Abaikan klik pada tombol gabung itu sendiri
+      if (e.target.classList.contains('btn-merge')) return;
+      // Abaikan klik pada input
+      if (e.target.tagName === 'INPUT') return;
+
+      const tr = e.target.closest('tr');
+      if (!tr || !tr.dataset.row) return;
+      const n = parseInt(tr.dataset.row);
+
+      if (selectedRows.has(n)) {
+        // Deselect (kecuali baris sumber)
+        if (n === mergeSourceRow) return;
+        selectedRows.delete(n);
+        tr.classList.remove('row-selected-merge');
+      } else {
+        selectedRows.add(n);
+        tr.classList.add('row-selected-merge');
+      }
+    }
+
+    function cancelMerge() {
+      document.body.classList.remove('merge-mode');
+      document.getElementById('merge-banner').classList.remove('show');
+      document.getElementById('prep-tbody').removeEventListener('click', onRowClick);
+
+      // Hapus highlight sementara
+      document.querySelectorAll('.row-selected-merge').forEach(r => r.classList.remove('row-selected-merge'));
+
+      // Reset tombol aktif
+      if (mergeSourceRow !== null) {
+        const btn = document.querySelector(`#prep-row-${mergeSourceRow} .btn-merge`);
+        if (btn) btn.classList.remove('active');
+      }
+      mergeSourceRow = null;
+      selectedRows = new Set();
+    }
+
+    function applyMerge() {
+      if (selectedRows.size < 2) { showToast('Pilih minimal 2 baris untuk digabung', 'error'); return; }
+
+      // Kumpulkan nilai From dan To dari baris yang dipilih
+      let fromVals = [], toVals = [];
+      selectedRows.forEach(n => {
+        const fEl = document.getElementById('from_' + n);
+        const tEl = document.getElementById('to_' + n);
+        if (fEl && fEl.value !== '') fromVals.push(parseFloat(fEl.value));
+        if (tEl && tEl.value !== '') toVals.push(parseFloat(tEl.value));
+      });
+
+      const fromCum = fromVals.length ? Math.min(...fromVals) : '';
+      const toCum   = toVals.length   ? Math.max(...toVals)   : '';
+
+      // Buat group ID unik
+      const groupId = 'G' + Date.now();
+
+      // Terapkan ke semua baris yang dipilih
+      const sortedRows = [...selectedRows].sort((a,b) => a-b);
+      const lastRow = sortedRows[sortedRows.length - 1];
+
+      sortedRows.forEach(n => {
+        const tr = document.getElementById('prep-row-' + n);
+        if (!tr) return;
+        tr.classList.add('row-merged');
+        tr.classList.remove('row-merged-last');
+        tr.dataset.mergeGroup = groupId;
+
+        // Isi From_Cum dan To_Cum
+        const fcEl = document.getElementById('from_cum_' + n);
+        const tcEl = document.getElementById('to_cum_' + n);
+        if (fcEl) fcEl.value = fromCum;
+        if (tcEl) tcEl.value = toCum;
+      });
+
+      // Tandai baris terakhir grup
+      const lastTr = document.getElementById('prep-row-' + lastRow);
+      if (lastTr) lastTr.classList.add('row-merged-last');
+
+      cancelMerge();
+      showToast(`✓ ${selectedRows.size || '?'} baris digabung: ${fromCum} – ${toCum} m`);
+    }
+
+    // Tombol Terapkan di banner
+    document.addEventListener('DOMContentLoaded', () => {
+      const banner = document.getElementById('merge-banner');
+      const applyBtn = document.createElement('button');
+      applyBtn.textContent = '✓ Terapkan';
+      applyBtn.style.cssText = 'background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;';
+      applyBtn.onclick = applyMerge;
+      banner.insertBefore(applyBtn, banner.querySelector('button'));
+    });
+
     // ===== IMPORT CSV =====
     function importCSV(input) {
       const file = input.files[0];
       if (!file) return;
       document.getElementById('csv-filename').textContent = file.name;
-
       const reader = new FileReader();
       reader.onload = function(e) {
         const text = e.target.result;
         const lines = text.trim().split(/\r?\n/);
         if (lines.length < 2) { showToast('CSV kosong atau format salah', 'error'); return; }
-
-        // Deteksi separator (koma atau titik koma)
         const sep = lines[0].includes(';') ? ';' : ',';
-
-        // Parse header
         const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
-
-        const findCol = (...names) => {
-          for (const n of names) {
-            const idx = headers.findIndex(h => h.includes(n));
-            if (idx >= 0) return idx;
-          }
-          return -1;
-        };
-
-        const iFrom     = findCol('from', 'depth_from', 'start');
-        const iTo       = findCol('to', 'depth_to', 'end');
-        const iLen      = findCol('length', 'len', 'panjang');
-        const iRecovery = findCol('recovery', 'rec');
-        const iGrain    = findCol('grain', 'grain_size', 'grainsize');
-
-        if (iFrom < 0 || iTo < 0) {
-          showToast('Kolom From/To tidak ditemukan di CSV', 'error');
-          return;
-        }
-
-        // Bersihkan tabel lama
+        const findCol = (...names) => { for (const n of names) { const idx = headers.findIndex(h => h.includes(n)); if (idx >= 0) return idx; } return -1; };
+        const iFrom = findCol('from','depth_from','start');
+        const iTo   = findCol('to','depth_to','end');
+        const iLen  = findCol('length','len','panjang');
+        const iRec  = findCol('recovery','rec');
+        const iGrain= findCol('grain','grain_size','grainsize');
+        if (iFrom < 0 || iTo < 0) { showToast('Kolom From/To tidak ditemukan di CSV', 'error'); return; }
         document.getElementById('prep-tbody').innerHTML = '';
         rowCount = 0;
-
-        // Isi baris dari CSV
         lines.slice(1).forEach(line => {
           if (!line.trim()) return;
           const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
-          const fromVal = parseFloat(cols[iFrom] || 0);
-          const toVal   = parseFloat(cols[iTo]   || 0);
-          const lenVal  = iLen >= 0
-            ? cols[iLen]
-            : (toVal - fromVal).toFixed(2);
-
+          const fv = parseFloat(cols[iFrom]||0), tv = parseFloat(cols[iTo]||0);
           addRow({
-            from:       cols[iFrom]     || '',
-            to:         cols[iTo]       || '',
-            length:     lenVal,
-            recovery:   iRecovery >= 0  ? cols[iRecovery] : '',
-            grain_size: iGrain >= 0     ? cols[iGrain]    : ''
+            from: cols[iFrom]||'', to: cols[iTo]||'',
+            length: iLen >= 0 ? cols[iLen] : (tv-fv).toFixed(2),
+            recovery: iRec >= 0 ? cols[iRec] : '',
+            grain_size: iGrain >= 0 ? cols[iGrain] : ''
           });
         });
-
         showToast(`✓ ${rowCount} baris diimport dari CSV`);
       };
       reader.readAsText(file);
@@ -403,17 +430,19 @@
     // ===== SAVE =====
     function saveData() {
       const data = {};
-      // Header info
       ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
         const el = document.querySelector('[name="' + k + '"]');
         if (el) data[k] = el.value;
       });
       data.row_count = rowCount;
-      // Semua input tabel
+      // Simpan merge group per baris
+      for (let i = 1; i <= rowCount; i++) {
+        const tr = document.getElementById('prep-row-' + i);
+        if (tr && tr.dataset.mergeGroup) data['merge_group_' + i] = tr.dataset.mergeGroup;
+      }
       document.querySelectorAll('#prep-table input, #prep-table select').forEach(el => {
         if (el.name) data[el.name] = el.value;
       });
-
       if (window._editRecordId) {
         DB.update('preparation', window._editRecordId, data);
         window._editRecordId = null;
@@ -430,64 +459,79 @@
       document.getElementById('prep-tbody').innerHTML = '';
       document.getElementById('csv-filename').textContent = 'Pilih file .csv dari HP';
       document.getElementById('csv-input').value = '';
-      rowCount = 0;
-      window._editRecordId = null;
+      rowCount = 0; window._editRecordId = null;
+      cancelMerge();
       addRow();
       showToast('Form dikosongkan');
     }
 
+    // ===== GENERATE CSV =====
+    function generateCSV() {
+      const headers = [
+        'From(m)','To(m)','Length(m)','Recovery(%)','Grain Size','Core Weight',
+        'From_Cum','To_Cum',
+        'Sampling No.','Sampling Weight',
+        '+10mm Archive','+10mm Wet(Kg)to lab','+10mm Sample_ID',
+        '+2-10mm Archive','+2-10mm Wet(Kg)to lab','+2-10mm Sample_ID',
+        '+0.6-2mm Archive','+0.6-2mm Wet(Kg)to lab','+0.6-2mm Sample_ID',
+        '-0.6mm Archive','-0.6mm Wet(Kg)to lab','-0.6mm Sample_ID',
+        'QAQC Sample_ID','QAQC Wet(Kg)','Remarks','Merge_Group'
+      ];
+      const rows = [headers.join(',')];
+      for (let i = 1; i <= rowCount; i++) {
+        const get = (id) => { const el = document.querySelector(`[name="${id}_${i}"]`); return el ? (el.value||'') : ''; };
+        const tr = document.getElementById('prep-row-' + i);
+        const mg = tr ? (tr.dataset.mergeGroup || '') : '';
+        const row = [
+          get('from'),get('to'),get('len'),get('rec'),get('grain'),get('core_wt'),
+          get('from_cum'),get('to_cum'),
+          get('samp_no'),get('samp_wt'),
+          get('a10_arc'),get('a10_lab'),get('a10_sid'),
+          get('a2_arc'),get('a2_lab'),get('a2_sid'),
+          get('a06_arc'),get('a06_lab'),get('a06_sid'),
+          get('m06_arc'),get('m06_lab'),get('m06_sid'),
+          get('qaqc_sid'),get('qaqc_wt'),get('remarks'),mg
+        ].map(v => `"${v}"`);
+        rows.push(row.join(','));
+      }
+      return rows.join('\r\n');
+    }
+
     // ===== SUBMIT =====
     async function submitData() {
-      if (!confirm('Submit? Data akan diupload ke Google Drive.')) return;
+      if (!confirm('Submit? Data akan diupload ke Google Drive sebagai CSV.')) return;
       saveData();
-      const holeId   = document.getElementById('h-holeid').value || 'unknown';
-      const filename = `Prep_${holeId.replace(/\s+/g, '_')}.json`;
-      const FOLDER   = '1e5xBWUtcF4tAuF93e5p8fcJXWSVtDBcT';
-      const folderId = await pickFolder(FOLDER, 'Pilih Folder Tujuan Preparation');
-      if (!folderId) return;
-      const json   = JSON.stringify(DB.getAll('preparation'), null, 2);
-      const fileId = await uploadFileToFolder(filename, json, 'application/json', folderId);
-      if (fileId) showToast('✓ Data berhasil diupload!');
+      const holeId = document.getElementById('h-holeid').value || 'unknown';
+      const filename = `Prep_${holeId.replace(/\s+/g,'_')}.csv`;
+      const FOLDER = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
+      const fileId = await uploadFileToFolder(filename, generateCSV(), 'text/csv', FOLDER);
+      if (fileId) showToast('✓ Data berhasil diupload ke Google Drive!');
     }
 
     // ===== LOAD MODE EDIT / CONTINUE =====
     window.addEventListener('load', () => {
-      const mode   = sessionStorage.getItem('form_mode');
+      const mode = sessionStorage.getItem('form_mode');
       const editId = sessionStorage.getItem('edit_record_id');
-
       if (mode === 'edit' && editId) {
         const rec = DB.getAll('preparation').find(r => String(r.id) === editId);
         if (rec) {
           ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
-            const el = document.querySelector('[name="' + k + '"]');
+            const el = document.querySelector('[name="'+k+'"]');
             if (el && rec[k] !== undefined) el.value = rec[k];
           });
-          const rc = parseInt(rec.row_count) || 0;
+          const rc = parseInt(rec.row_count)||0;
           for (let i = 1; i <= rc; i++) {
             addRow({
-              from:       rec['from_' + i],
-              to:         rec['to_' + i],
-              length:     rec['len_' + i],
-              recovery:   rec['rec_' + i],
-              grain_size: rec['grain_' + i],
-              core_wt:    rec['core_wt_' + i],
-              samp_no:    rec['samp_no_' + i],
-              samp_wt:    rec['samp_wt_' + i],
-              a10_arc:    rec['a10_arc_' + i],
-              a10_lab:    rec['a10_lab_' + i],
-              a10_sid:    rec['a10_sid_' + i],
-              a2_arc:     rec['a2_arc_' + i],
-              a2_lab:     rec['a2_lab_' + i],
-              a2_sid:     rec['a2_sid_' + i],
-              a06_arc:    rec['a06_arc_' + i],
-              a06_lab:    rec['a06_lab_' + i],
-              a06_sid:    rec['a06_sid_' + i],
-              m06_arc:    rec['m06_arc_' + i],
-              m06_lab:    rec['m06_lab_' + i],
-              m06_sid:    rec['m06_sid_' + i],
-              qaqc_sid:   rec['qaqc_sid_' + i],
-              qaqc_wt:    rec['qaqc_wt_' + i],
-              remarks:    rec['remarks_' + i]
+              from:rec['from_'+i],to:rec['to_'+i],length:rec['len_'+i],
+              recovery:rec['rec_'+i],grain_size:rec['grain_'+i],
+              core_wt:rec['core_wt_'+i],from_cum:rec['from_cum_'+i],to_cum:rec['to_cum_'+i],
+              samp_no:rec['samp_no_'+i],samp_wt:rec['samp_wt_'+i],
+              a10_arc:rec['a10_arc_'+i],a10_lab:rec['a10_lab_'+i],a10_sid:rec['a10_sid_'+i],
+              a2_arc:rec['a2_arc_'+i],a2_lab:rec['a2_lab_'+i],a2_sid:rec['a2_sid_'+i],
+              a06_arc:rec['a06_arc_'+i],a06_lab:rec['a06_lab_'+i],a06_sid:rec['a06_sid_'+i],
+              m06_arc:rec['m06_arc_'+i],m06_lab:rec['m06_lab_'+i],m06_sid:rec['m06_sid_'+i],
+              qaqc_sid:rec['qaqc_sid_'+i],qaqc_wt:rec['qaqc_wt_'+i],remarks:rec['remarks_'+i],
+              merge_group:rec['merge_group_'+i]
             });
           }
           window._editRecordId = rec.id;
@@ -496,24 +540,17 @@
       } else if (mode === 'continue') {
         const saved = DB.getAll('preparation');
         if (saved.length) {
-          const last = saved[saved.length - 1];
+          const last = saved[saved.length-1];
           ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
-            const el = document.querySelector('[name="' + k + '"]');
+            const el = document.querySelector('[name="'+k+'"]');
             if (el && last[k] !== undefined) el.value = last[k];
           });
-          const rc = parseInt(last.row_count) || 0;
+          const rc = parseInt(last.row_count)||0;
           for (let i = 1; i <= rc; i++) {
-            addRow({
-              from: last['from_' + i], to: last['to_' + i],
-              length: last['len_' + i], recovery: last['rec_' + i],
-              grain_size: last['grain_' + i]
-            });
+            addRow({from:last['from_'+i],to:last['to_'+i],length:last['len_'+i],recovery:last['rec_'+i],grain_size:last['grain_'+i]});
           }
         }
-      } else {
-        addRow(); // default 1 baris kosong
-      }
-
+      } else { addRow(); }
       sessionStorage.removeItem('form_mode');
       sessionStorage.removeItem('edit_record_id');
     });
