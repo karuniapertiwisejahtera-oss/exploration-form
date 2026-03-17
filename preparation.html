@@ -26,26 +26,35 @@
     .prep-table thead tr:nth-child(1) th { top: 0; border-top: 1px solid #bbb; }
     .prep-table thead tr:nth-child(2) th { top: 32px; }
     .prep-table thead th.group { background: #a8c4f0; }
-    /* Warna per grup fraksi */
-    .prep-table thead th.g10  { background: #b3e5fc; color: #01579b; } /* +10mm   - biru muda */
-    .prep-table thead th.g2   { background: #c8e6c9; color: #1b5e20; } /* +2-10mm - hijau */
-    .prep-table thead th.g06  { background: #fff9c4; color: #f57f17; } /* +0.6-2  - kuning */
-    .prep-table thead th.gm06 { background: #ffe0b2; color: #bf360c; } /* -0.6mm  - oranye */
-    .prep-table thead th.gp03 { background: #f3e5f5; color: #6a1b9a; } /* +0.3mm  - ungu */
-    .prep-table thead th.gqaqc{ background: #fce4ec; color: #880e4f; } /* QAQC    - pink */
+    /* Warna per grup fraksi — hanya header */
+    .prep-table thead th.g10  { background: #b3e5fc; color: #01579b; }
+    .prep-table thead th.g2   { background: #c8e6c9; color: #1b5e20; }
+    .prep-table thead th.g06  { background: #fff9c4; color: #f57f17; }
+    .prep-table thead th.gm06 { background: #ffe0b2; color: #bf360c; }
+    .prep-table thead th.gp03 { background: #f3e5f5; color: #6a1b9a; }
+    .prep-table thead th.gqaqc{ background: #fce4ec; color: #880e4f; }
     /* Sub-header Total/Rec lebih gelap */
     .prep-table thead tr:nth-child(3) th.g10  { background: #81d4fa; }
     .prep-table thead tr:nth-child(3) th.g2   { background: #a5d6a7; }
     .prep-table thead tr:nth-child(3) th.g06  { background: #fff176; }
     .prep-table thead tr:nth-child(3) th.gm06 { background: #ffcc80; }
     .prep-table thead tr:nth-child(3) th.gp03 { background: #e1bee7; }
-    /* Warna teks data baris per grup */
-    .prep-table td.g10  { background: #e1f5fe; }
-    .prep-table td.g2   { background: #e8f5e9; }
-    .prep-table td.g06  { background: #fffde7; }
-    .prep-table td.gm06 { background: #fff3e0; }
-    .prep-table td.gp03 { background: #f3e5f5; }
-    .prep-table td.gqaqc{ background: #fce4ec; }
+    /* Baris data: tidak ada background warna, hanya garis tebal kiri sebagai pemisah grup */
+    .prep-table td.g10  { background: transparent; }
+    .prep-table td.g2   { background: transparent; }
+    .prep-table td.g06  { background: transparent; }
+    .prep-table td.gm06 { background: transparent; }
+    .prep-table td.gp03 { background: transparent; }
+    .prep-table td.gqaqc{ background: transparent; }
+    /* Garis tebal kiri sebagai pemisah antar grup — berlaku di header dan data */
+    .prep-table th.g-start { border-left: 3px solid #888 !important; }
+    .prep-table td.g-start { border-left: 3px solid #888 !important; }
+    .prep-table th.g-start.g10,  .prep-table td.g-start.g10  { border-left-color: #29b6f6 !important; }
+    .prep-table th.g-start.g2,   .prep-table td.g-start.g2   { border-left-color: #66bb6a !important; }
+    .prep-table th.g-start.g06,  .prep-table td.g-start.g06  { border-left-color: #fdd835 !important; }
+    .prep-table th.g-start.gm06, .prep-table td.g-start.gm06 { border-left-color: #ffa726 !important; }
+    .prep-table th.g-start.gp03, .prep-table td.g-start.gp03 { border-left-color: #ab47bc !important; }
+    .prep-table th.g-start.gqaqc,.prep-table td.g-start.gqaqc{ border-left-color: #ec407a !important; }
 
     /* Freeze kolom kiri */
     .prep-table th.col-freeze, .prep-table td.col-freeze {
@@ -78,6 +87,10 @@
       box-sizing: border-box; min-width: 0;
     }
     .prep-table td input.auto { color: #1a6b4a; font-weight: 700; }
+    /* Hilangkan spinner/arrow pada input number */
+    .prep-table td input[type=number]::-webkit-inner-spin-button,
+    .prep-table td input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .prep-table td input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 
     /* Kolom Cum */
     .prep-table td.td-cum { background: #fff8f0; }
@@ -222,19 +235,19 @@
               <th class="g10 c-wide" colspan="2">Wet (Kg)</th>
               <th class="g10 c-sid" rowspan="2">Sample_ID</th>
               <!-- +2-10mm -->
-              <th class="g2 c-wide" colspan="2">Wet (Kg)</th>
+              <th class="g2 g-start c-wide" colspan="2">Wet (Kg)</th>
               <th class="g2 c-sid" rowspan="2">Sample_ID</th>
               <!-- +0.6-2mm -->
-              <th class="g06 c-wide" colspan="2">Wet (Kg)</th>
+              <th class="g06 g-start c-wide" colspan="2">Wet (Kg)</th>
               <th class="g06 c-sid" rowspan="2">Sample_ID</th>
               <!-- -0.6mm -->
-              <th class="gm06 c-wide" colspan="2">Wet (Kg)</th>
+              <th class="gm06 g-start c-wide" colspan="2">Wet (Kg)</th>
               <th class="gm06 c-sid" rowspan="2">Sample_ID</th>
               <!-- +0.3mm -->
-              <th class="gp03 c-wide" colspan="2">Wet (Kg)</th>
+              <th class="gp03 g-start c-wide" colspan="2">Wet (Kg)</th>
               <th class="gp03 c-sid" rowspan="2">Sample_ID</th>
               <!-- QAQC -->
-              <th class="gqaqc c-sid" rowspan="2">Sample_ID</th>
+              <th class="gqaqc g-start c-sid" rowspan="2">Sample_ID</th>
               <th class="gqaqc c-std" rowspan="2">Wet(Kg)</th>
             </tr>
             <!-- ROW 3: Detail -->
@@ -242,13 +255,13 @@
               <!-- +10mm -->
               <th class="g10 c-std">Total</th><th class="g10 c-std">Rec</th>
               <!-- +2-10mm -->
-              <th class="g2 c-std">Total</th><th class="g2 c-std">Rec</th>
+              <th class="g2 g-start c-std">Total</th><th class="g2 c-std">Rec</th>
               <!-- +0.6-2mm -->
-              <th class="g06 c-std">Total</th><th class="g06 c-std">Rec</th>
+              <th class="g06 g-start c-std">Total</th><th class="g06 c-std">Rec</th>
               <!-- -0.6mm -->
-              <th class="gm06 c-std">Total</th><th class="gm06 c-std">Rec</th>
+              <th class="gm06 g-start c-std">Total</th><th class="gm06 c-std">Rec</th>
               <!-- +0.3mm -->
-              <th class="gp03 c-std">Total</th><th class="gp03 c-std">Rec</th>
+              <th class="gp03 g-start c-std">Total</th><th class="gp03 c-std">Rec</th>
             </tr>
           </thead>
           <tbody id="prep-tbody"></tbody>
@@ -317,22 +330,22 @@
         <td>${txt('samp_no', v.samp_no)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
         <td>${txt('sample_id', v.sample_id)}</td>
-        <td class="g10">${num('a10_tot', v.a10_tot)}</td>
+        <td class="g10 g-start">${num('a10_tot', v.a10_tot)}</td>
         <td class="g10">${num('a10_rec', v.a10_rec)}</td>
         <td class="g10">${txt('a10_sid', v.a10_sid)}</td>
-        <td class="g2">${num('a2_tot',  v.a2_tot)}</td>
+        <td class="g2 g-start">${num('a2_tot',  v.a2_tot)}</td>
         <td class="g2">${num('a2_rec',  v.a2_rec)}</td>
         <td class="g2">${txt('a2_sid',  v.a2_sid)}</td>
-        <td class="g06">${num('a06_tot', v.a06_tot)}</td>
+        <td class="g06 g-start">${num('a06_tot', v.a06_tot)}</td>
         <td class="g06">${num('a06_rec', v.a06_rec)}</td>
         <td class="g06">${txt('a06_sid', v.a06_sid)}</td>
-        <td class="gm06">${num('m06_tot', v.m06_tot)}</td>
+        <td class="gm06 g-start">${num('m06_tot', v.m06_tot)}</td>
         <td class="gm06">${num('m06_rec', v.m06_rec)}</td>
         <td class="gm06">${txt('m06_sid', v.m06_sid)}</td>
-        <td class="gp03">${num('p03_tot', v.p03_tot)}</td>
+        <td class="gp03 g-start">${num('p03_tot', v.p03_tot)}</td>
         <td class="gp03">${num('p03_rec', v.p03_rec)}</td>
         <td class="gp03">${txt('p03_sid', v.p03_sid)}</td>
-        <td class="gqaqc">${txt('qaqc_sid', v.qaqc_sid)}</td>
+        <td class="gqaqc g-start">${txt('qaqc_sid', v.qaqc_sid)}</td>
         <td class="gqaqc">${num('qaqc_wt',  v.qaqc_wt)}</td>
         <td>${txt('remarks',  v.remarks)}</td>
       `;
@@ -499,7 +512,7 @@
       };
 
       Object.entries(tots).forEach(([recField, totVal]) => {
-        const rec = totVal > 0 ? parseFloat((totVal / sum3 * mult).toFixed(2)) : '';
+        const rec = totVal > 0 ? Math.round(totVal / sum3 * mult) : '';
         set(recField, rec);
       });
     }
