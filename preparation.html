@@ -370,16 +370,45 @@
     // ===== AUTO-FILL: Sampling No & Sample_ID berantai =====
 
     // Hitung ulang Sampling No untuk semua baris (S1, S2... hanya jika from_cum tidak kosong)
+    // Jika semua grain_size dalam grup = CLY, samp_no dikosongkan
     function recalcSamplingNo() {
+      // Bangun map: mergeGroup → array rowNums
+      const groupRows = {};
+      for (let i = 1; i <= rowCount; i++) {
+        const tr = document.getElementById('prep-row-' + i);
+        if (!tr) continue;
+        const mg = tr.dataset.mergeGroup || ('_single_' + i);
+        if (!groupRows[mg]) groupRows[mg] = [];
+        groupRows[mg].push(i);
+      }
+
+      // Tentukan grup mana yang semua grain = CLY
+      const isCLYGroup = {};
+      Object.entries(groupRows).forEach(([mg, rows]) => {
+        const allCLY = rows.every(n => {
+          const gEl = document.querySelector(`[name="grain_${n}"]`);
+          return gEl && gEl.value.trim().toUpperCase() === 'CLY';
+        });
+        isCLYGroup[mg] = allCLY;
+      });
+
       let counter = 0;
       for (let i = 1; i <= rowCount; i++) {
         const fcEl = document.getElementById('from_cum_' + i);
         const snEl = document.querySelector(`[name="samp_no_${i}"]`);
         if (!snEl) continue;
         const hasCum = fcEl && fcEl.closest('td').style.visibility !== 'hidden' && fcEl.value !== '';
-        if (hasCum) {
+        if (!hasCum) continue;
+
+        const tr = document.getElementById('prep-row-' + i);
+        const mg = tr ? (tr.dataset.mergeGroup || ('_single_' + i)) : ('_single_' + i);
+
+        if (isCLYGroup[mg]) {
+          // Grup CLY: kosongkan samp_no
+          snEl.value = '';
+          snEl.dataset.auto = 'true';
+        } else {
           counter++;
-          // Hanya isi jika kosong (bisa dihapus manual)
           if (snEl.value === '' || snEl.dataset.auto === 'true') {
             snEl.value = 'S' + counter;
             snEl.dataset.auto = 'true';
@@ -434,6 +463,8 @@
     function attachRowListeners(n) {
       const fcEl = document.getElementById('from_cum_' + n);
       if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
+      const grainEl = document.querySelector(`[name="grain_${n}"]`);
+      if (grainEl) grainEl.addEventListener('change', recalcSamplingNo);
       const snEl = document.querySelector(`[name="samp_no_${n}"]`);
       if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
       SID_ORDER.forEach(field => {
