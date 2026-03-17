@@ -540,6 +540,85 @@
         if (el) el.addEventListener('input', () => { el.dataset.autoRec = 'false'; });
       });
     }
+
+    // ===== KEYBOARD NAVIGATION =====
+    // Kumpulkan semua input/select yang focusable dalam tabel secara berurutan
+    function getTableCells() {
+      return Array.from(document.querySelectorAll(
+        '#prep-tbody tr input:not([type=hidden]), #prep-tbody tr select'
+      ));
+    }
+
+    // Dapatkan posisi {rowIdx, colIdx} dari elemen dalam tabel
+    function getCellPos(el) {
+      const td = el.closest('td');
+      const tr = el.closest('tr');
+      if (!td || !tr) return null;
+      const tbody = document.getElementById('prep-tbody');
+      const rows  = Array.from(tbody.rows);
+      const rowIdx = rows.indexOf(tr);
+      // Kumpulkan semua input/select dalam baris ini
+      const cols = Array.from(tr.querySelectorAll('input:not([type=hidden]), select'));
+      const colIdx = cols.indexOf(el);
+      return { rowIdx, colIdx, totalRows: rows.length, totalCols: cols.length };
+    }
+
+    function focusCell(rowIdx, colIdx) {
+      const tbody = document.getElementById('prep-tbody');
+      const rows  = Array.from(tbody.rows);
+      if (rowIdx < 0 || rowIdx >= rows.length) return false;
+      const cols = Array.from(rows[rowIdx].querySelectorAll('input:not([type=hidden]), select'));
+      const target = cols[Math.max(0, Math.min(colIdx, cols.length - 1))];
+      if (target) { target.focus(); target.select && target.select(); return true; }
+      return false;
+    }
+
+    document.addEventListener('keydown', function(e) {
+      const active = document.activeElement;
+      if (!active) return;
+      const td = active.closest('td');
+      if (!td || !active.closest('#prep-tbody')) return;
+
+      const pos = getCellPos(active);
+      if (!pos) return;
+
+      const { rowIdx, colIdx, totalRows } = pos;
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // Pindah ke baris berikutnya, kolom sama
+        if (rowIdx + 1 >= totalRows) {
+          addRow(); // tambah baris baru
+          setTimeout(() => focusCell(rowIdx + 1, colIdx), 30);
+        } else {
+          focusCell(rowIdx + 1, colIdx);
+        }
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (rowIdx + 1 < totalRows) focusCell(rowIdx + 1, colIdx);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (rowIdx > 0) focusCell(rowIdx - 1, colIdx);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        const tbody = document.getElementById('prep-tbody');
+        const rows  = Array.from(tbody.rows);
+        const cols  = Array.from(rows[rowIdx].querySelectorAll('input:not([type=hidden]), select'));
+        if (colIdx + 1 < cols.length) {
+          const next = cols[colIdx + 1];
+          next.focus(); next.select && next.select();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const tbody = document.getElementById('prep-tbody');
+        const rows  = Array.from(tbody.rows);
+        const cols  = Array.from(rows[rowIdx].querySelectorAll('input:not([type=hidden]), select'));
+        if (colIdx > 0) {
+          const prev = cols[colIdx - 1];
+          prev.focus(); prev.select && prev.select();
+        }
+      }
+    }, true); // capture phase agar intercept sebelum input number pakai arrow
     // selectedRows = set nomor baris yang dipilih untuk digabung dengan mergeSourceRow
     let selectedRows = new Set();
 
