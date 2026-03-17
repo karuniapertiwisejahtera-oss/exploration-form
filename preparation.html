@@ -1082,17 +1082,11 @@
         // Sheet_No = 4 karakter awal Hole_ID
         const sheetNoAuto = holeId.slice(0, 4);
 
-        // Kolom tetap yang terisi di SETIAP baris fraksi (Hole_id, Depth_From, Depth_To selalu terisi)
-        // Kolom yang hanya di baris pertama: No., ID, Deposit, Sheet_No, Recovery_sampling, Core_Weight, Sampling_Insitu_Weight
-        const fixedFirst = [
+        // Kolom tetap terisi di SEMUA baris fraksi
+        const fixedAll = [
           intervalCounter, idCol, deposit, sheetNoAuto, holeId,
           depthFrom, depthTo,
           recAvg, coreWt, insitu
-        ];
-        const fixedRest = [
-          '', '', '', '', holeId,
-          depthFrom, depthTo,
-          '', '', ''
         ];
 
         // Baris vertikal per fraksi — skip jika Total kosong
@@ -1102,14 +1096,13 @@
           if (!totVal) return; // skip fraksi kosong
           const sidVal = get(frac.sid, firstRow);
 
-          const fixedCols = firstFrac
-            ? fixedFirst.map(v => q(v))
-            : fixedRest.map(v => q(v));
+          // Sample_id_to_Lab: isi di baris pertama interval ATAU fraksi +0.3
+          const sidToLabRow = (firstFrac || frac.label === '+0.3') ? sidToLab : '';
 
           const row = [
-            ...fixedCols,
+            ...fixedAll.map(v => q(v)),
             q(frac.label), q(sidVal), q(totVal),
-            q(''), q(sidToLab), q(''),
+            q(''), q(sidToLabRow), q(''),
             q(''), q(''), firstFrac ? q(remarks) : q(''), q('')
           ];
           rows.push(row.join(','));
@@ -1120,7 +1113,7 @@
         if (qaqcSid) {
           const qaqcWt = get('qaqc_wt', firstRow);
           const row = [
-            ...fixedRest.map(v => q(v)),
+            ...fixedAll.map(v => q(v)),
             q('QAQC'), q(qaqcSidLab), q(qaqcWt),
             q(''), q(qaqcSidLab), q(''),
             q(''), q(''), q(''), q('')
