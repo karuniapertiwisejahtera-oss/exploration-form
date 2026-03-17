@@ -993,7 +993,7 @@
         'Recovery_Sampling(%)','Core_Weight(kg)','Sampling_Insitu_Weight',
         'Sample_ID_to_Lab','Ore',
         'DUPLICATE_SAMPLE','BLANK_SAMPLE',
-        'Fraction','Total(kg)','Rec','Fraction_Sample_ID',
+        'Fraction','Total(kg)','Rec','Fraction_Sample_ID','Washing_weight',
         'Remarks'
       ];
 
@@ -1064,7 +1064,7 @@
 
           const row = [
             ...fixedCols,
-            q(frac.label), q(totVal), q(recVal), q(sidVal),
+            q(frac.label), q(totVal), q(recVal), q(sidVal), q(totVal),
             idx === 0 ? q(remarks) : q('')
           ];
           rows.push(row.join(','));
@@ -1075,7 +1075,7 @@
           const qaqcWt = get('qaqc_wt', firstRow);
           const row = [
             ...fixedVals.map(() => q('')),
-            q('QAQC'), q(qaqcWt), q(''), q(qaqcSidLab), q('')
+            q('QAQC'), q(qaqcWt), q(''), q(qaqcSidLab), q(''), q('')
           ];
           rows.push(row.join(','));
         }
