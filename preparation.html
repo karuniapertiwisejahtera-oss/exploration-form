@@ -483,30 +483,61 @@
         const text = e.target.result;
         const lines = text.trim().split(/\r?\n/);
         if (lines.length < 2) { showToast('CSV kosong atau format salah', 'error'); return; }
-        const sep = lines[0].includes(';') ? ';' : ',';
-        const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
-        const findCol = (...names) => { for (const n of names) { const idx = headers.findIndex(h => h.includes(n)); if (idx >= 0) return idx; } return -1; };
-        const iFrom = findCol('from','depth_from','start');
-        const iTo   = findCol('to','depth_to','end');
-        const iLen  = findCol('length','len','panjang');
-        const iRec  = findCol('recovery','rec');
-        const iGrain= findCol('grain','grain_size','grainsize');
-        if (iFrom < 0 || iTo < 0) { showToast('Kolom From/To tidak ditemukan di CSV', 'error'); return; }
+
+        // Deteksi separator: coba titik koma dulu, lalu tab, lalu koma
+        let sep = ',';
+        if (lines[0].includes('\t')) sep = '\t';
+        else if (lines[0].split(';').length > lines[0].split(',').length) sep = ';';
+
+        const rawHeaders = lines[0].split(sep);
+        const headers = rawHeaders.map(h => h.trim().toLowerCase().replace(/[^a-z0-9]/g, ''));
+
+        // Debug: tampilkan header yang terdeteksi
+        console.log('CSV headers raw:', rawHeaders);
+        console.log('CSV headers normalized:', headers);
+        console.log('Separator:', sep === '\t' ? 'TAB' : sep);
+
+        const findCol = (...names) => {
+          for (const name of names) {
+            const idx = headers.findIndex(h => h.includes(name));
+            if (idx >= 0) return idx;
+          }
+          return -1;
+        };
+
+        const iFrom  = findCol('from','depthfrom','start','dari');
+        const iTo    = findCol('to','depthto','end','ke','sampai');
+        const iLen   = findCol('length','len','panjang','interval');
+        const iRec   = findCol('recovery','rec','recov');
+        const iGrain = findCol('grain','grainsize','litho','lithology','jenis');
+
+        console.log('Col indices — From:', iFrom, 'To:', iTo, 'Len:', iLen, 'Rec:', iRec, 'Grain:', iGrain);
+
+        if (iFrom < 0 || iTo < 0) {
+          showToast(`Kolom From/To tidak ditemukan. Header: ${rawHeaders.slice(0,5).join(' | ')}`, 'error');
+          return;
+        }
+
         document.getElementById('prep-tbody').innerHTML = '';
         rowCount = 0;
+
+        let imported = 0;
         lines.slice(1).forEach(line => {
           if (!line.trim()) return;
-          const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g, '').replace(',','.'));
-          const fv = parseFloat(cols[iFrom]||0), tv = parseFloat(cols[iTo]||0);
+          const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g, '').replace(',', '.'));
+          const fv = parseFloat(cols[iFrom] || 0);
+          const tv = parseFloat(cols[iTo]   || 0);
           addRow({
             from:       cols[iFrom] || '',
             to:         cols[iTo]   || '',
-            length:     iLen >= 0 ? cols[iLen] : (!isNaN(tv-fv) ? (tv-fv).toFixed(2) : ''),
-            recovery:   iRec   >= 0 ? cols[iRec].trim()   : '',
+            length:     iLen   >= 0 ? cols[iLen]  : (!isNaN(tv - fv) ? (tv - fv).toFixed(2) : ''),
+            recovery:   iRec   >= 0 ? cols[iRec].trim()  : '',
             grain_size: iGrain >= 0 ? cols[iGrain].trim().toUpperCase() : ''
           });
+          imported++;
         });
-        showToast(`✓ ${rowCount} baris diimport dari CSV`);
+
+        showToast(`✓ ${imported} baris diimport dari CSV`);
       };
       reader.readAsText(file);
     }
