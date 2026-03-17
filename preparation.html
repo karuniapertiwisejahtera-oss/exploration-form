@@ -99,6 +99,7 @@
       box-sizing: border-box; min-width: 0; text-transform: uppercase;
     }
     .prep-table td input.auto { color: #1a6b4a; font-weight: 700; }
+    .prep-table td input.dup  { background: #ffebee !important; color: #c62828 !important; outline: 1px solid #e53935; }
     /* Hilangkan spinner/arrow pada input number */
     .prep-table td input[type=number]::-webkit-inner-spin-button,
     .prep-table td input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -461,6 +462,29 @@
       });
     }
 
+    // ===== HIGHLIGHT DUPLIKAT SAMPLE_ID =====
+    const SID_ALL_FIELDS = ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'];
+    function highlightDuplicates() {
+      const seen = {};
+      // Kumpulkan semua nilai
+      for (let i = 1; i <= rowCount; i++) {
+        SID_ALL_FIELDS.forEach(field => {
+          const el = document.querySelector(`[name="${field}_${i}"]`);
+          if (!el) return;
+          const val = el.value.trim().toUpperCase();
+          if (!val) return;
+          if (!seen[val]) seen[val] = [];
+          seen[val].push(el);
+        });
+      }
+      // Reset semua dulu
+      document.querySelectorAll('#prep-table input.dup').forEach(el => el.classList.remove('dup'));
+      // Tandai yang duplikat
+      Object.values(seen).forEach(els => {
+        if (els.length > 1) els.forEach(el => el.classList.add('dup'));
+      });
+    }
+
     function attachRowListeners(n) {
       const fcEl = document.getElementById('from_cum_' + n);
       if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
@@ -475,6 +499,7 @@
         // Auto-fill Sample_ID berikutnya
         el.addEventListener('input', () => {
           if (el.dataset.auto === 'true') el.dataset.auto = 'false';
+          highlightDuplicates();
         });
 
         // Barcode scan → isi kolom Total sebarisnya
@@ -763,7 +788,7 @@
 
       cancelMerge();
       recalcSamplingNo();
-      const msg = sortedRows.length === 1
+      highlightDuplicates();
         ? `✓ From_Cum & To_Cum diisi: ${fromCum} – ${toCum} m`
         : `✓ ${sortedRows.length} baris digabung: ${fromCum} – ${toCum} m`;
       showToast(msg);
@@ -792,6 +817,7 @@
       });
       showToast('Gabungan dilepas');
       recalcSamplingNo();
+      highlightDuplicates();
     }
 
     // Tombol Terapkan di banner
@@ -915,6 +941,7 @@
             // Reset input agar bisa import file yang sama lagi
             input.value = '';
             showToast('✓ ' + imported + ' baris diimport dari CSV');
+            highlightDuplicates();
           } catch(err) {
             console.error('[importCSV] parse error:', err);
             showToast('Error parsing CSV: ' + err.message, 'error');
@@ -1134,7 +1161,30 @@
     }
 
     // ===== SUBMIT =====
+    // ===== CEK DUPLIKAT SAMPLE_ID =====
+    function checkDuplicateSampleIDs() {
+      const SID_FIELDS = ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'];
+      const seen = {};
+      const dupes = new Set();
+      for (let i = 1; i <= rowCount; i++) {
+        SID_FIELDS.forEach(field => {
+          const el = document.querySelector(`[name="${field}_${i}"]`);
+          if (!el) return;
+          const val = el.value.trim().toUpperCase();
+          if (!val) return;
+          if (seen[val] !== undefined) dupes.add(val);
+          else seen[val] = i;
+        });
+      }
+      return [...dupes];
+    }
+
     async function submitData() {
+      const dupes = checkDuplicateSampleIDs();
+      if (dupes.length > 0) {
+        const list = dupes.join(', ');
+        if (!confirm(`⚠️ Sample_ID duplikat ditemukan:\n${list}\n\nLanjutkan submit?`)) return;
+      }
       if (!confirm('Submit? Data akan diupload ke Google Drive.')) return;
       saveData();
       const holeId = document.getElementById('h-holeid').value || 'unknown';
