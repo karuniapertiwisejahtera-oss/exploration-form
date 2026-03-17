@@ -284,7 +284,6 @@
     <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
     <button class="btn btn-clear"  onclick="clearData()">✕ Clear</button>
     <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
-    <button class="btn btn-upload" onclick="exportData()">📤 Export</button>
   </div>
 
   <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -993,13 +992,24 @@
 
     // ===== SUBMIT =====
     async function submitData() {
-      if (!confirm('Submit? Data akan diupload ke Google Drive sebagai CSV.')) return;
+      if (!confirm('Submit? Data akan diupload ke Google Drive.')) return;
       saveData();
       const holeId = document.getElementById('h-holeid').value || 'unknown';
-      const filename = `Prep_${holeId.replace(/\s+/g,'_')}.csv`;
+      const safeName = holeId.replace(/\s+/g,'_');
       const FOLDER = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
-      const fileId = await uploadFileToFolder(filename, generateCSV(), 'text/csv', FOLDER);
-      if (fileId) showToast('✓ Data berhasil diupload ke Google Drive!');
+
+      // Upload 1: raw prep data
+      const prepFile = await uploadFileToFolder(
+        `Prep_${safeName}.csv`, generateCSV(), 'text/csv', FOLDER
+      );
+      // Upload 2: export format lab
+      const exportFile = await uploadFileToFolder(
+        `Export_${safeName}.csv`, generateExportCSV(), 'text/csv', FOLDER
+      );
+
+      if (prepFile && exportFile) showToast('✓ Prep & Export berhasil diupload!');
+      else if (prepFile) showToast('✓ Prep diupload, Export gagal', 'error');
+      else showToast('Upload gagal', 'error');
     }
 
     // ===== EXPORT LAB CSV =====
