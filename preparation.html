@@ -96,7 +96,7 @@
     .prep-table td input, .prep-table td select {
       width: 100%; border: none; outline: none; font-size: 11px;
       text-align: center; padding: 1px 2px; background: transparent;
-      box-sizing: border-box; min-width: 0;
+      box-sizing: border-box; min-width: 0; text-transform: uppercase;
     }
     .prep-table td input.auto { color: #1a6b4a; font-weight: 700; }
     /* Hilangkan spinner/arrow pada input number */
@@ -152,6 +152,7 @@
     .info-row input {
       flex: 1; border: none; border-bottom: 1px solid #999; outline: none;
       font-size: 10px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
+      text-transform: uppercase;
     }
 
     /* CSV bar */
@@ -1001,8 +1002,8 @@
 
     // ===== GENERATE EXPORT CSV (format lab — vertikal per fraksi) =====
     function generateExportCSV() {
-      const holeId   = document.getElementById('h-holeid').value   || '';
-      const deposit  = document.getElementById('h-deposit').value  || '';
+      const holeId   = (document.getElementById('h-holeid').value   || '').toUpperCase();
+      const deposit  = (document.getElementById('h-deposit').value  || '').toUpperCase();
 
       const groups = {};
       for (let i = 1; i <= rowCount; i++) {
@@ -1015,7 +1016,7 @@
 
       const get = (id, n) => {
         const el = document.querySelector(`[name="${id}_${n}"]`);
-        return el ? (el.value || '') : '';
+        return el ? (el.value || '').toUpperCase() : '';
       };
       const getF = (id, n) => parseFloat(get(id, n)) || 0;
 
@@ -1077,7 +1078,7 @@
         const remarkUpper = remarks.trim().toUpperCase();
 
         // ID = Hole_ID + "-" + No.
-        const idCol   = holeId ? holeId + '-' + intervalCounter : intervalCounter;
+        const idCol   = holeId ? holeId + intervalCounter : intervalCounter;
         // Sheet_No = 4 karakter awal Hole_ID
         const sheetNoAuto = holeId.slice(0, 4);
 
