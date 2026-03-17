@@ -346,8 +346,57 @@
       }
     }
 
-    // Isi Sample_ID turunan dari a10_sid: ambil 6 angka terakhir + increment
-    function autoFillSampleIDs(rowNum) {
+    // Urutan kolom Sample_ID dalam satu baris
+    const SID_ORDER = ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
+
+    // Auto-fill Sample_ID setelah kolom trigger diisi
+    function autoFillSampleIDs(rowNum, triggerField) {
+      const triggerIdx = SID_ORDER.indexOf(triggerField);
+      if (triggerIdx < 0) return;
+      const triggerEl = document.querySelector(`[name="${triggerField}_${rowNum}"]`);
+      if (!triggerEl) return;
+      const base = triggerEl.value.trim();
+      if (!base) return;
+      const match = base.match(/^(.*?)(\d+)$/);
+      if (!match) return;
+      const prefix = match[1], numPart = match[2];
+      const numVal = parseInt(numPart), padLen = numPart.length;
+      SID_ORDER.slice(triggerIdx + 1).forEach((name, idx) => {
+        const el = document.querySelector(`[name="${name}_${rowNum}"]`);
+        if (!el) return;
+        if (el.value === '' || el.dataset.auto === 'true') {
+          el.value = prefix + String(numVal + idx + 1).padStart(padLen, '0');
+          el.dataset.auto = 'true';
+        }
+      });
+    }
+
+    function clearAutoAfter(rowNum, triggerField) {
+      const triggerIdx = SID_ORDER.indexOf(triggerField);
+      if (triggerIdx < 0) return;
+      SID_ORDER.slice(triggerIdx + 1).forEach(name => {
+        const el = document.querySelector(`[name="${name}_${rowNum}"]`);
+        if (el && el.dataset.auto === 'true') { el.value = ''; el.dataset.auto = 'false'; }
+      });
+    }
+
+    function attachRowListeners(n) {
+      const fcEl = document.getElementById('from_cum_' + n);
+      if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
+      const snEl = document.querySelector(`[name="samp_no_${n}"]`);
+      if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
+      SID_ORDER.forEach(field => {
+        const el = document.querySelector(`[name="${field}_${n}"]`);
+        if (!el) return;
+        el.addEventListener('change', () => {
+          if (el.value.trim()) autoFillSampleIDs(n, field);
+          else clearAutoAfter(n, field);
+        });
+        el.addEventListener('input', () => {
+          if (el.dataset.auto === 'true') el.dataset.auto = 'false';
+        });
+      });
+    }
       const a10El = document.querySelector(`[name="a10_sid_${rowNum}"]`);
       if (!a10El) return;
       const base = a10El.value.trim();
