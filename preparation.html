@@ -187,10 +187,11 @@
         <div class="info-row"><label>Hole_ID:</label><input type="text" id="h-holeid" name="hole_id"></div>
         <div class="info-row"><label>Sampler:</label><input type="text" id="h-sampler" name="sampler"></div>
         <div class="info-row"><label>Sheet/Grid No.:</label><input type="text" id="h-sheet" name="sheet_no"></div>
-        <div class="info-row"><label>Date of Prep.:</label><input type="date" id="h-date" name="date_prep"></div>
+        <div class="info-row"><label>Date Start:</label><input type="date" id="h-date-start" name="date_start"></div>
         <div class="info-row"><label>Deposit:</label><input type="text" id="h-deposit" name="deposit"></div>
+        <div class="info-row"><label>Date Finish:</label><input type="date" id="h-date-finish" name="date_finish"></div>
         <div class="info-row"><label>Total Depth:</label><input type="number" id="h-depth" name="total_depth" step="0.01"></div>
-        <div class="info-row" style="grid-column:1/-1;justify-content:flex-end;">
+        <div class="info-row" style="justify-content:flex-end;">
           <label>Total Sample:</label>
           <input type="text" id="h-total-sample" name="total_sample" style="max-width:70px;" readonly>
         </div>
@@ -217,8 +218,8 @@
             <tr>
               <th class="col-freeze cf1" rowspan="3">From</th>
               <th class="col-freeze cf2" rowspan="3">To</th>
-              <th class="col-freeze cf3" rowspan="3">Len(m)</th>
-              <th class="col-freeze cf4" rowspan="3">Rec Len</th>
+              <th class="col-freeze cf3" rowspan="3">Length(m)</th>
+              <th class="col-freeze cf4" rowspan="3">Rec_Length</th>
               <th class="col-freeze cf5" rowspan="3">Grain</th>
               <th class="c-std" rowspan="3">Core Wt</th>
               <th class="c-cum" rowspan="3">From Cum</th>
@@ -746,7 +747,7 @@
             var iFrom     = findCol('from','depthfrom','dari','start');
             var iTo       = findCol('to','depthto','sampai','end');
             var iLen      = findCol('length','len','panjang','interval');
-            var iRec      = findCol('recoverylength','recoverylength','recovlength','reclength','recovery','recov','rec');
+            var iRec      = findCol('corerec','core_rec','correcovery','corerecovery','recoverylength','recovlength','reclength','recovery','recov','rec');
             var iGrain    = findCol('grainsize','grain','litho','lithology','jenis');
             var iHoleId   = findCol('holeid','hole_id','holename','hole','bhid','drillhole');
             var iDeposit  = findCol('deposit','area','lokasi','location');
@@ -818,7 +819,7 @@
     // ===== SAVE =====
     function saveData() {
       const data = {};
-      ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
+      ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
         const el = document.querySelector('[name="' + k + '"]');
         if (el) data[k] = el.value;
       });
@@ -935,7 +936,7 @@
       if (mode === 'edit' && editId) {
         const rec = DB.getAll('preparation').find(r => String(r.id) === editId);
         if (rec) {
-          ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
+          ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
             const el = document.querySelector('[name="'+k+'"]');
             if (el && rec[k] !== undefined) el.value = rec[k];
           });
@@ -962,7 +963,7 @@
         const saved = DB.getAll('preparation');
         if (saved.length) {
           const last = saved[saved.length-1];
-          ['hole_id','sampler','sheet_no','date_prep','deposit','total_depth'].forEach(k => {
+          ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
             const el = document.querySelector('[name="'+k+'"]');
             if (el && last[k] !== undefined) el.value = last[k];
           });
