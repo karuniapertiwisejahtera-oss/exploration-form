@@ -789,6 +789,7 @@
       cancelMerge();
       recalcSamplingNo();
       highlightDuplicates();
+      const msg = sortedRows.length === 1
         ? `✓ From_Cum & To_Cum diisi: ${fromCum} – ${toCum} m`
         : `✓ ${sortedRows.length} baris digabung: ${fromCum} – ${toCum} m`;
       showToast(msg);
