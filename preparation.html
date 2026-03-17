@@ -968,12 +968,11 @@
       return rows.join('\r\n');
     }
 
-    // ===== GENERATE EXPORT CSV (format lab) =====
+    // ===== GENERATE EXPORT CSV (format lab — vertikal per fraksi) =====
     function generateExportCSV() {
       const holeId  = document.getElementById('h-holeid').value  || '';
       const deposit = document.getElementById('h-deposit').value || '';
 
-      // Kumpulkan grup merge: groupId → array row numbers (sorted)
       const groups = {};
       for (let i = 1; i <= rowCount; i++) {
         const tr = document.getElementById('prep-row-' + i);
@@ -994,24 +993,29 @@
         'Recovery_Sampling(%)','Core_Weight(kg)','Sampling_Insitu_Weight',
         'Sample_ID_to_Lab','Ore',
         'DUPLICATE_SAMPLE','BLANK_SAMPLE',
-        '+10mm_Total','+10mm_Rec','+10mm_Sample_ID',
-        '+2-10mm_Total','+2-10mm_Rec','+2-10mm_Sample_ID',
-        '+0.6-2mm_Total','+0.6-2mm_Rec','+0.6-2mm_Sample_ID',
-        '-0.6mm_Total','-0.6mm_Sample_ID',
-        '+0.3mm_Total','+0.3mm_Rec','+0.3mm_Sample_ID',
+        'Fraction','Total(kg)','Rec','Fraction_Sample_ID',
         'Remarks'
       ];
 
       const rows = [exportHeaders.join(',')];
 
+      // Fraksi: label sesuai permintaan, mapping ke field name
+      const FRACTIONS = [
+        { label: '+10 mm',     tot: 'a10_tot', rec: 'a10_rec', sid: 'a10_sid' },
+        { label: '+2-10 mm',   tot: 'a2_tot',  rec: 'a2_rec',  sid: 'a2_sid'  },
+        { label: '+0.6-2 mm',  tot: 'a06_tot', rec: 'a06_rec', sid: 'a06_sid' },
+        { label: '-0.6 mm',    tot: 'm06_tot', rec: 'm06_rec', sid: 'm06_sid' },
+        { label: '+0.3 mm',    tot: 'p03_tot', rec: 'p03_rec', sid: 'p03_sid' },
+      ];
+
+      const q = v => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
+
       Object.entries(groups).forEach(([mg, rowNums]) => {
         rowNums.sort((a,b) => a-b);
         const firstRow = rowNums[0];
 
-        // Hanya proses grup yang punya Sampling_No (from_cum terisi)
         const fcEl = document.getElementById('from_cum_' + firstRow);
-        const hasCum = fcEl && fcEl.value !== '';
-        if (!hasCum) return;
+        if (!fcEl || fcEl.value === '') return;
 
         // Recovery_Sampling = average Rec_Length dari semua baris dalam grup
         let recSum = 0, recCount = 0;
@@ -1030,40 +1034,51 @@
         const insitu = (coreWt && recAvg && recAvg > 0)
           ? parseFloat((coreWt / recAvg).toFixed(4)) : '';
 
-        // Depth from/to dari from_cum / to_cum baris pertama
         const depthFrom = get('from_cum', firstRow);
         const depthTo   = get('to_cum',   firstRow);
-
-        // Sample_ID utama (kolom Sample_ID baris pertama)
-        const sampleId = get('sample_id', firstRow);
-
-        // Sample_ID_to_Lab: ganti 2 huruf pertama dengan "GS"
-        const sidToLab = sampleId ? 'GS' + sampleId.slice(2) : '';
-
-        // Remarks baris pertama
-        const remarks = get('remarks', firstRow);
-
-        // QAQC
-        const qaqcSid = get('qaqc_sid', firstRow);
+        const sampleId  = get('sample_id', firstRow);
+        const sidToLab  = sampleId ? 'GS' + sampleId.slice(2) : '';
+        const remarks   = get('remarks', firstRow);
+        const qaqcSid   = get('qaqc_sid', firstRow);
         const qaqcSidLab = qaqcSid ? 'GS' + qaqcSid.slice(2) : '';
         const remarkUpper = remarks.trim().toUpperCase();
         const dupSample   = remarkUpper === 'DS' ? qaqcSidLab : '';
         const blankSample = remarkUpper === 'BS' ? qaqcSidLab : '';
 
-        // Data fraksi dari baris pertama grup
-        const row = [
+        const fixedVals = [
           sampleId, holeId, deposit, depthFrom, depthTo,
           recAvg, coreWt, insitu,
-          sidToLab, '', // Ore = blank
-          dupSample, blankSample,
-          get('a10_tot', firstRow), get('a10_rec', firstRow), get('a10_sid', firstRow),
-          get('a2_tot',  firstRow), get('a2_rec',  firstRow), get('a2_sid',  firstRow),
-          get('a06_tot', firstRow), get('a06_rec', firstRow), get('a06_sid', firstRow),
-          get('m06_tot', firstRow), get('m06_sid', firstRow),
-          get('p03_tot', firstRow), get('p03_rec', firstRow), get('p03_sid', firstRow),
-          remarks
-        ].map(v => `"${String(v).replace(/"/g,'""')}"`);
-        rows.push(row.join(','));
+          sidToLab, '',
+          dupSample, blankSample
+        ];
+
+        // 5 baris vertikal per fraksi
+        FRACTIONS.forEach((frac, idx) => {
+          const totVal = get(frac.tot, firstRow);
+          const recVal = frac.label === '-0.6 mm' ? '' : get(frac.rec, firstRow);
+          const sidVal = get(frac.sid, firstRow);
+
+          const fixedCols = idx === 0
+            ? fixedVals.map(v => q(v))
+            : fixedVals.map(() => q(''));
+
+          const row = [
+            ...fixedCols,
+            q(frac.label), q(totVal), q(recVal), q(sidVal),
+            idx === 0 ? q(remarks) : q('')
+          ];
+          rows.push(row.join(','));
+        });
+
+        // Baris QAQC jika ada
+        if (qaqcSid) {
+          const qaqcWt = get('qaqc_wt', firstRow);
+          const row = [
+            ...fixedVals.map(() => q('')),
+            q('QAQC'), q(qaqcWt), q(''), q(qaqcSidLab), q('')
+          ];
+          rows.push(row.join(','));
+        }
       });
 
       return rows.join('\r\n');
