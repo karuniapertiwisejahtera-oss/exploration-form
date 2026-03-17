@@ -39,11 +39,17 @@
     .prep-table .cf5 { left: 222px; min-width: 60px; width: 60px; border-right: 2px solid #888 !important; }
 
     /* Kolom non-freeze */
-    .prep-table th.c-std  { min-width: 56px;  width: 56px; }
-    .prep-table th.c-wide { min-width: 70px;  width: 70px; }
-    .prep-table th.c-sid  { min-width: 80px;  width: 80px; }
-    .prep-table th.c-rem  { min-width: 90px;  width: 90px; }
-    .prep-table th.c-cum  { min-width: 60px;  width: 60px; background: #fff3e0; }
+    .prep-table th.c-std  { min-width: 50px;  width: 50px; }
+    .prep-table th.c-wide { min-width: 65px;  width: 65px; }
+    .prep-table th.c-sid  { min-width: 75px;  width: 75px; }
+    .prep-table th.c-rem  { min-width: 80px;  width: 80px; }
+    .prep-table th.c-cum  { min-width: 55px;  width: 55px; background: #fff3e0; }
+    .prep-table th.c-send { min-width: 65px;  width: 65px; background: #e8f5e9; }
+
+    /* Row 2 offset = tinggi row 1 */
+    .prep-table thead tr:nth-child(2) th { top: 28px; }
+    /* Row 3 offset = tinggi row 1 + row 2 */
+    .prep-table thead tr:nth-child(3) th { top: 56px; }
 
     /* Input dalam tabel */
     .prep-table td input, .prep-table td select {
@@ -167,31 +173,62 @@
       <div class="prep-wrap">
         <table class="prep-table" id="prep-table">
           <thead>
+            <!-- ROW 1: Group headers -->
             <tr>
-              <th class="col-freeze cf1" rowspan="2">From<br>(m)</th>
-              <th class="col-freeze cf2" rowspan="2">To<br>(m)</th>
-              <th class="col-freeze cf3" rowspan="2">Length<br>(m)</th>
-              <th class="col-freeze cf4" rowspan="2">Recovery<br>(%)</th>
-              <th class="col-freeze cf5" rowspan="2">Grain<br>Size</th>
-              <th class="c-std" rowspan="2">Core<br>Weight</th>
-              <th class="c-cum" rowspan="2">From<br>Cum</th>
-              <th class="c-cum" rowspan="2">To<br>Cum</th>
-              <th class="c-std" rowspan="2" style="min-width:40px;width:40px;">Gabung</th>
-              <th class="c-std" rowspan="2">Sampling<br>No.</th>
-              <th class="c-std" rowspan="2">Sampling<br>Weight</th>
-              <th class="group c-wide" colspan="3">+10 mm</th>
-              <th class="group c-wide" colspan="3">+2-10 mm</th>
-              <th class="group c-wide" colspan="3">+0.6-2 mm</th>
-              <th class="group c-wide" colspan="3">-0.6 mm</th>
-              <th class="group c-wide" colspan="2">Sample QAQC</th>
-              <th class="c-rem" rowspan="2">Remarks</th>
+              <th class="col-freeze cf1" colspan="2">Depth</th>
+              <th class="col-freeze cf3" rowspan="3">Length<br>(m)</th>
+              <th class="col-freeze cf4" rowspan="3">Recovery_<br>Length</th>
+              <th class="col-freeze cf5" rowspan="3">Grain_<br>size</th>
+              <th class="c-std" rowspan="3">Core<br>Weight</th>
+              <th class="c-cum" rowspan="3">From<br>Cum</th>
+              <th class="c-cum" rowspan="3">To<br>Cum</th>
+              <th class="c-std" rowspan="3" style="min-width:38px;width:38px;">Gabung</th>
+              <th class="c-std" rowspan="3">Sampling<br>No.</th>
+              <th class="c-send" rowspan="3">Send_Cu<br>mulative</th>
+              <th class="c-sid" rowspan="3">Sample_ID</th>
+              <th class="group" colspan="3">+10 mm</th>
+              <th class="group" colspan="3">+2-10 mm</th>
+              <th class="group" colspan="3">+0.6-2 mm</th>
+              <th class="group" colspan="3">-0.6 mm</th>
+              <th class="group" colspan="3">+0.3 mm</th>
+              <th class="group" colspan="2">Sample QAQC</th>
+              <th class="c-rem" rowspan="3">Remarks</th>
             </tr>
+            <!-- ROW 2: Sub-group -->
             <tr>
-              <th class="c-std">Archive</th><th class="c-wide">Wet(Kg)<br>to lab</th><th class="c-sid">Sample_ID</th>
-              <th class="c-std">Archive</th><th class="c-wide">Wet(Kg)<br>to lab</th><th class="c-sid">Sample_ID</th>
-              <th class="c-std">Archive</th><th class="c-wide">Wet(Kg)<br>to lab</th><th class="c-sid">Sample_ID</th>
-              <th class="c-std">Archive</th><th class="c-wide">Wet(Kg)<br>to lab</th><th class="c-sid">Sample_ID</th>
-              <th class="c-sid">Sample_ID</th><th class="c-std">Wet(Kg)</th>
+              <th class="col-freeze cf1" rowspan="2">From</th>
+              <th class="col-freeze cf2" rowspan="2">To</th>
+              <!-- +10mm -->
+              <th class="group c-wide" colspan="2">Wet (Kg)</th>
+              <th class="group c-sid" rowspan="2">Sample_ID</th>
+              <!-- +2-10mm -->
+              <th class="group c-wide" colspan="2">Wet (Kg)</th>
+              <th class="group c-sid" rowspan="2">Sample_ID</th>
+              <!-- +0.6-2mm -->
+              <th class="group c-wide" colspan="2">Wet (Kg)</th>
+              <th class="group c-sid" rowspan="2">Sample_ID</th>
+              <!-- -0.6mm -->
+              <th class="group c-wide" colspan="2">Wet (Kg)</th>
+              <th class="group c-sid" rowspan="2">Sample_ID</th>
+              <!-- +0.3mm -->
+              <th class="group c-wide" colspan="2">Wet (Kg)</th>
+              <th class="group c-sid" rowspan="2">Sample_ID</th>
+              <!-- QAQC -->
+              <th class="group c-sid" rowspan="2">Sample_ID</th>
+              <th class="group c-std" rowspan="2">Wet(Kg)</th>
+            </tr>
+            <!-- ROW 3: Detail -->
+            <tr>
+              <!-- +10mm -->
+              <th class="group c-std">Total</th><th class="group c-std">Rec</th>
+              <!-- +2-10mm -->
+              <th class="group c-std">Total</th><th class="group c-std">Rec</th>
+              <!-- +0.6-2mm -->
+              <th class="group c-std">Total</th><th class="group c-std">Rec</th>
+              <!-- -0.6mm -->
+              <th class="group c-std">Total</th><th class="group c-std">Rec</th>
+              <!-- +0.3mm -->
+              <th class="group c-std">Total</th><th class="group c-std">Rec</th>
             </tr>
           </thead>
           <tbody id="prep-tbody"></tbody>
@@ -230,6 +267,11 @@
         `<input type="number" id="${id}_${n}" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01" class="auto" readonly>`;
       const autoTxt = (id, val) =>
         `<input type="text" id="${id}_${n}" name="${id}_${n}" value="${val || ''}" class="auto" readonly>`;
+      // Grain size dropdown
+      const grainOpts = ['','GVL','CS','FS','CLY'];
+      const grainSel = (val) => `<select id="grain_${n}" name="grain_${n}" class="auto" style="color:#1a6b4a;font-weight:700;background:transparent;border:none;outline:none;width:100%;font-size:11px;text-align:center;">
+        ${grainOpts.map(o => `<option value="${o}"${o===(val||'')?'selected':''}>${o}</option>`).join('')}
+      </select>`;
       const num = (id, val) =>
         `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01">`;
       const txt = (id, val) =>
@@ -244,25 +286,29 @@
         <td class="col-freeze cf2">${autoNum('to', v.to)}</td>
         <td class="col-freeze cf3">${autoNum('len', v.length)}</td>
         <td class="col-freeze cf4">${autoNum('rec', v.recovery)}</td>
-        <td class="col-freeze cf5">${autoTxt('grain', v.grain_size)}</td>
+        <td class="col-freeze cf5">${grainSel(v.grain_size)}</td>
         <td>${num('core_wt', v.core_wt)}</td>
         <td class="td-cum"><input type="number" name="from_cum_${n}" id="from_cum_${n}" value="${v.from_cum != null ? v.from_cum : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td class="td-cum"><input type="number" name="to_cum_${n}"   id="to_cum_${n}"   value="${v.to_cum   != null ? v.to_cum   : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td><button class="btn-merge" onclick="startMerge(${n}, this)" title="Pilih baris untuk digabung">🔗</button></td>
         <td>${txt('samp_no', v.samp_no)}</td>
-        <td>${num('samp_wt', v.samp_wt)}</td>
-        <td>${num('a10_arc', v.a10_arc)}</td>
-        <td>${num('a10_lab', v.a10_lab)}</td>
+        <td>${num('send_cum', v.send_cum)}</td>
+        <td>${txt('sample_id', v.sample_id)}</td>
+        <td>${num('a10_tot', v.a10_tot)}</td>
+        <td>${num('a10_rec', v.a10_rec)}</td>
         <td>${txt('a10_sid', v.a10_sid)}</td>
-        <td>${num('a2_arc',  v.a2_arc)}</td>
-        <td>${num('a2_lab',  v.a2_lab)}</td>
+        <td>${num('a2_tot',  v.a2_tot)}</td>
+        <td>${num('a2_rec',  v.a2_rec)}</td>
         <td>${txt('a2_sid',  v.a2_sid)}</td>
-        <td>${num('a06_arc', v.a06_arc)}</td>
-        <td>${num('a06_lab', v.a06_lab)}</td>
+        <td>${num('a06_tot', v.a06_tot)}</td>
+        <td>${num('a06_rec', v.a06_rec)}</td>
         <td>${txt('a06_sid', v.a06_sid)}</td>
-        <td>${num('m06_arc', v.m06_arc)}</td>
-        <td>${num('m06_lab', v.m06_lab)}</td>
+        <td>${num('m06_tot', v.m06_tot)}</td>
+        <td>${num('m06_rec', v.m06_rec)}</td>
         <td>${txt('m06_sid', v.m06_sid)}</td>
+        <td>${num('p03_tot', v.p03_tot)}</td>
+        <td>${num('p03_rec', v.p03_rec)}</td>
+        <td>${txt('p03_sid', v.p03_sid)}</td>
         <td>${txt('qaqc_sid', v.qaqc_sid)}</td>
         <td>${num('qaqc_wt',  v.qaqc_wt)}</td>
         <td>${txt('remarks',  v.remarks)}</td>
@@ -357,19 +403,30 @@
       // Terapkan ke semua baris yang dipilih
       const sortedRows = [...selectedRows].sort((a,b) => a-b);
       const lastRow = sortedRows[sortedRows.length - 1];
+      const firstRow = sortedRows[0];
 
-      sortedRows.forEach(n => {
+      sortedRows.forEach((n, idx) => {
         const tr = document.getElementById('prep-row-' + n);
         if (!tr) return;
         tr.classList.add('row-merged');
         tr.classList.remove('row-merged-last');
         tr.dataset.mergeGroup = groupId;
 
-        // Isi From_Cum dan To_Cum
         const fcEl = document.getElementById('from_cum_' + n);
         const tcEl = document.getElementById('to_cum_' + n);
-        if (fcEl) fcEl.value = fromCum;
-        if (tcEl) tcEl.value = toCum;
+        const btnEl = tr.querySelector('.btn-merge');
+
+        if (idx === 0) {
+          // Baris pertama: tampilkan From_Cum & To_Cum, tombol jadi unlock
+          if (fcEl) { fcEl.value = fromCum; fcEl.closest('td').style.visibility = 'visible'; }
+          if (tcEl) { tcEl.value = toCum;   tcEl.closest('td').style.visibility = 'visible'; }
+          if (btnEl) { btnEl.textContent = '🔓'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.classList.remove('active'); }
+        } else {
+          // Baris lain: sembunyikan From_Cum & To_Cum
+          if (fcEl) { fcEl.value = fromCum; fcEl.closest('td').style.visibility = 'hidden'; }
+          if (tcEl) { tcEl.value = toCum;   tcEl.closest('td').style.visibility = 'hidden'; }
+          if (btnEl) { btnEl.style.visibility = 'hidden'; }
+        }
       });
 
       // Tandai baris terakhir grup
@@ -380,8 +437,31 @@
       showToast(`✓ ${selectedRows.size || '?'} baris digabung: ${fromCum} – ${toCum} m`);
     }
 
-    // Tombol Terapkan di banner
-    document.addEventListener('DOMContentLoaded', () => {
+    // ===== UNMERGE =====
+    function unmerge(groupId) {
+      if (!confirm('Lepas gabungan baris ini?')) return;
+      document.querySelectorAll(`tr[data-merge-group="${groupId}"]`).forEach(tr => {
+        tr.classList.remove('row-merged', 'row-merged-last');
+        delete tr.dataset.mergeGroup;
+        const n = tr.dataset.row;
+        const fcEl = document.getElementById('from_cum_' + n);
+        const tcEl = document.getElementById('to_cum_' + n);
+        if (fcEl) { fcEl.value = ''; fcEl.closest('td').style.visibility = 'visible'; }
+        if (tcEl) { tcEl.value = ''; tcEl.closest('td').style.visibility = 'visible'; }
+        const btnEl = tr.querySelector('.btn-merge');
+        if (btnEl) {
+          btnEl.textContent = '🔗';
+          btnEl.title = 'Pilih baris untuk digabung';
+          btnEl.style.visibility = 'visible';
+          const rowNum = parseInt(n);
+          btnEl.onclick = () => startMerge(rowNum, btnEl);
+          btnEl.classList.remove('active');
+        }
+      });
+      showToast('Gabungan dilepas');
+    }
+
+    // Tombol Terapkan di banner    document.addEventListener('DOMContentLoaded', () => {
       const banner = document.getElementById('merge-banner');
       const applyBtn = document.createElement('button');
       applyBtn.textContent = '✓ Terapkan';
@@ -468,14 +548,15 @@
     // ===== GENERATE CSV =====
     function generateCSV() {
       const headers = [
-        'From(m)','To(m)','Length(m)','Recovery(%)','Grain Size','Core Weight',
+        'From','To','Length(m)','Recovery_Length','Grain_size','Core_Weight',
         'From_Cum','To_Cum',
-        'Sampling No.','Sampling Weight',
-        '+10mm Archive','+10mm Wet(Kg)to lab','+10mm Sample_ID',
-        '+2-10mm Archive','+2-10mm Wet(Kg)to lab','+2-10mm Sample_ID',
-        '+0.6-2mm Archive','+0.6-2mm Wet(Kg)to lab','+0.6-2mm Sample_ID',
-        '-0.6mm Archive','-0.6mm Wet(Kg)to lab','-0.6mm Sample_ID',
-        'QAQC Sample_ID','QAQC Wet(Kg)','Remarks','Merge_Group'
+        'Sampling_No','Send_Cumulative','Sample_ID',
+        '+10mm_Total','+10mm_Rec','+10mm_Sample_ID',
+        '+2-10mm_Total','+2-10mm_Rec','+2-10mm_Sample_ID',
+        '+0.6-2mm_Total','+0.6-2mm_Rec','+0.6-2mm_Sample_ID',
+        '-0.6mm_Total','-0.6mm_Rec','-0.6mm_Sample_ID',
+        '+0.3mm_Total','+0.3mm_Rec','+0.3mm_Sample_ID',
+        'QAQC_Sample_ID','QAQC_Wet_Kg','Remarks','Merge_Group'
       ];
       const rows = [headers.join(',')];
       for (let i = 1; i <= rowCount; i++) {
@@ -485,11 +566,12 @@
         const row = [
           get('from'),get('to'),get('len'),get('rec'),get('grain'),get('core_wt'),
           get('from_cum'),get('to_cum'),
-          get('samp_no'),get('samp_wt'),
-          get('a10_arc'),get('a10_lab'),get('a10_sid'),
-          get('a2_arc'),get('a2_lab'),get('a2_sid'),
-          get('a06_arc'),get('a06_lab'),get('a06_sid'),
-          get('m06_arc'),get('m06_lab'),get('m06_sid'),
+          get('samp_no'),get('send_cum'),get('sample_id'),
+          get('a10_tot'),get('a10_rec'),get('a10_sid'),
+          get('a2_tot'),get('a2_rec'),get('a2_sid'),
+          get('a06_tot'),get('a06_rec'),get('a06_sid'),
+          get('m06_tot'),get('m06_rec'),get('m06_sid'),
+          get('p03_tot'),get('p03_rec'),get('p03_sid'),
           get('qaqc_sid'),get('qaqc_wt'),get('remarks'),mg
         ].map(v => `"${v}"`);
         rows.push(row.join(','));
@@ -506,6 +588,35 @@
       const FOLDER = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
       const fileId = await uploadFileToFolder(filename, generateCSV(), 'text/csv', FOLDER);
       if (fileId) showToast('✓ Data berhasil diupload ke Google Drive!');
+    }
+
+    // ===== RESTORE MERGE VISIBILITY SETELAH LOAD =====
+    function restoreMergeVisibility() {
+      // Kumpulkan semua grup
+      const groups = {};
+      document.querySelectorAll('tr[data-merge-group]').forEach(tr => {
+        const g = tr.dataset.mergeGroup;
+        if (!groups[g]) groups[g] = [];
+        groups[g].push(parseInt(tr.dataset.row));
+      });
+      Object.entries(groups).forEach(([groupId, rows]) => {
+        rows.sort((a,b) => a-b);
+        rows.forEach((n, idx) => {
+          const fcEl = document.getElementById('from_cum_' + n);
+          const tcEl = document.getElementById('to_cum_' + n);
+          const tr   = document.getElementById('prep-row-' + n);
+          const btnEl = tr ? tr.querySelector('.btn-merge') : null;
+          if (idx === 0) {
+            if (fcEl) fcEl.closest('td').style.visibility = 'visible';
+            if (tcEl) tcEl.closest('td').style.visibility = 'visible';
+            if (btnEl) { btnEl.textContent = '🔓'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.style.visibility = 'visible'; }
+          } else {
+            if (fcEl) fcEl.closest('td').style.visibility = 'hidden';
+            if (tcEl) tcEl.closest('td').style.visibility = 'hidden';
+            if (btnEl) btnEl.style.visibility = 'hidden';
+          }
+        });
+      });
     }
 
     // ===== LOAD MODE EDIT / CONTINUE =====
@@ -536,6 +647,7 @@
           }
           window._editRecordId = rec.id;
           showToast('Mode Edit aktif');
+          restoreMergeVisibility();
         }
       } else if (mode === 'continue') {
         const saved = DB.getAll('preparation');
