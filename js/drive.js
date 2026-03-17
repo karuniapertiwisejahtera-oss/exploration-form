@@ -1,5 +1,5 @@
 ﻿// ===== GOOGLE IDENTITY SERVICES (GIS) =====
-const CLIENT_ID = '654026557452-fg48pbmo1b74relpab797pp4t55pn34f.apps.googleusercontent.com';
+const CLIENT_ID = '654026557452-f20ngscfrgdsvmm42p3visqp0hagoim7.apps.googleusercontent.com';
 const API_KEY   = 'AIzaSyBm4tZzy1s7BQ3sXhl10-zWkJhl5TCHgrU';
 const SCOPES    = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
 
