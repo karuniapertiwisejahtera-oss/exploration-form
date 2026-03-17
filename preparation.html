@@ -317,11 +317,96 @@
         <td>${txt('remarks',  v.remarks)}</td>
       `;
       tbody.appendChild(tr);
+      attachRowListeners(n);
       updateTotalSample();
     }
 
     function updateTotalSample() {
       document.getElementById('h-total-sample').value = rowCount;
+    }
+
+    // ===== AUTO-FILL: Sampling No & Sample_ID berantai =====
+
+    // Hitung ulang Sampling No untuk semua baris (S1, S2... hanya jika from_cum tidak kosong)
+    function recalcSamplingNo() {
+      let counter = 0;
+      for (let i = 1; i <= rowCount; i++) {
+        const fcEl = document.getElementById('from_cum_' + i);
+        const snEl = document.querySelector(`[name="samp_no_${i}"]`);
+        if (!snEl) continue;
+        const hasCum = fcEl && fcEl.closest('td').style.visibility !== 'hidden' && fcEl.value !== '';
+        if (hasCum) {
+          counter++;
+          // Hanya isi jika kosong (bisa dihapus manual)
+          if (snEl.value === '' || snEl.dataset.auto === 'true') {
+            snEl.value = 'S' + counter;
+            snEl.dataset.auto = 'true';
+          }
+        }
+      }
+    }
+
+    // Isi Sample_ID turunan dari a10_sid: ambil 6 angka terakhir + increment
+    function autoFillSampleIDs(rowNum) {
+      const a10El = document.querySelector(`[name="a10_sid_${rowNum}"]`);
+      if (!a10El) return;
+      const base = a10El.value.trim();
+      if (!base) return;
+
+      // Ambil prefix (non-angka di akhir) dan 6 angka terakhir
+      const match = base.match(/^(.*?)(\d{1,6})$/);
+      if (!match) return;
+      const prefix = match[1];
+      const num6   = parseInt(match[2]);
+
+      const siblings = [
+        `a2_sid_${rowNum}`,
+        `a06_sid_${rowNum}`,
+        `m06_sid_${rowNum}`,
+        `p03_sid_${rowNum}`
+      ];
+
+      siblings.forEach((name, idx) => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (!el) return;
+        if (el.value === '' || el.dataset.auto === 'true') {
+          const newNum = String(num6 + idx + 1).padStart(match[2].length, '0');
+          el.value = prefix + newNum;
+          el.dataset.auto = 'true';
+        }
+      });
+    }
+
+    // Pasang event listener ke input samp_no dan a10_sid setelah baris dibuat
+    function attachRowListeners(n) {
+      // Saat from_cum berubah → recalc sampling no
+      const fcEl = document.getElementById('from_cum_' + n);
+      if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
+
+      // Saat samp_no dihapus manual → hapus flag auto
+      const snEl = document.querySelector(`[name="samp_no_${n}"]`);
+      if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
+
+      // Saat a10_sid diisi → auto-fill sibling
+      const a10El = document.querySelector(`[name="a10_sid_${n}"]`);
+      if (a10El) {
+        a10El.addEventListener('change', () => autoFillSampleIDs(n));
+        a10El.addEventListener('input', () => {
+          if (a10El.value === '') {
+            // Hapus semua sibling yang auto
+            [`a2_sid_${n}`,`a06_sid_${n}`,`m06_sid_${n}`,`p03_sid_${n}`].forEach(name => {
+              const el = document.querySelector(`[name="${name}"]`);
+              if (el && el.dataset.auto === 'true') { el.value = ''; el.dataset.auto = 'false'; }
+            });
+          }
+        });
+      }
+
+      // Sibling sid: jika diedit manual → hapus flag auto
+      [`a2_sid_${n}`,`a06_sid_${n}`,`m06_sid_${n}`,`p03_sid_${n}`].forEach(name => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (el) el.addEventListener('input', () => { el.dataset.auto = 'false'; });
+      });
     }
 
     // ===== MERGE LOGIC =====
@@ -437,6 +522,7 @@
       if (lastTr) lastTr.classList.add('row-merged-last');
 
       cancelMerge();
+      recalcSamplingNo();
       showToast(`✓ ${selectedRows.size || '?'} baris digabung: ${fromCum} – ${toCum} m`);
     }
 
@@ -462,6 +548,7 @@
         }
       });
       showToast('Gabungan dilepas');
+      recalcSamplingNo();
     }
 
     // Tombol Terapkan di banner
