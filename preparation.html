@@ -22,12 +22,13 @@
     .prep-table thead th {
       background: #c5d8f7; font-weight: 700; font-size: 10px;
       line-height: 1.2; position: sticky; z-index: 3;
-      padding: 2px 4px;
+      padding: 2px 4px; height: 22px; max-height: 22px;
+      overflow: hidden;
     }
+    /* Paksa semua baris header sama tinggi, tidak ada gap */
+    .prep-table thead tr { height: 22px; }
     .prep-table thead tr:nth-child(1) th { top: 0; border-top: 1px solid #bbb; }
-    /* Row 2 offset — tinggi row 1 ~22px */
     .prep-table thead tr:nth-child(2) th { top: 22px; }
-    /* Row 3 offset — tinggi row 1 + row 2 ~44px */
     .prep-table thead tr:nth-child(3) th { top: 44px; }
     .prep-table thead th.g10  { background: #b3e5fc; color: #01579b; }
     .prep-table thead th.g2   { background: #c8e6c9; color: #1b5e20; }
@@ -213,16 +214,17 @@
           <thead>
             <!-- ROW 1: Group headers -->
             <tr>
-              <th class="col-freeze cf1" colspan="2">Depth</th>
-              <th class="col-freeze cf3" rowspan="3">Length<br>(m)</th>
-              <th class="col-freeze cf4" rowspan="3">Recovery_<br>Length</th>
-              <th class="col-freeze cf5" rowspan="3">Grain_<br>size</th>
-              <th class="c-std" rowspan="3">Core<br>Weight</th>
-              <th class="c-cum" rowspan="3">From<br>Cum</th>
-              <th class="c-cum" rowspan="3">To<br>Cum</th>
+              <th class="col-freeze cf1" rowspan="3">From</th>
+              <th class="col-freeze cf2" rowspan="3">To</th>
+              <th class="col-freeze cf3" rowspan="3">Len(m)</th>
+              <th class="col-freeze cf4" rowspan="3">Rec Len</th>
+              <th class="col-freeze cf5" rowspan="3">Grain</th>
+              <th class="c-std" rowspan="3">Core Wt</th>
+              <th class="c-cum" rowspan="3">From Cum</th>
+              <th class="c-cum" rowspan="3">To Cum</th>
               <th class="c-std" rowspan="3" style="min-width:38px;width:38px;">Gabung</th>
-              <th class="c-std" rowspan="3">Sampling<br>No.</th>
-              <th class="c-send" rowspan="3">Send_Cu<br>mulative</th>
+              <th class="c-std" rowspan="3">Samp No.</th>
+              <th class="c-send" rowspan="3">Send Cum</th>
               <th class="c-sid" rowspan="3">Sample_ID</th>
               <th class="g10" colspan="3">+10 mm</th>
               <th class="g2 g-start" colspan="3">+2-10 mm</th>
@@ -232,41 +234,40 @@
               <th class="gqaqc g-start" colspan="2">Sample QAQC</th>
               <th class="c-rem" rowspan="3">Remarks</th>
             </tr>
-            <!-- ROW 2: Wet (Kg) + Sample_ID -->
+            <!-- ROW 2: Wet (Kg) -->
             <tr>
-              <th class="col-freeze cf1" rowspan="2">From</th>
-              <th class="col-freeze cf2" rowspan="2">To</th>
-              <!-- +10mm -->
               <th class="g10 c-wide" colspan="2">Wet (Kg)</th>
-              <th class="g10 c-sid" rowspan="2">Sample_ID</th>
-              <!-- +2-10mm -->
+              <th class="g10 c-sid"></th>
               <th class="g2 g-start c-wide" colspan="2">Wet (Kg)</th>
-              <th class="g2 c-sid" rowspan="2">Sample_ID</th>
-              <!-- +0.6-2mm -->
+              <th class="g2 c-sid"></th>
               <th class="g06 g-start c-wide" colspan="2">Wet (Kg)</th>
-              <th class="g06 c-sid" rowspan="2">Sample_ID</th>
-              <!-- -0.6mm -->
+              <th class="g06 c-sid"></th>
               <th class="gm06 g-start c-wide" colspan="2">Wet (Kg)</th>
-              <th class="gm06 c-sid" rowspan="2">Sample_ID</th>
-              <!-- +0.3mm -->
+              <th class="gm06 c-sid"></th>
               <th class="gp03 g-start c-wide" colspan="2">Wet (Kg)</th>
-              <th class="gp03 c-sid" rowspan="2">Sample_ID</th>
-              <!-- QAQC -->
-              <th class="gqaqc g-start c-sid" rowspan="2">Sample_ID</th>
-              <th class="gqaqc c-std" rowspan="2">Wet(Kg)</th>
+              <th class="gp03 c-sid"></th>
+              <th class="gqaqc g-start c-sid"></th>
+              <th class="gqaqc c-std">Wet(Kg)</th>
             </tr>
-            <!-- ROW 3: Total | Rec -->
+            <!-- ROW 3: Total | Rec | Sample_ID -->
             <tr>
-              <!-- +10mm -->
-              <th class="g10 c-std">Total</th><th class="g10 c-std">Rec</th>
-              <!-- +2-10mm -->
-              <th class="g2 g-start c-std">Total</th><th class="g2 c-std">Rec</th>
-              <!-- +0.6-2mm -->
-              <th class="g06 g-start c-std">Total</th><th class="g06 c-std">Rec</th>
-              <!-- -0.6mm -->
-              <th class="gm06 g-start c-std">Total</th><th class="gm06 c-std">Rec</th>
-              <!-- +0.3mm -->
-              <th class="gp03 g-start c-std">Total</th><th class="gp03 c-std">Rec</th>
+              <th class="g10 c-std">Total</th>
+              <th class="g10 c-std">Rec</th>
+              <th class="g10 c-sid">Sample_ID</th>
+              <th class="g2 g-start c-std">Total</th>
+              <th class="g2 c-std">Rec</th>
+              <th class="g2 c-sid">Sample_ID</th>
+              <th class="g06 g-start c-std">Total</th>
+              <th class="g06 c-std">Rec</th>
+              <th class="g06 c-sid">Sample_ID</th>
+              <th class="gm06 g-start c-std">Total</th>
+              <th class="gm06 c-std">Rec</th>
+              <th class="gm06 c-sid">Sample_ID</th>
+              <th class="gp03 g-start c-std">Total</th>
+              <th class="gp03 c-std">Rec</th>
+              <th class="gp03 c-sid">Sample_ID</th>
+              <th class="gqaqc g-start c-sid">Sample_ID</th>
+              <th class="gqaqc c-std"></th>
             </tr>
           </thead>
           <tbody id="prep-tbody"></tbody>
