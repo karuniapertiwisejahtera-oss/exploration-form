@@ -1098,8 +1098,11 @@
           rowCounter++;
           const sidVal = get(frac.sid, firstRow);
 
-          // Sample_id_to_Lab: isi di baris pertama interval ATAU fraksi +0.3
-          const sidToLabRow = (firstFrac || frac.label === '+0.3') ? sidToLab : '';
+          // Sample_id_to_Lab: baris pertama interval pakai sampleId utama
+          // fraksi +0.3 pakai sid fraksi +0.3 sendiri (GS prefix)
+          const sidToLabRow = firstFrac
+            ? sidToLab
+            : (frac.label === '+0.3' ? (sidVal ? 'GS' + sidVal.slice(2) : '') : '');
 
           const row = [
             ...fixedAll.map((v, i) => i === 0 ? q(rowCounter) : q(v)),
@@ -1115,9 +1118,11 @@
         if (qaqcSid) {
           rowCounter++;
           const qaqcWt = get('qaqc_wt', firstRow);
+          // QAQC: Depth_From & Depth_To kosong (index 5,6), Sample_id kosong, Sample_id_to_Lab terisi
+          const qaqcFixed = fixedAll.map((v, i) => (i === 5 || i === 6) ? q('') : (i === 0 ? q(rowCounter) : q(v)));
           const row = [
-            ...fixedAll.map((v, i) => i === 0 ? q(rowCounter) : q(v)),
-            q('QAQC'), q(qaqcSidLab), q(qaqcWt),
+            ...qaqcFixed,
+            q('QAQC'), q(''), q(qaqcWt),
             q(''), q(qaqcSidLab), q(''),
             q(''), q(''), q(''), q('')
           ];
