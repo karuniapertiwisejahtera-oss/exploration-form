@@ -1043,6 +1043,7 @@
       const q = v => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
 
       let intervalCounter = 0;
+      let rowCounter = 0; // No. berurut per baris fraksi
       Object.entries(groups).forEach(([mg, rowNums]) => {
         rowNums.sort((a,b) => a-b);
         const firstRow = rowNums[0];
@@ -1094,13 +1095,14 @@
         FRACTIONS.forEach((frac) => {
           const totVal = get(frac.tot, firstRow);
           if (!totVal) return; // skip fraksi kosong
+          rowCounter++;
           const sidVal = get(frac.sid, firstRow);
 
           // Sample_id_to_Lab: isi di baris pertama interval ATAU fraksi +0.3
           const sidToLabRow = (firstFrac || frac.label === '+0.3') ? sidToLab : '';
 
           const row = [
-            ...fixedAll.map(v => q(v)),
+            ...fixedAll.map((v, i) => i === 0 ? q(rowCounter) : q(v)),
             q(frac.label), q(sidVal), q(totVal),
             q(''), q(sidToLabRow), q(''),
             q(''), q(''), firstFrac ? q(remarks) : q(''), q('')
@@ -1111,9 +1113,10 @@
 
         // Baris QAQC jika ada
         if (qaqcSid) {
+          rowCounter++;
           const qaqcWt = get('qaqc_wt', firstRow);
           const row = [
-            ...fixedAll.map(v => q(v)),
+            ...fixedAll.map((v, i) => i === 0 ? q(rowCounter) : q(v)),
             q('QAQC'), q(qaqcSidLab), q(qaqcWt),
             q(''), q(qaqcSidLab), q(''),
             q(''), q(''), q(''), q('')
