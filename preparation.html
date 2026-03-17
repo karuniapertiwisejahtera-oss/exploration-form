@@ -1003,7 +1003,6 @@
     function generateExportCSV() {
       const holeId   = document.getElementById('h-holeid').value   || '';
       const deposit  = document.getElementById('h-deposit').value  || '';
-      const sheetNo  = document.querySelector('[name="sheet_no"]')  ? document.querySelector('[name="sheet_no"]').value  : '';
 
       const groups = {};
       for (let i = 1; i <= rowCount; i++) {
@@ -1068,22 +1067,31 @@
         const insitu = (coreWt && recAvg && recAvg > 0)
           ? parseFloat((coreWt / recAvg).toFixed(4)) : '';
 
-        const depthFrom = get('from_cum', firstRow);
-        const depthTo   = get('to_cum',   firstRow);
-        const sampleId  = get('sample_id', firstRow);
-        const sidToLab  = sampleId ? 'GS' + sampleId.slice(2) : '';
-        const remarks   = get('remarks', firstRow);
-        const qaqcSid   = get('qaqc_sid', firstRow);
+        const depthFrom  = get('from_cum', firstRow);
+        const depthTo    = get('to_cum',   firstRow);
+        const sampleId   = get('sample_id', firstRow);   // kolom Sample_ID (setelah Send_Cum)
+        const sidToLab   = sampleId ? 'GS' + sampleId.slice(2) : '';  // Sample_id_to_Lab
+        const remarks    = get('remarks', firstRow);
+        const qaqcSid    = get('qaqc_sid', firstRow);
         const qaqcSidLab = qaqcSid ? 'GS' + qaqcSid.slice(2) : '';
         const remarkUpper = remarks.trim().toUpperCase();
-        const dupSample   = remarkUpper === 'DS' ? qaqcSidLab : '';
-        const blankSample = remarkUpper === 'BS' ? qaqcSidLab : '';
 
-        // No. = nomor urut interval
-        const fixedVals = [
-          intervalCounter, sampleId, deposit, sheetNo, holeId,
+        // ID = Hole_ID + "-" + No.
+        const idCol   = holeId ? holeId + '-' + intervalCounter : intervalCounter;
+        // Sheet_No = 4 karakter awal Hole_ID
+        const sheetNoAuto = holeId.slice(0, 4);
+
+        // Kolom tetap yang terisi di SETIAP baris fraksi (Hole_id, Depth_From, Depth_To selalu terisi)
+        // Kolom yang hanya di baris pertama: No., ID, Deposit, Sheet_No, Recovery_sampling, Core_Weight, Sampling_Insitu_Weight
+        const fixedFirst = [
+          intervalCounter, idCol, deposit, sheetNoAuto, holeId,
           depthFrom, depthTo,
           recAvg, coreWt, insitu
+        ];
+        const fixedRest = [
+          '', '', '', '', holeId,
+          depthFrom, depthTo,
+          '', '', ''
         ];
 
         // Baris vertikal per fraksi — skip jika Total kosong
@@ -1091,18 +1099,16 @@
         FRACTIONS.forEach((frac) => {
           const totVal = get(frac.tot, firstRow);
           if (!totVal) return; // skip fraksi kosong
-          const recVal = frac.label === '-0.6' ? '' : get(frac.rec, firstRow);
           const sidVal = get(frac.sid, firstRow);
-          const sidToLabFrac = sidVal ? 'GS' + sidVal.slice(2) : '';
 
           const fixedCols = firstFrac
-            ? fixedVals.map(v => q(v))
-            : fixedVals.map(() => q(''));
+            ? fixedFirst.map(v => q(v))
+            : fixedRest.map(v => q(v));
 
           const row = [
             ...fixedCols,
             q(frac.label), q(sidVal), q(totVal),
-            q(''), q(sidToLabFrac), q(''),
+            q(''), q(sidToLab), q(''),
             q(''), q(''), firstFrac ? q(remarks) : q(''), q('')
           ];
           rows.push(row.join(','));
@@ -1113,7 +1119,7 @@
         if (qaqcSid) {
           const qaqcWt = get('qaqc_wt', firstRow);
           const row = [
-            ...fixedVals.map(() => q('')),
+            ...fixedRest.map(v => q(v)),
             q('QAQC'), q(qaqcSidLab), q(qaqcWt),
             q(''), q(qaqcSidLab), q(''),
             q(''), q(''), q(''), q('')
@@ -1134,10 +1140,10 @@
       const FOLDER = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
 
       const exportFile = await uploadFileToFolder(
-        `Export_${safeName}.csv`, generateExportCSV(), 'text/csv', FOLDER
+        `Prep_${safeName}.csv`, generateExportCSV(), 'text/csv', FOLDER
       );
 
-      if (exportFile) showToast('✓ Export berhasil diupload!');
+      if (exportFile) showToast('✓ Prep berhasil diupload!');
       else showToast('Upload gagal', 'error');
     }
 
