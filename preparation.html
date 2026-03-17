@@ -1001,8 +1001,9 @@
 
     // ===== GENERATE EXPORT CSV (format lab — vertikal per fraksi) =====
     function generateExportCSV() {
-      const holeId  = document.getElementById('h-holeid').value  || '';
-      const deposit = document.getElementById('h-deposit').value || '';
+      const holeId   = document.getElementById('h-holeid').value   || '';
+      const deposit  = document.getElementById('h-deposit').value  || '';
+      const sheetNo  = document.querySelector('[name="sheet_no"]')  ? document.querySelector('[name="sheet_no"]').value  : '';
 
       const groups = {};
       for (let i = 1; i <= rowCount; i++) {
@@ -1020,33 +1021,35 @@
       const getF = (id, n) => parseFloat(get(id, n)) || 0;
 
       const exportHeaders = [
-        'Sample_ID','Hole_ID','Deposit','Depth_From','Depth_To',
-        'Recovery_Sampling(%)','Core_Weight(kg)','Sampling_Insitu_Weight',
-        'Sample_ID_to_Lab','Ore',
-        'DUPLICATE_SAMPLE','BLANK_SAMPLE',
-        'Fraction','Total(kg)','Rec','Fraction_Sample_ID','Washing_weight',
-        'Remarks'
+        'No.','ID','Deposit','Sheet_No','Hole_id',
+        'Depth_From','Depth_To',
+        'Recovery_sampling','Core_Weight','Sampling_Insitu_Weight',
+        'Fraksi','Sample_id','Washing_weight',
+        'Berat_Kering','Sample_id_to_Lab','Recovery_Sample',
+        'Dev_Sieve & Semi_Dry','H2O','comment','Ore'
       ];
 
       const rows = [exportHeaders.join(',')];
 
       // Fraksi: label sesuai permintaan, mapping ke field name
       const FRACTIONS = [
-        { label: '+10 mm',     tot: 'a10_tot', rec: 'a10_rec', sid: 'a10_sid' },
-        { label: '+2-10 mm',   tot: 'a2_tot',  rec: 'a2_rec',  sid: 'a2_sid'  },
-        { label: '+0.6-2 mm',  tot: 'a06_tot', rec: 'a06_rec', sid: 'a06_sid' },
-        { label: '-0.6 mm',    tot: 'm06_tot', rec: 'm06_rec', sid: 'm06_sid' },
-        { label: '+0.3 mm',    tot: 'p03_tot', rec: 'p03_rec', sid: 'p03_sid' },
+        { label: '+10',  tot: 'a10_tot', rec: 'a10_rec', sid: 'a10_sid' },
+        { label: '+2',   tot: 'a2_tot',  rec: 'a2_rec',  sid: 'a2_sid'  },
+        { label: '+0.6', tot: 'a06_tot', rec: 'a06_rec', sid: 'a06_sid' },
+        { label: '-0.6', tot: 'm06_tot', rec: 'm06_rec', sid: 'm06_sid' },
+        { label: '+0.3', tot: 'p03_tot', rec: 'p03_rec', sid: 'p03_sid' },
       ];
 
       const q = v => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
 
+      let intervalCounter = 0;
       Object.entries(groups).forEach(([mg, rowNums]) => {
         rowNums.sort((a,b) => a-b);
         const firstRow = rowNums[0];
 
         const fcEl = document.getElementById('from_cum_' + firstRow);
         if (!fcEl || fcEl.value === '') return;
+        intervalCounter++;
 
         // Recovery_Sampling = average Rec_Length dari semua baris dalam grup
         let recSum = 0, recCount = 0;
@@ -1076,29 +1079,34 @@
         const dupSample   = remarkUpper === 'DS' ? qaqcSidLab : '';
         const blankSample = remarkUpper === 'BS' ? qaqcSidLab : '';
 
+        // No. = nomor urut interval
         const fixedVals = [
-          sampleId, holeId, deposit, depthFrom, depthTo,
-          recAvg, coreWt, insitu,
-          sidToLab, '',
-          dupSample, blankSample
+          intervalCounter, sampleId, deposit, sheetNo, holeId,
+          depthFrom, depthTo,
+          recAvg, coreWt, insitu
         ];
 
-        // 5 baris vertikal per fraksi
-        FRACTIONS.forEach((frac, idx) => {
+        // Baris vertikal per fraksi — skip jika Total kosong
+        let firstFrac = true;
+        FRACTIONS.forEach((frac) => {
           const totVal = get(frac.tot, firstRow);
-          const recVal = frac.label === '-0.6 mm' ? '' : get(frac.rec, firstRow);
+          if (!totVal) return; // skip fraksi kosong
+          const recVal = frac.label === '-0.6' ? '' : get(frac.rec, firstRow);
           const sidVal = get(frac.sid, firstRow);
+          const sidToLabFrac = sidVal ? 'GS' + sidVal.slice(2) : '';
 
-          const fixedCols = idx === 0
+          const fixedCols = firstFrac
             ? fixedVals.map(v => q(v))
             : fixedVals.map(() => q(''));
 
           const row = [
             ...fixedCols,
-            q(frac.label), q(totVal), q(recVal), q(sidVal), q(totVal),
-            idx === 0 ? q(remarks) : q('')
+            q(frac.label), q(sidVal), q(totVal),
+            q(''), q(sidToLabFrac), q(''),
+            q(''), q(''), firstFrac ? q(remarks) : q(''), q('')
           ];
           rows.push(row.join(','));
+          firstFrac = false;
         });
 
         // Baris QAQC jika ada
@@ -1106,7 +1114,9 @@
           const qaqcWt = get('qaqc_wt', firstRow);
           const row = [
             ...fixedVals.map(() => q('')),
-            q('QAQC'), q(qaqcWt), q(''), q(qaqcSidLab), q(''), q('')
+            q('QAQC'), q(qaqcSidLab), q(qaqcWt),
+            q(''), q(qaqcSidLab), q(''),
+            q(''), q(''), q(''), q('')
           ];
           rows.push(row.join(','));
         }
@@ -1123,17 +1133,11 @@
       const safeName = holeId.replace(/\s+/g,'_');
       const FOLDER = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
 
-      // Upload 1: raw prep data
-      const prepFile = await uploadFileToFolder(
-        `Prep_${safeName}.csv`, generateCSV(), 'text/csv', FOLDER
-      );
-      // Upload 2: export format lab
       const exportFile = await uploadFileToFolder(
         `Export_${safeName}.csv`, generateExportCSV(), 'text/csv', FOLDER
       );
 
-      if (prepFile && exportFile) showToast('✓ Prep & Export berhasil diupload!');
-      else if (prepFile) showToast('✓ Prep diupload, Export gagal', 'error');
+      if (exportFile) showToast('✓ Export berhasil diupload!');
       else showToast('Upload gagal', 'error');
     }
 
