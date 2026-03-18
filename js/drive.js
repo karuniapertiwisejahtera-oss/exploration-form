@@ -1,13 +1,12 @@
 ﻿// ===== GOOGLE IDENTITY SERVICES (GIS) =====
 const CLIENT_ID = '654026557452-f20ngscfrgdsvmm42p3visqp0hagoim7.apps.googleusercontent.com';
 const API_KEY   = 'AIzaSyBm4tZzy1s7BQ3sXhl10-zWkJhl5TCHgrU';
-const SCOPES    = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets';
+const SCOPES    = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets';
 
 let _accessToken  = null;
 let _tokenClient  = null;
 let _tokenResolve = null;
 
-// Reset token (paksa minta token baru)
 function resetAccessToken() { _accessToken = null; }
 
 function _initTokenClient() {
@@ -42,7 +41,7 @@ function getAccessToken() {
       if (_tokenClient) {
         clearInterval(interval);
         _tokenResolve = resolve;
-        _tokenClient.requestAccessToken({ prompt: '' });
+        _tokenClient.requestAccessToken({ prompt: 'consent' });
       } else if (waited >= 6000) {
         clearInterval(interval);
         alert('Google API belum siap. Refresh halaman dan coba lagi.');
@@ -103,4 +102,53 @@ function pickFolder(rootFolderId, title) {
     });
     box.querySelector('#_fp_cancel').addEventListener('click', function() { document.body.removeChild(overlay); resolve(null); });
   });
+}
+
+// ===== APPEND ROWS TO GOOGLE SHEET =====
+async function appendToSheet(sheetId, sheetName, rows) {
+  var token = await getAccessToken();
+  if (!token) return false;
+  var range = encodeURIComponent(sheetName + '!A1');
+  try {
+    var res = await fetch(
+      'https://sheets.googleapis.com/v4/spreadsheets/' + sheetId +
+      '/values/' + range + ':append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS',
+      {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: rows })
+      }
+    );
+    if (!res.ok) {
+      var err = await res.json();
+      if (err.error && err.error.code === 401) { _accessToken = null; return appendToSheet(sheetId, sheetName, rows); }
+      alert('Sheets error: ' + (err.error ? err.error.message : res.status));
+      return false;
+    }
+    return true;
+  } catch(e) { alert('Sheets error: ' + e.message); return false; }
+}
+
+// ===== BUAT GOOGLE SHEET BARU DI FOLDER =====
+async function createSheetInFolder(fileName, folderId) {
+  var token = await getAccessToken();
+  if (!token) return null;
+  try {
+    var res = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: fileName,
+        mimeType: 'application/vnd.google-apps.spreadsheet',
+        parents: [folderId]
+      })
+    });
+    if (!res.ok) {
+      var err = await res.json();
+      if (err.error && err.error.code === 401) { _accessToken = null; return createSheetInFolder(fileName, folderId); }
+      alert('Gagal buat sheet: ' + (err.error ? err.error.message : res.status));
+      return null;
+    }
+    return (await res.json()).id;
+  } catch(e) { alert('Error buat sheet: ' + e.message); return null; }
 }
