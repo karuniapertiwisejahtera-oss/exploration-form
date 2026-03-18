@@ -565,7 +565,8 @@
 
       if (sum3 === 0) return; // belum ada data
 
-      const mult = sum3 > 1000 ? 1000 : 500;
+      // Jika sum < 500 → ×250, selain itu → ×500
+      const mult = sum3 < 500 ? 250 : 500;
 
       // Hitung Rec untuk fraksi +10, +2-10, +0.6-2, +0.3 saja (bukan -0.6)
       const tots = {
@@ -1088,10 +1089,8 @@
         });
         const recAvg = recCount > 0 ? parseFloat((recSum / recCount).toFixed(4)) : '';
 
-        // Core_Weight = sum Core_Wt semua baris dalam grup
-        let coreWtSum = 0;
-        rowNums.forEach(n => { coreWtSum += getF('core_wt', n); });
-        const coreWt = coreWtSum > 0 ? parseFloat(coreWtSum.toFixed(4)) : '';
+        // Core_Weight = Core_Wt baris pertama (bukan sum)
+        const coreWt = get('core_wt', firstRow) || '';
 
         // Sampling_Insitu_Weight = Core_Weight / Recovery_Sampling
         const insitu = (coreWt && recAvg && recAvg > 0)
@@ -1149,7 +1148,8 @@
           }
 
           // DS/BS: kosongkan Washing_weight dan Berat_Kering juga
-          const washVal = isQAQCInterval ? '' : totVal;
+          const totNum = parseFloat(totVal) || 0;
+          const washVal = isQAQCInterval ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
 
           const row = [
             ...fixedAll.map((v, i) => i === 0 ? q(rowCounter) : q(v)),
