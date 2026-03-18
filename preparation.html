@@ -1202,24 +1202,57 @@
       return [...dupes];
     }
 
+    // ===== SHEET ID TUJUAN PREPARATION =====
+    const PREP_FOLDER_ID = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
+    const PREP_SHEET_TAB = 'Sheet1';
+
+    // Konversi generateExportCSV ke array of arrays untuk Sheets API
+    function generateExportRows() {
+      const csv = generateExportCSV();
+      return csv.split('\r\n').map(line => {
+        // Parse CSV line dengan benar (handle quoted fields)
+        const result = [];
+        let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i];
+          if (c === '"') {
+            if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+            else inQ = !inQ;
+          } else if (c === ',' && !inQ) {
+            result.push(cur); cur = '';
+          } else cur += c;
+        }
+        result.push(cur);
+        return result;
+      });
+    }
+
     async function submitData() {
       const dupes = checkDuplicateSampleIDs();
       if (dupes.length > 0) {
         const list = dupes.join(', ');
         if (!confirm(`⚠️ Sample_ID duplikat ditemukan:\n${list}\n\nLanjutkan submit?`)) return;
       }
-      if (!confirm('Submit? Data akan diupload ke Google Drive.')) return;
+      if (!confirm('Submit? Data akan dikirim ke Google Sheet baru.')) return;
       saveData();
-      const holeId = document.getElementById('h-holeid').value || 'unknown';
-      const safeName = holeId.replace(/\s+/g,'_');
-      const FOLDER = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
 
-      const exportFile = await uploadFileToFolder(
-        `Prep_${safeName}.csv`, generateExportCSV(), 'text/csv', FOLDER
-      );
+      const allRows = generateExportRows();
+      if (allRows.length < 2) { showToast('Tidak ada data untuk disubmit', 'error'); return; }
 
-      if (exportFile) showToast('✓ Prep berhasil diupload!');
-      else showToast('Upload gagal', 'error');
+      const holeId   = (document.getElementById('h-holeid').value || 'unknown').toUpperCase();
+      const safeName = holeId.replace(/\s+/g, '_');
+      const fileName = 'Prep_' + safeName;
+
+      showToast('Membuat Google Sheet...');
+
+      // Buat Google Sheet baru di folder
+      const sheetId = await createSheetInFolder(fileName, PREP_FOLDER_ID);
+      if (!sheetId) { showToast('Gagal membuat Google Sheet', 'error'); return; }
+
+      // Tulis header + data sekaligus
+      const ok = await appendToSheet(sheetId, PREP_SHEET_TAB, allRows);
+      if (ok) showToast('✓ ' + fileName + ' berhasil dibuat di Google Drive!');
+      else showToast('Sheet dibuat tapi gagal isi data', 'error');
     }
 
     // ===== EXPORT LAB CSV =====
