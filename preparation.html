@@ -1133,12 +1133,13 @@
           ];
 
           // Sample_id_to_Lab:
-          // - baris pertama interval: pakai sampleId utama (kecuali DS/BS → pakai QAQC)
+          // - DS/BS interval: semua baris pakai QAQC Sample_ID
+          // - baris pertama interval normal: pakai sampleId utama
           // - fraksi +0.3: jika remarks = '+0.3' pakai QAQC, selain itu pakai sid +0.3
           // - baris lain: kosong
           let sidToLabRow = '';
           if (isQAQCInterval) {
-            sidToLabRow = firstFrac ? qaqcSidLab : '';
+            sidToLabRow = qaqcSidLab; // semua baris DS/BS pakai QAQC
           } else if (firstFrac) {
             sidToLabRow = sidToLab;
           } else if (frac.label === '+0.3') {
