@@ -1118,7 +1118,7 @@
           const totVal = get(frac.tot, firstRow);
           if (!totVal) return; // skip fraksi kosong
           rowCounter++;
-          const noPad = String(rowCounter).padStart(3, '0');
+          const noPad = String(rowCounter);
           const idCol = holeId ? holeId + noPad : noPad;
           const sidVal = get(frac.sid, firstRow);
 
@@ -1163,7 +1163,7 @@
         // Baris QAQC jika ada — tanpa label Fraksi, kosong Depth s/d Berat_Kering
         if (qaqcSid) {
           rowCounter++;
-          const qaqcNoPad = String(rowCounter).padStart(3, '0');
+          const qaqcNoPad = String(rowCounter);
           const qaqcIdCol = holeId ? holeId + qaqcNoPad : qaqcNoPad;
           const qaqcWt = get('qaqc_wt', firstRow);
           const qaqcFixed = [
