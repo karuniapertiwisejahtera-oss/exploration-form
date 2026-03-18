@@ -1105,25 +1105,12 @@
         const qaqcSidLab = qaqcSid ? 'GS' + qaqcSid.slice(2) : '';
         const remarkUpper = remarks.trim().toUpperCase();
 
-        // ID = Hole_ID + No. (No. di-pad 3 digit)
-        const noPad = String(intervalCounter).padStart(3, '0');
-        const idCol   = holeId ? holeId + noPad : noPad;
+        // ID = Hole_ID + No. (dihitung per baris di dalam loop fraksi)
         // Sheet_No = 4 karakter awal Hole_ID
         const sheetNoAuto = holeId.slice(0, 4);
 
         // DS/BS: kosongkan Depth_From s/d Berat_Kering, Sample_id_to_Lab = QAQC
         const isQAQCInterval = remarkUpper === 'DS' || remarkUpper === 'BS';
-
-        // Kolom tetap terisi di SEMUA baris fraksi
-        // Jika DS/BS: index 5(Depth_From),6(Depth_To),7(Rec),8(CoreWt),9(Insitu) dikosongkan
-        const fixedAll = [
-          intervalCounter, idCol, deposit, sheetNoAuto, holeId,
-          isQAQCInterval ? '' : depthFrom,
-          isQAQCInterval ? '' : depthTo,
-          isQAQCInterval ? '' : recAvg,
-          isQAQCInterval ? '' : coreWt,
-          isQAQCInterval ? '' : insitu
-        ];
 
         // Baris vertikal per fraksi — skip jika Total kosong
         let firstFrac = true;
@@ -1131,7 +1118,19 @@
           const totVal = get(frac.tot, firstRow);
           if (!totVal) return; // skip fraksi kosong
           rowCounter++;
+          const noPad = String(rowCounter).padStart(3, '0');
+          const idCol = holeId ? holeId + noPad : noPad;
           const sidVal = get(frac.sid, firstRow);
+
+          // Kolom tetap per baris
+          const fixedAll = [
+            rowCounter, idCol, deposit, sheetNoAuto, holeId,
+            isQAQCInterval ? '' : depthFrom,
+            isQAQCInterval ? '' : depthTo,
+            isQAQCInterval ? '' : recAvg,
+            isQAQCInterval ? '' : coreWt,
+            isQAQCInterval ? '' : insitu
+          ];
 
           // Sample_id_to_Lab:
           // - baris pertama interval: pakai sampleId utama (kecuali DS/BS → pakai QAQC)
@@ -1152,7 +1151,7 @@
           const washVal = isQAQCInterval ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
 
           const row = [
-            ...fixedAll.map((v, i) => i === 0 ? q(rowCounter) : q(v)),
+            ...fixedAll.map(v => q(v)),
             q(frac.label), q(sidVal), q(washVal),
             q(''), q(sidToLabRow), q(''),
             q(''), q(''), firstFrac ? q(remarks) : q(''), q('')
@@ -1164,14 +1163,15 @@
         // Baris QAQC jika ada — tanpa label Fraksi, kosong Depth s/d Berat_Kering
         if (qaqcSid) {
           rowCounter++;
+          const qaqcNoPad = String(rowCounter).padStart(3, '0');
+          const qaqcIdCol = holeId ? holeId + qaqcNoPad : qaqcNoPad;
           const qaqcWt = get('qaqc_wt', firstRow);
-          const qaqcFixed = fixedAll.map((v, i) => {
-            if (i === 0) return q(rowCounter);
-            if (i >= 5 && i <= 9) return q(''); // kosongkan Depth_From s/d Insitu
-            return q(v);
-          });
+          const qaqcFixed = [
+            rowCounter, qaqcIdCol, deposit, sheetNoAuto, holeId,
+            '', '', '', '', ''  // Depth s/d Insitu kosong
+          ];
           const row = [
-            ...qaqcFixed,
+            ...qaqcFixed.map(v => q(v)),
             q(''), q(''), q(qaqcWt),
             q(''), q(qaqcSidLab), q(''),
             q(''), q(''), q(''), q('')
