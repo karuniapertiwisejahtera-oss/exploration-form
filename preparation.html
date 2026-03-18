@@ -1234,26 +1234,21 @@
         const list = dupes.join(', ');
         if (!confirm(`⚠️ Sample_ID duplikat ditemukan:\n${list}\n\nLanjutkan submit?`)) return;
       }
-      if (!confirm('Submit? Data akan dikirim ke Google Sheet baru.')) return;
+      if (!confirm('Submit? Data akan diupload sebagai CSV ke Google Drive.')) return;
       saveData();
 
-      const allRows = generateExportRows();
-      if (allRows.length < 2) { showToast('Tidak ada data untuk disubmit', 'error'); return; }
+      const csv = generateExportCSV();
+      if (!csv || csv.split('\r\n').length < 2) { showToast('Tidak ada data untuk disubmit', 'error'); return; }
 
       const holeId   = (document.getElementById('h-holeid').value || 'unknown').toUpperCase();
       const safeName = holeId.replace(/\s+/g, '_');
-      const fileName = 'Prep_' + safeName;
+      const fileName = 'Prep_' + safeName + '.csv';
 
-      showToast('Membuat Google Sheet...');
+      showToast('Mengupload CSV...');
 
-      // Buat Google Sheet baru di folder
-      const sheetId = await createSheetInFolder(fileName, PREP_FOLDER_ID);
-      if (!sheetId) { showToast('Gagal membuat Google Sheet', 'error'); return; }
-
-      // Tulis header + data sekaligus
-      const ok = await appendToSheet(sheetId, PREP_SHEET_TAB, allRows);
-      if (ok) showToast('✓ ' + fileName + ' berhasil dibuat di Google Drive!');
-      else showToast('Sheet dibuat tapi gagal isi data', 'error');
+      const fileId = await uploadFileToFolder(fileName, csv, 'text/csv', PREP_FOLDER_ID);
+      if (fileId) showToast('✓ ' + fileName + ' berhasil diupload ke Google Drive!');
+      else showToast('Upload gagal', 'error');
     }
 
     // ===== EXPORT LAB CSV =====
