@@ -1038,18 +1038,15 @@
 
     // ===== GENERATE EXPORT CSV (format lab — vertikal per fraksi) =====
     function generateExportCSV() {
-      const holeId  = (document.getElementById('h-holeid').value  || '').toUpperCase();
-      const deposit = (document.getElementById('h-deposit').value || '').toUpperCase();
-      const sheetNoAuto = holeId.slice(0, 4);
+      const holeId   = (document.getElementById('h-holeid').value   || '').toUpperCase();
+      const deposit  = (document.getElementById('h-deposit').value  || '').toUpperCase();
 
-      // Kumpulkan grup (merge group atau single row)
       const groups = {};
-      const groupOrder = [];
       for (let i = 1; i <= rowCount; i++) {
         const tr = document.getElementById('prep-row-' + i);
         if (!tr) continue;
         const mg = tr.dataset.mergeGroup || ('_single_' + i);
-        if (!groups[mg]) { groups[mg] = []; groupOrder.push(mg); }
+        if (!groups[mg]) groups[mg] = [];
         groups[mg].push(i);
       }
 
@@ -1058,7 +1055,6 @@
         return el ? (el.value || '').toUpperCase() : '';
       };
       const getF = (id, n) => parseFloat(get(id, n)) || 0;
-      const q = v => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
 
       const exportHeaders = [
         'No.','ID','Deposit','Sheet_No','Hole_id',
@@ -1068,31 +1064,31 @@
         'Berat_Kering','Sample_id_to_Lab','Recovery_Sample',
         'Dev_Sieve & Semi_Dry','H2O','comment','Ore'
       ];
+
       const rows = [exportHeaders.join(',')];
 
+      // Fraksi: label sesuai permintaan, mapping ke field name
       const FRACTIONS = [
-        { label: '+10',  tot: 'a10_tot', sid: 'a10_sid' },
-        { label: '+2',   tot: 'a2_tot',  sid: 'a2_sid'  },
-        { label: '+0.6', tot: 'a06_tot', sid: 'a06_sid' },
-        { label: '-0.6', tot: 'm06_tot', sid: 'm06_sid' },
-        { label: '+0.3', tot: 'p03_tot', sid: 'p03_sid' },
+        { label: '+10',  tot: 'a10_tot', rec: 'a10_rec', sid: 'a10_sid' },
+        { label: '+2',   tot: 'a2_tot',  rec: 'a2_rec',  sid: 'a2_sid'  },
+        { label: '+0.6', tot: 'a06_tot', rec: 'a06_rec', sid: 'a06_sid' },
+        { label: '-0.6', tot: 'm06_tot', rec: 'm06_rec', sid: 'm06_sid' },
+        { label: '+0.3', tot: 'p03_tot', rec: 'p03_rec', sid: 'p03_sid' },
       ];
 
-      // Kumpulkan baris DS dan BS untuk ditulis di akhir (urut DS dulu, BS kemudian)
-      const qaqcDSRows = [];
-      const qaqcBSRows = [];
+      const q = v => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
 
-      let rowCounter = 0;
-
-      groupOrder.forEach(mg => {
-        const rowNums = groups[mg];
-        rowNums.sort((a, b) => a - b);
+      let intervalCounter = 0;
+      let rowCounter = 0; // No. berurut per baris fraksi
+      Object.entries(groups).forEach(([mg, rowNums]) => {
+        rowNums.sort((a,b) => a-b);
         const firstRow = rowNums[0];
 
         const fcEl = document.getElementById('from_cum_' + firstRow);
         if (!fcEl || fcEl.value === '') return;
+        intervalCounter++;
 
-        // Recovery_Sampling = rata-rata Rec_Length semua sub-baris dalam grup
+        // Recovery_Sampling = average Rec_Length dari semua baris dalam grup
         let recSum = 0, recCount = 0;
         rowNums.forEach(n => {
           const rv = getF('rec', n);
@@ -1100,93 +1096,97 @@
         });
         const recAvg = recCount > 0 ? parseFloat((recSum / recCount).toFixed(4)) : '';
 
-        const coreWt    = get('core_wt', firstRow) || '';
-        const insitu    = (coreWt && recAvg && recAvg > 0)
-                          ? parseFloat((parseFloat(coreWt) / recAvg).toFixed(4)) : '';
-        const depthFrom = get('from_cum', firstRow);
-        const depthTo   = get('to_cum',   firstRow);
-        const remarks   = get('remarks',  firstRow);
+        // Core_Weight = Core_Wt baris pertama (bukan sum)
+        const coreWt = get('core_wt', firstRow) || '';
 
-        // Setiap sub-baris dalam grup ditulis fraksinya masing-masing
-        rowNums.forEach(subRow => {
-          const sampleId  = get('sample_id', subRow);  // Original Sample_ID
-          const qaqcSid   = get('qaqc_sid',  subRow);
-          const qaqcSidLab = qaqcSid ? qaqcSid : '';
-          const jenisUpper = get('jenis', subRow).trim().toUpperCase();
-          const isDS = jenisUpper === 'DS';
-          const isBS = jenisUpper === 'BS';
-          const isQAQC = isDS || isBS;
-          const isp03  = jenisUpper === '+0.3';
+        // Sampling_Insitu_Weight = Core_Weight / Recovery_Sampling
+        const insitu = (coreWt && recAvg && recAvg > 0)
+          ? parseFloat((coreWt / recAvg).toFixed(4)) : '';
 
-          // Fraksi yang ada Total-nya untuk sub-baris ini
-          const activeFracs = FRACTIONS.filter(f => get(f.tot, subRow) !== '');
-          if (activeFracs.length === 0) return;
+        const depthFrom  = get('from_cum', firstRow);
+        const depthTo    = get('to_cum',   firstRow);
+        const sampleId   = get('sample_id', firstRow);   // kolom Sample_ID (setelah Send_Cum)
+        const sidToLab   = sampleId ? 'GS' + sampleId.slice(2) : '';  // Sample_id_to_Lab
+        const remarks    = get('remarks', firstRow);
+        const qaqcSid    = get('qaqc_sid', firstRow);
+        const qaqcSidLab = qaqcSid ? 'GS' + qaqcSid.slice(2) : '';
+        const remarkUpper = remarks.trim().toUpperCase();
+        const jenisUpper  = get('jenis', firstRow).trim().toUpperCase();
 
-          // Fraksi terbesar = fraksi pertama dalam urutan FRACTIONS yang ada Total-nya
-          const biggestFrac = activeFracs[0];
+        // ID = Hole_ID + No. (dihitung per baris di dalam loop fraksi)
+        // Sheet_No = 4 karakter awal Hole_ID
+        const sheetNoAuto = holeId.slice(0, 4);
 
-          activeFracs.forEach(frac => {
-            const totVal = get(frac.tot, subRow);
-            const sidVal = get(frac.sid, subRow);
-            const totNum = parseFloat(totVal) || 0;
-            const washVal = isQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
+        // DS/BS: kosongkan Depth_From s/d Berat_Kering, Sample_id_to_Lab = QAQC
+        const isQAQCInterval = jenisUpper === 'DS' || jenisUpper === 'BS';
 
-            rowCounter++;
-            const idCol = holeId ? holeId + rowCounter : String(rowCounter);
+        // Baris vertikal per fraksi — skip jika Total kosong
+        let firstFrac = true;
+        FRACTIONS.forEach((frac) => {
+          const totVal = get(frac.tot, firstRow);
+          if (!totVal) return; // skip fraksi kosong
+          rowCounter++;
+          const noPad = String(rowCounter);
+          const idCol = holeId ? holeId + noPad : noPad;
+          const sidVal = get(frac.sid, firstRow);
 
-            // Depth s/d Insitu: kosong jika DS/BS
-            const dFrom  = isQAQC ? '' : depthFrom;
-            const dTo    = isQAQC ? '' : depthTo;
-            const rAvg   = isQAQC ? '' : recAvg;
-            const cWt    = isQAQC ? '' : coreWt;
-            const ins    = isQAQC ? '' : insitu;
+          // Kolom tetap per baris
+          const fixedAll = [
+            rowCounter, idCol, deposit, sheetNoAuto, holeId,
+            isQAQCInterval ? '' : depthFrom,
+            isQAQCInterval ? '' : depthTo,
+            isQAQCInterval ? '' : recAvg,
+            isQAQCInterval ? '' : coreWt,
+            isQAQCInterval ? '' : insitu
+          ];
 
-            // Sample_id_to_Lab:
-            // - DS/BS: semua fraksi pakai QAQC Sample_ID
-            // - Jenis +0.3: fraksi +0.3 pakai QAQC Sample_ID, fraksi lain kosong
-            // - Normal: fraksi terbesar pakai Original Sample_ID, fraksi lain kosong
-            let sidToLabRow = '';
-            if (isQAQC) {
-              sidToLabRow = qaqcSidLab;
-            } else if (isp03 && frac.label === '+0.3') {
-              sidToLabRow = qaqcSidLab;
-            } else if (!isp03 && frac === biggestFrac) {
-              sidToLabRow = sampleId;
-            }
-
-            const isFirstFracOfFirstSub = (subRow === rowNums[0] && frac === activeFracs[0]);
-
-            const row = [
-              q(rowCounter), q(idCol), q(deposit), q(sheetNoAuto), q(holeId),
-              q(dFrom), q(dTo), q(rAvg), q(cWt), q(ins),
-              q(frac.label), q(sidVal), q(washVal),
-              q(''), q(sidToLabRow), q(''),
-              q(''), q(''), isFirstFracOfFirstSub ? q(remarks) : q(''), q('')
-            ];
-            rows.push(row.join(','));
-          });
-
-          // Kumpulkan baris QAQC khusus DS/BS untuk ditulis belakangan
-          if ((isDS || isBS) && qaqcSid) {
-            const qaqcEntry = { jenis: jenisUpper, qaqcSidLab, deposit, sheetNoAuto, holeId, qaqcWt: get('qaqc_wt', subRow) };
-            if (isDS) qaqcDSRows.push(qaqcEntry);
-            else      qaqcBSRows.push(qaqcEntry);
+          // Sample_id_to_Lab:
+          // - DS/BS interval: semua baris pakai QAQC Sample_ID
+          // - baris pertama interval normal: pakai sampleId utama
+          // - fraksi +0.3: jika remarks = '+0.3' pakai QAQC, selain itu pakai sid +0.3
+          // - baris lain: kosong
+          let sidToLabRow = '';
+          if (isQAQCInterval) {
+            sidToLabRow = qaqcSidLab; // semua baris DS/BS pakai QAQC
+          } else if (firstFrac) {
+            sidToLabRow = sidToLab;
+          } else if (frac.label === '+0.3') {
+            const p03Jenis = jenisUpper === '+0.3';
+            sidToLabRow = p03Jenis ? qaqcSidLab : (sidVal ? 'GS' + sidVal.slice(2) : '');
           }
-        });
-      });
 
-      // Tulis baris QAQC DS dulu, kemudian BS — Depth From s/d Berat_Kering blank
-      [...qaqcDSRows, ...qaqcBSRows].forEach(entry => {
-        rowCounter++;
-        const idCol = entry.holeId ? entry.holeId + rowCounter : String(rowCounter);
-        const row = [
-          q(rowCounter), q(idCol), q(entry.deposit), q(entry.sheetNoAuto), q(entry.holeId),
-          q(''), q(''), q(''), q(''), q(''),
-          q(''), q(''), q(entry.qaqcWt),
-          q(''), q(entry.qaqcSidLab), q(''),
-          q(''), q(''), q(''), q('')
-        ];
-        rows.push(row.join(','));
+          // DS/BS: kosongkan Washing_weight dan Berat_Kering juga
+          const totNum = parseFloat(totVal) || 0;
+          const washVal = isQAQCInterval ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
+
+          const row = [
+            ...fixedAll.map(v => q(v)),
+            q(frac.label), q(sidVal), q(washVal),
+            q(''), q(sidToLabRow), q(''),
+            q(''), q(''), firstFrac ? q(remarks) : q(''), q('')
+          ];
+          rows.push(row.join(','));
+          firstFrac = false;
+        });
+
+        // Baris QAQC jika ada — tanpa label Fraksi, kosong Depth s/d Berat_Kering
+        if (qaqcSid) {
+          rowCounter++;
+          const qaqcNoPad = String(rowCounter);
+          const qaqcIdCol = holeId ? holeId + qaqcNoPad : qaqcNoPad;
+          const qaqcWt = get('qaqc_wt', firstRow);
+          const qaqcFixed = [
+            rowCounter, qaqcIdCol, deposit, sheetNoAuto, holeId,
+            '', '', '', '', ''  // Depth s/d Insitu kosong
+          ];
+          const row = [
+            ...qaqcFixed.map(v => q(v)),
+            q(''), q(''), q(qaqcWt),
+            q(''), q(qaqcSidLab), q(''),
+            q(''), q(''), q(''), q('')
+          ];
+          rows.push(row.join(','));
+        }
       });
 
       return rows.join('\r\n');
