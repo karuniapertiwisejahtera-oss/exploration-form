@@ -647,7 +647,8 @@
       const t10  = get('a10_tot');
       const t2   = get('a2_tot');
       const t06  = get('a06_tot');
-      const sum3 = t10 + t2 + t06;
+      const tm06 = get('m06_tot');  // +0.3-0.6 mm
+      const sum3 = t10 + t2 + t06 + tm06;
 
       if (sum3 === 0) return; // belum ada data
 
@@ -656,10 +657,11 @@
 
       // Hitung Rec untuk fraksi +10, +2-10, +0.6-2, +0.3 saja (bukan -0.6)
       const tots = {
-        a10_rec: t10,
-        a2_rec:  t2,
-        a06_rec: t06,
-        p03_rec: get('p03_tot')
+        a10_rec:  t10,
+        a2_rec:   t2,
+        a06_rec:  t06,
+        m06_rec:  tm06,
+        p03_rec:  get('p03_tot')
       };
 
       Object.entries(tots).forEach(([recField, totVal]) => {
