@@ -321,6 +321,8 @@
       </select>`;
       const num = (id, val) =>
         `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01">`;
+      const numRO = (id, val) =>
+        `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01" readonly style="color:#888;background:#f5f5f5;">`;
       const txt = (id, val) =>
         `<input type="text" name="${id}_${n}" value="${val || ''}">`;
 
