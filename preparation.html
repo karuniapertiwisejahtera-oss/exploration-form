@@ -346,25 +346,25 @@
         <td>${txt('samp_no', v.samp_no)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
         <td>${txt('sample_id', v.sample_id)}</td>
-        <td class="g10 g-start">${num('a10_tot', v.a10_tot)}</td>
-        <td class="g10">${num('a10_rec', v.a10_rec)}</td>
-        <td class="g10">${txt('a10_sid', v.a10_sid)}</td>
-        <td class="g2 g-start">${num('a2_tot',  v.a2_tot)}</td>
-        <td class="g2">${num('a2_rec',  v.a2_rec)}</td>
-        <td class="g2">${txt('a2_sid',  v.a2_sid)}</td>
-        <td class="g06 g-start">${num('a06_tot', v.a06_tot)}</td>
-        <td class="g06">${num('a06_rec', v.a06_rec)}</td>
-        <td class="g06">${txt('a06_sid', v.a06_sid)}</td>
-        <td class="gm06 g-start">${num('m06_tot', v.m06_tot)}</td>
-        <td class="gm06">${num('m06_rec', v.m06_rec)}</td>
-        <td class="gm06">${txt('m06_sid', v.m06_sid)}</td>
-        <td class="gp03 g-start">${num('p03_tot', v.p03_tot)}</td>
-        <td class="gp03">${num('p03_rec', v.p03_rec)}</td>
-        <td class="gp03">${txt('p03_sid', v.p03_sid)}</td>
-        <td class="gqaqc g-start">${txt('qaqc_sid', v.qaqc_sid)}</td>
-        <td class="gqaqc">${num('qaqc_wt',  v.qaqc_wt)}</td>
-        <td>${jenisSel(v.jenis)}</td>
-        <td>${txt('remarks',  v.remarks)}</td>
+        <td class="g10 g-start frac-cell">${num('a10_tot', v.a10_tot)}</td>
+        <td class="g10 frac-cell">${numRO('a10_rec', v.a10_rec)}</td>
+        <td class="g10 frac-cell">${txt('a10_sid', v.a10_sid)}</td>
+        <td class="g2 g-start frac-cell">${num('a2_tot',  v.a2_tot)}</td>
+        <td class="g2 frac-cell">${numRO('a2_rec',  v.a2_rec)}</td>
+        <td class="g2 frac-cell">${txt('a2_sid',  v.a2_sid)}</td>
+        <td class="g06 g-start frac-cell">${num('a06_tot', v.a06_tot)}</td>
+        <td class="g06 frac-cell">${numRO('a06_rec', v.a06_rec)}</td>
+        <td class="g06 frac-cell">${txt('a06_sid', v.a06_sid)}</td>
+        <td class="gm06 g-start frac-cell">${num('m06_tot', v.m06_tot)}</td>
+        <td class="gm06 frac-cell">${numRO('m06_rec', v.m06_rec)}</td>
+        <td class="gm06 frac-cell">${txt('m06_sid', v.m06_sid)}</td>
+        <td class="gp03 g-start frac-cell">${num('p03_tot', v.p03_tot)}</td>
+        <td class="gp03 frac-cell">${numRO('p03_rec', v.p03_rec)}</td>
+        <td class="gp03 frac-cell">${txt('p03_sid', v.p03_sid)}</td>
+        <td class="gqaqc g-start frac-cell">${txt('qaqc_sid', v.qaqc_sid)}</td>
+        <td class="gqaqc frac-cell">${num('qaqc_wt',  v.qaqc_wt)}</td>
+        <td class="frac-cell">${jenisSel(v.jenis)}</td>
+        <td class="frac-cell">${txt('remarks',  v.remarks)}</td>
       `;
       tbody.appendChild(tr);
       attachRowListeners(n);
