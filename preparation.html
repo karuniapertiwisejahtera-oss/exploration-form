@@ -378,15 +378,21 @@
       document.getElementById('h-total-sample').value = rowCount;
     }
 
-    // Kunci/buka fraksi berdasarkan visibilitas From_Cum
+    // Kunci/buka fraksi berdasarkan Samp_No
     function updateFracLock() {
       for (let i = 1; i <= rowCount; i++) {
         const tr = document.getElementById('prep-row-' + i);
         if (!tr) continue;
-        const fcEl = document.getElementById('from_cum_' + i);
-        const isHidden = fcEl && fcEl.closest('td').style.visibility === 'hidden';
-        if (isHidden) tr.classList.add('row-frac-locked');
-        else tr.classList.remove('row-frac-locked');
+        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
+        const hasSampNo = snEl && snEl.value.trim() !== '';
+        const fracCells = tr.querySelectorAll('td.frac-cell input, td.frac-cell select');
+        if (hasSampNo) {
+          tr.classList.remove('row-frac-locked');
+          fracCells.forEach(el => { el.disabled = false; });
+        } else {
+          tr.classList.add('row-frac-locked');
+          fracCells.forEach(el => { el.disabled = true; });
+        }
       }
     }
 
