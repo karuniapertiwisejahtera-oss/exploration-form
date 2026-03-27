@@ -109,6 +109,10 @@
     .prep-table td.td-cum { background: #fff8f0; }
     .prep-table td.td-cum input { color: #e65100; font-weight: 700; }
 
+    /* Sembunyikan kolom Sample QAQC dan Jenis */
+    .prep-table th.gqaqc, .prep-table td.gqaqc { display: none !important; }
+    .prep-table th.col-jenis, .prep-table td.col-jenis { display: none !important; }
+
     /* Baris yang tergabung — hilangkan border bawah antar baris dalam grup, TANPA garis oranye */
     .prep-table tr.row-merged td {
       border-bottom: 1px dashed #ccc !important;
@@ -237,7 +241,7 @@
               <th class="gm06 g-start" colspan="3">+0.3-0.6 mm</th>
               <th class="gp03 g-start" colspan="3">-0.3 mm</th>
               <th class="gqaqc g-start" colspan="2">Sample QAQC</th>
-              <th class="c-std" rowspan="3" style="min-width:55px;width:55px;">Jenis</th>
+              <th class="c-std col-jenis" rowspan="3" style="min-width:55px;width:55px;">Jenis</th>
               <th class="c-rem" rowspan="3">Remarks</th>
             </tr>
             <!-- ROW 2: Wet (Kg) -->
@@ -373,7 +377,7 @@
         <td class="gp03 frac-cell">${txt('p03_sid', v.p03_sid)}</td>
         <td class="gqaqc g-start frac-cell">${txt('qaqc_sid', v.qaqc_sid)}</td>
         <td class="gqaqc frac-cell">${num('qaqc_wt',  v.qaqc_wt)}</td>
-        <td class="frac-cell">${jenisSel(v.jenis)}</td>
+        <td class="frac-cell col-jenis">${jenisSel(v.jenis)}</td>
         <td class="frac-cell">${txt('remarks',  v.remarks)}</td>
       `;
       tbody.appendChild(tr);
