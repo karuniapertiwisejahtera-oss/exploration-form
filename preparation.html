@@ -396,20 +396,21 @@
       showToast('Baris QAQC ' + jenis + ' ditambahkan');
     }
 
-    // Kunci/buka fraksi berdasarkan Samp_No
+    // Kunci fraksi hanya pada baris non-pertama dalam grup gabung
     function updateFracLock() {
       for (let i = 1; i <= rowCount; i++) {
         const tr = document.getElementById('prep-row-' + i);
         if (!tr) continue;
-        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
-        const hasSampNo = snEl && snEl.value.trim() !== '';
         const fracCells = tr.querySelectorAll('td.frac-cell input, td.frac-cell select');
-        if (hasSampNo) {
-          tr.classList.remove('row-frac-locked');
-          fracCells.forEach(el => { el.disabled = false; });
-        } else {
+        // Kunci jika baris ada dalam grup gabung DAN from_cum tersembunyi (bukan baris pertama)
+        const fcEl = document.getElementById('from_cum_' + i);
+        const inMerge = tr.dataset.mergeGroup && fcEl && fcEl.closest('td').style.visibility === 'hidden';
+        if (inMerge) {
           tr.classList.add('row-frac-locked');
           fracCells.forEach(el => { el.disabled = true; });
+        } else {
+          tr.classList.remove('row-frac-locked');
+          fracCells.forEach(el => { el.disabled = false; });
         }
       }
     }
