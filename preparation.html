@@ -113,6 +113,10 @@
     .prep-table th.gqaqc, .prep-table td.gqaqc { display: none !important; }
     .prep-table th.col-jenis, .prep-table td.col-jenis { display: none !important; }
 
+    /* Warna maroon untuk baris QAQC */
+    .prep-table tr.row-qaqc td input,
+    .prep-table tr.row-qaqc td select { color: maroon !important; font-weight: 700; }
+
     /* Baris yang tergabung — hilangkan border bawah antar baris dalam grup, TANPA garis oranye */
     .prep-table tr.row-merged td {
       border-bottom: 1px dashed #ccc !important;
@@ -402,6 +406,8 @@
       }
       qNum++;
       addRow({ samp_no: 'Q' + qNum, jenis: jenis });
+      const qTr = document.getElementById('prep-row-' + rowCount);
+      if (qTr) qTr.classList.add('row-qaqc');
       // Auto-copy qaqc_sid ke sample_id saat diisi
       const newRow = rowCount;
       const qaqcEl_q = document.querySelector('[name="qaqc_sid_' + newRow + '"]');
@@ -895,6 +901,7 @@
       cancelMerge();
       recalcSamplingNo();
       highlightDuplicates();
+          restoreQAQCClass();
       updateFracLock();
       const msg = sortedRows.length === 1
         ? `✓ From_Cum & To_Cum diisi: ${fromCum} – ${toCum} m`
@@ -929,6 +936,7 @@
       showToast('Gabungan dilepas');
       recalcSamplingNo();
       highlightDuplicates();
+          restoreQAQCClass();
     }
 
     // Tombol Terapkan di banner
@@ -1374,6 +1382,16 @@
       });
     }
       updateFracLock();
+
+    function restoreQAQCClass() {
+      for (let i = 1; i <= rowCount; i++) {
+        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
+        if (snEl && /^Q\d+$/i.test(snEl.value.trim())) {
+          const tr = document.getElementById('prep-row-' + i);
+          if (tr) tr.classList.add('row-qaqc');
+        }
+      }
+    }
 
     // ===== LOAD MODE EDIT / CONTINUE =====
     window.addEventListener('load', () => {
