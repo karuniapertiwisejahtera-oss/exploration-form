@@ -376,6 +376,18 @@
       document.getElementById('h-total-sample').value = rowCount;
     }
 
+    // Kunci/buka fraksi berdasarkan visibilitas From_Cum
+    function updateFracLock() {
+      for (let i = 1; i <= rowCount; i++) {
+        const tr = document.getElementById('prep-row-' + i);
+        if (!tr) continue;
+        const fcEl = document.getElementById('from_cum_' + i);
+        const isHidden = fcEl && fcEl.closest('td').style.visibility === 'hidden';
+        if (isHidden) tr.classList.add('row-frac-locked');
+        else tr.classList.remove('row-frac-locked');
+      }
+    }
+
     // ===== AUTO-FILL: Sampling No & Sample_ID berantai =====
 
     // Hitung ulang Sampling No untuk semua baris (S1, S2... hanya jika from_cum tidak kosong)
@@ -797,6 +809,7 @@
       cancelMerge();
       recalcSamplingNo();
       highlightDuplicates();
+      updateFracLock();
       const msg = sortedRows.length === 1
         ? `✓ From_Cum & To_Cum diisi: ${fromCum} – ${toCum} m`
         : `✓ ${sortedRows.length} baris digabung: ${fromCum} – ${toCum} m`;
@@ -1274,6 +1287,7 @@
         });
       });
     }
+      updateFracLock();
 
     // ===== LOAD MODE EDIT / CONTINUE =====
     window.addEventListener('load', () => {
