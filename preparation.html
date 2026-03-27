@@ -398,6 +398,20 @@
       }
       qNum++;
       addRow({ samp_no: 'Q' + qNum, jenis: jenis });
+      // Auto-copy qaqc_sid ke sample_id saat diisi
+      const newRow = rowCount;
+      const qaqcEl_q = document.querySelector('[name="qaqc_sid_' + newRow + '"]');
+      const sidEl_q  = document.querySelector('[name="sample_id_' + newRow + '"]');
+      if (qaqcEl_q && sidEl_q) {
+        const syncQAQC = function() {
+          if (sidEl_q.value === '' || sidEl_q.dataset.autoQ === 'true') {
+            sidEl_q.value = qaqcEl_q.value.toUpperCase();
+            sidEl_q.dataset.autoQ = 'true';
+          }
+        };
+        qaqcEl_q.addEventListener('input', syncQAQC);
+        qaqcEl_q.addEventListener('change', syncQAQC);
+      }
       updateFracLock();
       showToast('Baris QAQC ' + jenis + ' ditambahkan');
     }
@@ -655,13 +669,12 @@
       // Jika sum < 500 → ×250, selain itu → ×500
       const mult = sum3 < 500 ? 250 : 500;
 
-      // Hitung Rec untuk fraksi +10, +2-10, +0.6-2, +0.3 saja (bukan -0.6)
+      // Hitung Rec untuk +10, +2-10, +0.6-2, +0.3-0.6 (bukan -0.3)
       const tots = {
         a10_rec:  t10,
         a2_rec:   t2,
         a06_rec:  t06,
         m06_rec:  tm06,
-        p03_rec:  get('p03_tot')
       };
 
       Object.entries(tots).forEach(([recField, totVal]) => {
