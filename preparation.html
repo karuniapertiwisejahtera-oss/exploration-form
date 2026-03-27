@@ -524,10 +524,8 @@
         if (!el) return;
         el.value = prefix + String(numVal + idx + 1).padStart(padLen, '0');
         el.dataset.auto = 'true';
-          el.dataset.auto = 'true';
       });
       highlightDuplicates();
-    }
     }
 
     function clearAutoAfter(rowNum, triggerField) {
