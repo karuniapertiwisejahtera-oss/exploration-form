@@ -522,11 +522,12 @@
       SID_ORDER.slice(triggerIdx + 1).forEach((name, idx) => {
         const el = document.querySelector(`[name="${name}_${rowNum}"]`);
         if (!el) return;
-        if (el.value === '' || el.dataset.auto === 'true') {
-          el.value = prefix + String(numVal + idx + 1).padStart(padLen, '0');
+        el.value = prefix + String(numVal + idx + 1).padStart(padLen, '0');
+        el.dataset.auto = 'true';
           el.dataset.auto = 'true';
-        }
       });
+      highlightDuplicates();
+    }
     }
 
     function clearAutoAfter(rowNum, triggerField) {
@@ -608,7 +609,8 @@
 
         // Auto-fill Sample_ID berikutnya
         el.addEventListener('input', () => {
-          if (el.dataset.auto === 'true') el.dataset.auto = 'false';
+          el.dataset.auto = 'false';
+          if (el.value.trim()) autoFillSampleIDs(n, field);
           highlightDuplicates();
         });
 
