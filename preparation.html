@@ -512,6 +512,34 @@
       });
     }
 
+    // ===== AUTO-FILL QAQC SAMPLE_ID =====
+    // Hanya aktif jika Jenis = DS atau BS
+    function autoFillQAQC(rowNum) {
+      const jenisEl = document.querySelector('[name="jenis_' + rowNum + '"]');
+      const jenis = jenisEl ? jenisEl.value.trim().toUpperCase() : '';
+      if (jenis !== 'DS' && jenis !== 'BS') return;
+      const sidEl = document.querySelector('[name="sample_id_' + rowNum + '"]');
+      if (!sidEl || !sidEl.value.trim()) return;
+      const qaqcEl = document.querySelector('[name="qaqc_sid_' + rowNum + '"]');
+      if (!qaqcEl || qaqcEl.value.trim()) return;
+      const base = sidEl.value.trim().toUpperCase();
+      const match = base.match(/^([A-Z]+)(\d+)$/);
+      if (!match) return;
+      const prefix = match[1], padLen = match[2].length;
+      const used = new Set();
+      for (let i = 1; i <= rowCount; i++) {
+        ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'].forEach(function(f) {
+          const el = document.querySelector('[name="' + f + '_' + i + '"]');
+          if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
+        });
+      }
+      let next = parseInt(match[2]) + 1;
+      while (used.has(prefix + String(next).padStart(padLen, '0'))) next++;
+      qaqcEl.value = prefix + String(next).padStart(padLen, '0');
+      qaqcEl.dataset.auto = 'true';
+      highlightDuplicates();
+    }
+
     function attachRowListeners(n) {
       const fcEl = document.getElementById('from_cum_' + n);
       if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
@@ -519,6 +547,12 @@
       if (grainEl) grainEl.addEventListener('change', recalcSamplingNo);
       const snEl = document.querySelector(`[name="samp_no_${n}"]`);
       if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
+
+      // Auto-fill QAQC saat Jenis berubah ke DS/BS atau Sample_ID diisi
+      const jenisEl_r = document.querySelector('[name="jenis_' + n + '"]');
+      if (jenisEl_r) jenisEl_r.addEventListener('change', function() { autoFillQAQC(n); });
+      const sidEl_r = document.querySelector('[name="sample_id_' + n + '"]');
+      if (sidEl_r) sidEl_r.addEventListener('change', function() { autoFillQAQC(n); highlightDuplicates(); });
       SID_ORDER.forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (!el) return;
