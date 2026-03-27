@@ -284,6 +284,8 @@
 
   <div class="action-bar">
     <button class="btn btn-add"    onclick="addRow()">+ Baris</button>
+    <button class="btn" style="background:#e91e8c;color:white;" onclick="addQAQCRow('DS')">+ DS</button>
+    <button class="btn" style="background:#9c27b0;color:white;" onclick="addQAQCRow('BS')">+ BS</button>
     <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
     <button class="btn btn-clear"  onclick="clearData()">✕ Clear</button>
     <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
@@ -376,6 +378,22 @@
 
     function updateTotalSample() {
       document.getElementById('h-total-sample').value = rowCount;
+    }
+
+    // ===== TAMBAH BARIS QAQC (interval blank) =====
+    function addQAQCRow(jenis) {
+      let qNum = 0;
+      for (let i = 1; i <= rowCount; i++) {
+        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
+        if (snEl && /^Q\d+$/i.test(snEl.value.trim())) {
+          const n = parseInt(snEl.value.trim().slice(1));
+          if (n > qNum) qNum = n;
+        }
+      }
+      qNum++;
+      addRow({ samp_no: 'Q' + qNum, jenis: jenis });
+      updateFracLock();
+      showToast('Baris QAQC ' + jenis + ' ditambahkan');
     }
 
     // Kunci/buka fraksi berdasarkan Samp_No
