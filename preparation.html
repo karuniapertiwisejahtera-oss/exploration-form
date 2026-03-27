@@ -291,10 +291,16 @@
     <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
   </div>
 
-  <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Google API removed - offline mode -->
+
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      alert('JS Error: ' + msg + '\nLine: ' + line + '\n' + (err ? err.stack : ''));
+      return false;
+    };
+  </script>
   <script>
     let rowCount = 0;
     let mergeSourceRow = null; // nomor baris yang menekan tombol Gabung
