@@ -707,7 +707,7 @@
       if (sum3 === 0) return; // belum ada data
 
       // Jika sum < 500 → ×250, selain itu → ×500
-      const mult = sum3 < 500 ? 250 : 500;
+      const mult = sum3 >= 1000 ? 1000 : (sum3 >= 500 ? 500 : 250);
 
       // Hitung Rec untuk +10, +2-10, +0.6-2, +0.3-0.6 (bukan -0.3)
       const tots = {
