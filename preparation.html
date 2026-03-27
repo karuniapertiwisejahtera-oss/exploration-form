@@ -396,6 +396,7 @@
 
     // ===== TAMBAH BARIS QAQC (interval blank) =====
     function addQAQCRow(jenis) {
+      // Hitung nomor Q berikutnya
       let qNum = 0;
       for (let i = 1; i <= rowCount; i++) {
         const snEl = document.querySelector('[name="samp_no_' + i + '"]');
@@ -405,10 +406,38 @@
         }
       }
       qNum++;
-      addRow({ samp_no: 'Q' + qNum, jenis: jenis });
+
+      // Cari Sample_ID terakhir yang terisi untuk auto-fill Original Sample_ID
+      let lastSID = '';
+      const allSIDFields = ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'];
+      for (let i = 1; i <= rowCount; i++) {
+        allSIDFields.forEach(function(f) {
+          const el = document.querySelector('[name="' + f + '_' + i + '"]');
+          if (el && el.value.trim()) lastSID = el.value.trim().toUpperCase();
+        });
+      }
+      // Hitung nomor berikutnya dari lastSID
+      let nextSID = '';
+      if (lastSID) {
+        const m = lastSID.match(/^([A-Z]+)(\d+)$/);
+        if (m) {
+          const used = new Set();
+          for (let i = 1; i <= rowCount; i++) {
+            allSIDFields.forEach(function(f) {
+              const el = document.querySelector('[name="' + f + '_' + i + '"]');
+              if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
+            });
+          }
+          let next = parseInt(m[2]) + 1;
+          while (used.has(m[1] + String(next).padStart(m[2].length, '0'))) next++;
+          nextSID = m[1] + String(next).padStart(m[2].length, '0');
+        }
+      }
+
+      addRow({ samp_no: 'Q' + qNum, jenis: jenis, sample_id: nextSID });
       const qTr = document.getElementById('prep-row-' + rowCount);
       if (qTr) qTr.classList.add('row-qaqc');
-      // Auto-copy qaqc_sid ke sample_id saat diisi
+      // Auto-copy qaqc_sid ke sample_id saat diisi (jika sample_id belum terisi manual)
       const newRow = rowCount;
       const qaqcEl_q = document.querySelector('[name="qaqc_sid_' + newRow + '"]');
       const sidEl_q  = document.querySelector('[name="sample_id_' + newRow + '"]');
@@ -423,6 +452,7 @@
         qaqcEl_q.addEventListener('change', syncQAQC);
       }
       updateFracLock();
+      highlightDuplicates();
       showToast('Baris QAQC ' + jenis + ' ditambahkan');
     }
 
