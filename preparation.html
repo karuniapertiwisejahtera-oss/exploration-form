@@ -1214,30 +1214,9 @@
       return [...dupes];
     }
 
-    // ===== SHEET ID TUJUAN PREPARATION =====
-    const PREP_FOLDER_ID = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
-    const PREP_SHEET_TAB = 'Sheet1';
-
-    // Konversi generateExportCSV ke array of arrays untuk Sheets API
-    function generateExportRows() {
-      const csv = generateExportCSV();
-      return csv.split('\r\n').map(line => {
-        // Parse CSV line dengan benar (handle quoted fields)
-        const result = [];
-        let cur = '', inQ = false;
-        for (let i = 0; i < line.length; i++) {
-          const c = line[i];
-          if (c === '"') {
-            if (inQ && line[i+1] === '"') { cur += '"'; i++; }
-            else inQ = !inQ;
-          } else if (c === ',' && !inQ) {
-            result.push(cur); cur = '';
-          } else cur += c;
-        }
-        result.push(cur);
-        return result;
-      });
-    }
+    // ===== GAS WEB APP URL =====
+    // Ganti dengan URL dari Deploy Google Apps Script Anda
+    const GAS_URL = 'PASTE_YOUR_GAS_WEB_APP_URL_HERE';
 
     async function submitData() {
       const dupes = checkDuplicateSampleIDs();
@@ -1255,11 +1234,23 @@
       const safeName = holeId.replace(/\s+/g, '_');
       const fileName = 'Prep_' + safeName + '.csv';
 
-      showToast('Mengupload CSV...');
+      if (!GAS_URL || GAS_URL.includes('PASTE_YOUR')) {
+        showToast('GAS_URL belum diisi di kode!', 'error'); return;
+      }
 
-      const fileId = await uploadFileToFolder(fileName, csv, 'text/csv', PREP_FOLDER_ID);
-      if (fileId) showToast('✓ ' + fileName + ' berhasil diupload ke Google Drive!');
-      else showToast('Upload gagal', 'error');
+      showToast('Mengupload CSV...');
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ fileName, csvData: csv })
+        });
+        const json = await res.json();
+        if (json.ok) showToast('✓ ' + fileName + ' berhasil diupload ke Google Drive!');
+        else showToast('Upload gagal: ' + json.msg, 'error');
+      } catch(err) {
+        showToast('Error: ' + err.message, 'error');
+      }
     }
 
     // ===== EXPORT LAB CSV =====
