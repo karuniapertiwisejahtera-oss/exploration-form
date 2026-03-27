@@ -1214,62 +1214,31 @@
       return [...dupes];
     }
 
-    // ===== GAS WEB APP URL =====
-    // Ganti dengan URL dari Deploy Google Apps Script Anda
-    const GAS_URL = 'PASTE_YOUR_GAS_WEB_APP_URL_HERE';
+    // ===== DOWNLOAD CSV HELPER =====
+    function downloadCSV(fileName, csv) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = fileName; a.click();
+      URL.revokeObjectURL(url);
+    }
 
-    async function submitData() {
+    function submitData() {
       const dupes = checkDuplicateSampleIDs();
       if (dupes.length > 0) {
         const list = dupes.join(', ');
-        if (!confirm(`⚠️ Sample_ID duplikat ditemukan:\n${list}\n\nLanjutkan submit?`)) return;
+        if (!confirm(`\u26a0\ufe0f Sample_ID duplikat ditemukan:\n\\n\nLanjutkan submit?`)) return;
       }
-      if (!confirm('Submit? Data akan diupload sebagai CSV ke Google Drive.')) return;
       saveData();
 
       const csv = generateExportCSV();
       if (!csv || csv.split('\r\n').length < 2) { showToast('Tidak ada data untuk disubmit', 'error'); return; }
 
       const holeId   = (document.getElementById('h-holeid').value || 'unknown').toUpperCase();
-      const safeName = holeId.replace(/\s+/g, '_');
-      const fileName = 'Prep_' + safeName + '.csv';
+      const fileName = 'Prep_' + holeId.replace(/\s+/g, '_') + '.csv';
 
-      if (!GAS_URL || GAS_URL.includes('PASTE_YOUR')) {
-        showToast('GAS_URL belum diisi di kode!', 'error'); return;
-      }
-
-      showToast('Mengupload CSV...');
-      try {
-        const res = await fetch(GAS_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ fileName, csvData: csv })
-        });
-        const json = await res.json();
-        if (json.ok) showToast('✓ ' + fileName + ' berhasil diupload ke Google Drive!');
-        else showToast('Upload gagal: ' + json.msg, 'error');
-      } catch(err) {
-        showToast('Error: ' + err.message, 'error');
-      }
-    }
-
-    // ===== EXPORT LAB CSV =====
-    async function exportData() {
-      if (!confirm('Export data ke format Lab CSV dan upload ke Google Drive?')) return;
-      const holeId = document.getElementById('h-holeid').value || 'unknown';
-      const filename = `Export_${holeId.replace(/\s+/g,'_')}.csv`;
-      const FOLDER = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
-      const csv = generateExportCSV();
-      // Download lokal juga
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-      // Upload ke Drive
-      const fileId = await uploadFileToFolder(filename, csv, 'text/csv', FOLDER);
-      if (fileId) showToast('✓ Export berhasil diupload!');
-      else showToast('✓ Export didownload (upload gagal)');
+      downloadCSV(fileName, csv);
+      showToast('✓ ' + fileName + ' berhasil didownload!');
     }
 
     // ===== RESTORE MERGE VISIBILITY SETELAH LOAD =====
