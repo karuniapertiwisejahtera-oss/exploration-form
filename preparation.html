@@ -1676,6 +1676,8 @@
           restoreMergeVisibility();
           recalcSamplingNo();
           highlightDuplicates();
+          restoreQAQCClass();
+          updateFracLock();
         }
       } else if (mode === 'continue') {
         const saved = DB.getAll('preparation');
@@ -1686,9 +1688,12 @@
             if (el && last[k] !== undefined) el.value = last[k];
           });
           restoreRows(last);
+          window._editRecordId = last.id; // update record yang sama saat Save
           restoreMergeVisibility();
           recalcSamplingNo();
           highlightDuplicates();
+          restoreQAQCClass();
+          updateFracLock();
         }
       } else { addRow(); }
       sessionStorage.removeItem('form_mode');
