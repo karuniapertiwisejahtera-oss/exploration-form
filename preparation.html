@@ -811,9 +811,9 @@
         if (el) el.addEventListener('input', () => { el.dataset.autoRec = 'false'; });
       });
       // Listener dry_wt dan core_wt untuk cek selisih >20%
-      ['dry_wt','core_wt'].forEach(field => {
-        const el = document.querySelector([name="${field}_${n}"]);
-        if (el) el.addEventListener('change', () => checkDryWtAlert(n));
+      ['dry_wt','core_wt'].forEach(function(field) {
+        const el = document.querySelector('[name="' + field + '_' + n + '"]');
+        if (el) el.addEventListener('change', function() { checkDryWtAlert(n); });
       });
     }
 
