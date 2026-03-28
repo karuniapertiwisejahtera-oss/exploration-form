@@ -801,6 +801,10 @@
       if (totalDryWt > 0 && totalWet > totalDryWt) {
         showToast('⚠️ Jumlah Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
       }
+      // Cek 3: Selisih Wet Total vs Dry Wt > 500
+      if (totalDryWt > 0 && totalWet > 0 && Math.abs(totalWet - totalDryWt) > 500) {
+        showToast('⚠️ Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
+      }
     }
 
     function attachTotListeners(n) {
