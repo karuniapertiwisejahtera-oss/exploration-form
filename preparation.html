@@ -1364,6 +1364,17 @@
         // Iterasi setiap sub-baris dalam grup
         let firstSubRow = true;
         let clyWritten = false;
+        // Hitung totalWet dan dryWt grup untuk Dev_Sieve dan H2O
+        let grpTotalWet = 0;
+        rowNums.forEach(function(n) {
+          ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(function(f) {
+            const v = parseFloat(get(f, n)) || 0; grpTotalWet += v;
+          });
+        });
+        const grpDryWt = parseFloat(get('dry_wt', firstRow)) || 0;
+        const grpDryWtKg = grpDryWt > 0 ? parseFloat((grpDryWt / 1000).toFixed(6)) : '';
+        const grpDevSieve = (grpTotalWet > 0 && grpDryWt > 0) ? parseFloat((grpTotalWet - grpDryWt).toFixed(4)) : '';
+        const grpH2O = (coreWt && grpDryWt > 0) ? parseFloat(((parseFloat(coreWt)*1000 - grpDryWt) / (parseFloat(coreWt)*1000) * 100).toFixed(4)) : '';
         rowNums.forEach(subRow => {
           const subSampleId  = get('sample_id', subRow);
           const subSidToLab  = subSampleId;
@@ -1403,12 +1414,12 @@
             }
             const totNum = parseFloat(totVal) || 0;
             const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
-            const dryWt = get('dry_wt', subRow);
+            const dryWtVal = isFirstRecord ? grpDryWtKg : '';
             const row = [
               ...fixedAll.map(v => q(v)),
               q(frac.label), q(sidVal), q(washVal),
-              q(dryWt), q(sidToLabRow), q(''),
-              q(''), q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), q('')
+              q(dryWtVal), q(sidToLabRow), q(''),
+              isFirstRecord ? q(grpDevSieve) : q(''), isFirstRecord ? q(grpH2O) : q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), q('')
             ];
             rows.push(row.join(','));
             firstFrac = false;
