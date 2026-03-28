@@ -238,6 +238,7 @@
               <th class="c-std" rowspan="3" style="min-width:38px;width:38px;">Gabung</th>
               <th class="c-std" rowspan="3" style="min-width:28px;width:28px;"></th>
               <th class="c-std" rowspan="3">Samp No.</th>
+              <th class="c-std" rowspan="3" style="min-width:55px;width:55px;">Dry Wt</th>
               <th class="c-send" rowspan="3">Send Cum</th>
               <th class="c-sid" rowspan="3">Original Sample_ID</th>
               <th class="g10" colspan="3">+10 mm</th>
@@ -364,6 +365,7 @@
         <td><button class="btn-merge" onclick="startMerge(${n}, this)" title="Pilih baris untuk digabung">🔗</button></td>
         <td><button class="btn-del-row" onclick="deleteRow(${n})" title="Hapus baris" style="background:#ef5350;color:white;border:none;border-radius:4px;padding:2px 5px;font-size:10px;cursor:pointer;">✕</button></td>
         <td>${txt('samp_no', v.samp_no)}</td>
+        <td>${num('dry_wt', v.dry_wt)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
         <td>${txt('sample_id', v.sample_id)}</td>
         <td class="g10 g-start frac-cell">${num('a10_tot', v.a10_tot)}</td>
@@ -1353,10 +1355,11 @@
             }
             const totNum = parseFloat(totVal) || 0;
             const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
+            const dryWt = get('dry_wt', subRow);
             const row = [
               ...fixedAll.map(v => q(v)),
               q(frac.label), q(sidVal), q(washVal),
-              q(''), q(sidToLabRow), q(''),
+              q(dryWt), q(sidToLabRow), q(''),
               q(''), q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), q('')
             ];
             rows.push(row.join(','));
@@ -1536,7 +1539,8 @@
             to_cum:      rec['to_cum_'+i],
             samp_no:     rec['samp_no_'+i],
             send_cum:    rec['send_cum_'+i],
-            sample_id:   rec['sample_id_'+i],
+            samp_no:     rec['samp_no_'+i],
+            dry_wt:      rec['dry_wt_'+i],
             a10_tot:     rec['a10_tot_'+i],
             a10_rec:     rec['a10_rec_'+i],
             a10_sid:     rec['a10_sid_'+i],
