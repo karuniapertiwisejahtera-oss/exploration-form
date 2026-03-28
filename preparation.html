@@ -1273,7 +1273,7 @@
 
         // Core_Weight = Core_Wt baris pertama (bukan sum)
         // Core_Weight = jumlah Core_Wt semua baris dalam grup
-        let coreWtSum = 0; rowNums.forEach(n => { const v = parseFloat(get('core_wt', n)); if (v > 0) coreWtSum += v; }); const coreWt = coreWtSum > 0 ? parseFloat(coreWtSum.toFixed(4)) : '';
+        let coreWtSum = 0; rowNums.forEach(n => { const v = parseFloat(get('core_wt', n)); if (v > 0) coreWtSum += v; }); const coreWt = coreWtSum > 0 ? parseFloat((coreWtSum / 1000).toFixed(6)) : '';
         // Sampling_Insitu_Weight = Core_Weight / Recovery_Sampling
         const insitu = (coreWt && recAvg && recAvg > 0)
           ? parseFloat((coreWt / recAvg).toFixed(4)) : '';
@@ -1297,6 +1297,7 @@
 
         // Iterasi setiap sub-baris dalam grup
         let firstSubRow = true;
+        let clyWritten = false;
         rowNums.forEach(subRow => {
           const subSampleId  = get('sample_id', subRow);
           const subSidToLab  = subSampleId;
@@ -1347,7 +1348,7 @@
           });
 
           // CLY atau Q-row tanpa fraksi: tulis 1 baris blank
-          if (firstFrac && (subAllCLY || subIsQRow)) {
+          if (firstFrac && ((subAllCLY && !clyWritten) || subIsQRow)) {
             rowCounter++;
             const idCol2 = holeId ? holeId + rowCounter : String(rowCounter);
             const row = [
@@ -1362,6 +1363,7 @@
               q(''), q(''), firstSubRow ? q(subRemarks) : q(''), q('')
             ];
             rows.push(row.join(','));
+            if (subAllCLY) clyWritten = true;
           }
           firstSubRow = false;
         });
