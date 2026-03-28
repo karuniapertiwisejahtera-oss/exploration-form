@@ -1380,7 +1380,7 @@
         const grainTotals = {};
         rowNums.forEach(function(n) {
           const g = get('grain', n).toUpperCase();
-          const r = parseFloat(get('rec', n)) || 0;
+          const r = parseFloat(get('len', n)) || 0;
           if (g) grainTotals[g] = (grainTotals[g] || 0) + r;
         });
         let dominantGrain = '', maxRec = 0;
