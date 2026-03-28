@@ -780,19 +780,26 @@
         const t = document.getElementById('prep-row-' + i);
         if (t && (t.dataset.mergeGroup || ('_single_' + i)) === mg) groupRows.push(i);
       }
-      let totalCoreWt = 0, totalDryWt = 0;
-      groupRows.forEach(i => {
+      let totalCoreWt = 0, totalDryWt = 0, totalWet = 0;
+      const FRAC_TOTS = ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'];
+      groupRows.forEach(function(i) {
         const cEl = document.querySelector('[name="core_wt_' + i + '"]');
         const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
         if (cEl && cEl.value) totalCoreWt += parseFloat(cEl.value) || 0;
         if (dEl && dEl.value) totalDryWt  += parseFloat(dEl.value) || 0;
+        FRAC_TOTS.forEach(function(f) {
+          const fEl = document.querySelector('[name="' + f + '_' + i + '"]');
+          if (fEl && fEl.value) totalWet += parseFloat(fEl.value) || 0;
+        });
       });
+      // Cek 1: selisih Core Wt vs Dry Wt >20%
       if (totalCoreWt > 0 && totalDryWt > 0) {
-        const selisih = Math.abs(totalCoreWt - totalDryWt);
-        const pct = selisih / totalCoreWt * 100;
-        if (pct > 20) {
-          showToast('⚠️ Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
-        }
+        const pct = Math.abs(totalCoreWt - totalDryWt) / totalCoreWt * 100;
+        if (pct > 20) showToast('⚠️ Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
+      }
+      // Cek 2: Wet Total semua fraksi > Dry Wt
+      if (totalDryWt > 0 && totalWet > totalDryWt) {
+        showToast('⚠️ Jumlah Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
       }
     }
 
@@ -814,6 +821,11 @@
       ['dry_wt','core_wt'].forEach(function(field) {
         const el = document.querySelector('[name="' + field + '_' + n + '"]');
         if (el) el.addEventListener('change', function() { checkDryWtAlert(n); });
+      });
+      // Listener fraksi Total untuk cek Wet Total vs Dry Wt
+      ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(function(field) {
+        const el2 = document.querySelector('[name="' + field + '_' + n + '"]');
+        if (el2) el2.addEventListener('change', function() { checkDryWtAlert(n); });
       });
     }
 
