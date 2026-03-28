@@ -1325,9 +1325,6 @@
             sidToLabRow = qaqcSidLab; // semua baris DS/BS pakai QAQC
           } else if (firstFrac) {
             sidToLabRow = sidToLab;
-          } else if (frac.label === '+0.3') {
-            const p03Jenis = jenisUpper === '+0.3';
-            sidToLabRow = p03Jenis ? qaqcSidLab : (sidVal ? 'GS' + sidVal.slice(2) : '');
           }
 
           // DS/BS: kosongkan Washing_weight dan Berat_Kering juga
