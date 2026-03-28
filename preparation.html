@@ -396,6 +396,34 @@
       document.getElementById('h-total-sample').value = rowCount;
     }
 
+    // ===== HAPUS BARIS =====
+    function deleteRow(rowNum) {
+      if (rowCount <= 1) { showToast('Minimal 1 baris harus ada', 'error'); return; }
+      const tr = document.getElementById('prep-row-' + rowNum);
+      if (!tr) return;
+      if (tr.dataset.mergeGroup) {
+        const mg = tr.dataset.mergeGroup;
+        // Lepas dari grup tanpa confirm
+        document.querySelectorAll('tr[data-merge-group="' + mg + '"]').forEach(function(r) {
+          r.classList.remove('row-merged', 'row-merged-last');
+          delete r.dataset.mergeGroup;
+          const n = r.dataset.row;
+          const fcEl = document.getElementById('from_cum_' + n);
+          const tcEl = document.getElementById('to_cum_' + n);
+          if (fcEl) { fcEl.value = ''; fcEl.closest('td').style.visibility = 'visible'; }
+          if (tcEl) { tcEl.value = ''; tcEl.closest('td').style.visibility = 'visible'; }
+          const btnEl = r.querySelector('.btn-merge');
+          if (btnEl) { btnEl.textContent = '🔗'; btnEl.style.visibility = 'visible'; btnEl.onclick = function() { startMerge(parseInt(n), btnEl); }; }
+        });
+      }
+      tr.remove();
+      recalcSamplingNo();
+      updateFracLock();
+      highlightDuplicates();
+      updateTotalSample();
+      showToast('Baris dihapus');
+    }
+
     // ===== TAMBAH BARIS QAQC (interval blank) =====
     function addQAQCRow(jenis) {
       // Hitung nomor Q berikutnya
