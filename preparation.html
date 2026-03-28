@@ -13,23 +13,23 @@
     }
     .prep-table {
       border-collapse: separate; border-spacing: 0;
-      font-size: 11px; white-space: nowrap;
+      font-size: 14px; white-space: nowrap;
     }
     .prep-table th, .prep-table td {
       border-right: 1px solid #bbb; border-bottom: 1px solid #bbb;
       padding: 4px 5px; text-align: center; vertical-align: middle;
     }
     .prep-table thead th {
-      background: #c5d8f7; font-weight: 700; font-size: 10px;
+      background: #c5d8f7; font-weight: 700; font-size: 13px;
       line-height: 1.2; position: sticky; z-index: 3;
-      padding: 2px 4px; height: 22px; max-height: 22px;
+      padding: 2px 4px; height: 30px; max-height: 30px;
       overflow: hidden;
     }
     /* Paksa semua baris header sama tinggi, tidak ada gap */
-    .prep-table thead tr { height: 22px; }
+    .prep-table thead tr { height: 30px; }
     .prep-table thead tr:nth-child(1) th { top: 0; border-top: 1px solid #bbb; }
-    .prep-table thead tr:nth-child(2) th { top: 22px; }
-    .prep-table thead tr:nth-child(3) th { top: 44px; }
+    .prep-table thead tr:nth-child(2) th { top: 30px; }
+    .prep-table thead tr:nth-child(3) th { top: 60px; }
     .prep-table thead th.g10  { background: #b3e5fc; color: #01579b; }
     .prep-table thead th.g2   { background: #c8e6c9; color: #1b5e20; }
     .prep-table thead th.g06  { background: #fff9c4; color: #f57f17; }
@@ -72,29 +72,29 @@
       position: sticky; background: #e8f4fd; z-index: 2;
     }
     .prep-table thead th.col-freeze { background: #b8d4f0; z-index: 5; }
-    .prep-table .cf1 { left: 0;     min-width: 52px; width: 52px; }
-    .prep-table .cf2 { left: 53px;  min-width: 52px; width: 52px; }
-    .prep-table .cf3 { left: 106px; min-width: 54px; width: 54px; }
-    .prep-table .cf4 { left: 161px; min-width: 60px; width: 60px; border-left: 2px solid #888 !important; }
-    .prep-table .cf5 { left: 222px; min-width: 60px; width: 60px; border-right: 2px solid #888 !important; }
+    .prep-table .cf1 { left: 0;     min-width: 70px; width:70px; }
+    .prep-table .cf2 { left: 71px;  min-width: 70px; width:70px; }
+    .prep-table .cf3 { left: 142px; min-width: 72px; width:72px; }
+    .prep-table .cf4 { left: 215px; min-width: 110px; width:110px; border-left: 2px solid #888 !important; }
+    .prep-table .cf5 { left: 296px; min-width: 110px; width:110px; border-right: 2px solid #888 !important; }
 
     /* Kolom non-freeze */
-    .prep-table th.c-std  { min-width: 44px;  width: 44px; }
-    .prep-table th.c-wide { min-width: 88px;  width: 88px; } /* colspan=2: 44+44 */
-    .prep-table th.c-sid  { min-width: 80px;  width: 80px; }
-    .prep-table th.c-rem  { min-width: 140px; width: 140px; }
-    .prep-table th.c-cum  { min-width: 55px;  width: 55px; background: #fff3e0; }
-    .prep-table th.c-send { min-width: 55px;  width: 55px; background: #e8f5e9; }
+    .prep-table th.c-std  { min-width: 60px; width:60px; }
+    .prep-table th.c-wide { min-width: 120px; width:120px; } /* colspan=2: 44+44 */
+    .prep-table th.c-sid  { min-width: 110px; width:110px; }
+    .prep-table th.c-rem  { min-width: 180px; width:180px; }
+    .prep-table th.c-cum  { min-width: 75px; width:75px; background: #fff3e0; }
+    .prep-table th.c-send { min-width: 75px; width:75px; background: #e8f5e9; }
     /* Lebar data cell ikut header */
     .prep-table td { min-width: 44px; }
 
     /* Sticky top offset sesuai height 22px per row */
-    .prep-table thead tr:nth-child(2) th { top: 22px; }
-    .prep-table thead tr:nth-child(3) th { top: 44px; }
+    .prep-table thead tr:nth-child(2) th { top: 30px; }
+    .prep-table thead tr:nth-child(3) th { top: 60px; }
 
     /* Input dalam tabel */
     .prep-table td input, .prep-table td select {
-      width: 100%; border: none; outline: none; font-size: 11px;
+      width: 100%; border: none; outline: none; font-size: 14px;
       text-align: center; padding: 1px 2px; background: transparent;
       box-sizing: border-box; min-width: 0; text-transform: uppercase;
     }
@@ -129,7 +129,7 @@
     /* Tombol gabung */
     .btn-merge {
       background: #ff9800; color: white; border: none;
-      border-radius: 4px; padding: 2px 5px; font-size: 10px;
+      border-radius: 4px; padding: 2px 5px; font-size: 13px;
       cursor: pointer; white-space: nowrap;
     }
     .btn-merge.active { background: #e65100; }
@@ -150,17 +150,17 @@
     .merge-banner.show { display: flex; }
     .merge-banner button {
       background: white; color: #e65100; border: none;
-      border-radius: 6px; padding: 4px 10px; font-size: 11px;
+      border-radius: 6px; padding: 4px 10px; font-size: 14px;
       font-weight: 700; cursor: pointer; margin-left: auto;
     }
 
     /* Info grid */
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; margin-bottom: 10px; }
-    .info-row { display: flex; align-items: center; gap: 4px; font-size: 11px; }
-    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 10px; }
+    .info-row { display: flex; align-items: center; gap: 4px; font-size: 14px; }
+    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 13px; }
     .info-row input {
       flex: 1; border: none; border-bottom: 1px solid #999; outline: none;
-      font-size: 10px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
+      font-size: 13px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
       text-transform: uppercase;
     }
 
@@ -174,7 +174,7 @@
       background: #1a6b4a; color: white; padding: 7px 14px; border-radius: 8px;
       font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
     }
-    #csv-filename { font-size: 11px; color: #555; flex: 1; }
+    #csv-filename { font-size: 14px; color: #555; flex: 1; }
     #csv-input { display: none; }
     .btn-add-row {
       margin-top: 8px; width: 100%; background: #4db6ac; color: white;
@@ -235,10 +235,10 @@
               <th class="c-std" rowspan="3">Core Wt</th>
               <th class="c-cum" rowspan="3">From Cum</th>
               <th class="c-cum" rowspan="3">To Cum</th>
-              <th class="c-std" rowspan="3" style="min-width:38px;width:38px;">Gabung</th>
+              <th class="c-std" rowspan="3" style="min-width:52px; width:52px;">Gabung</th>
               <th class="c-std" rowspan="3" style="min-width:28px;width:28px;"></th>
               <th class="c-std" rowspan="3">Samp No.</th>
-              <th class="c-std" rowspan="3" style="min-width:55px;width:55px;">Dry Wt</th>
+              <th class="c-std" rowspan="3" style="min-width:75px; width:75px;">Dry Wt</th>
               <th class="c-send" rowspan="3">Send Cum</th>
               <th class="c-sid" rowspan="3">Original Sample_ID</th>
               <th class="g10" colspan="3">+10 mm</th>
@@ -247,7 +247,7 @@
               <th class="gm06 g-start" colspan="3">+0.3-0.6 mm</th>
               <th class="gp03 g-start" colspan="3">-0.3 mm</th>
               <th class="gqaqc g-start" colspan="2">Sample QAQC</th>
-              <th class="c-std col-jenis" rowspan="3" style="min-width:55px;width:55px;">Jenis</th>
+              <th class="c-std col-jenis" rowspan="3" style="min-width:75px; width:75px;">Jenis</th>
               <th class="c-rem" rowspan="3">Remarks</th>
             </tr>
             <!-- ROW 2: Wet (Kg) -->
@@ -334,7 +334,7 @@
       // Grain size dropdown
       const grainOpts = ['','GVL','CS','FS','CLY'];
       const grainVal = (val) => (val || '').toString().trim().toUpperCase();
-      const grainSel = (val) => `<select id="grain_${n}" name="grain_${n}" class="auto" style="color:#1a6b4a;font-weight:700;background:transparent;border:none;outline:none;width:100%;font-size:11px;text-align:center;">
+      const grainSel = (val) => `<select id="grain_${n}" name="grain_${n}" class="auto" style="color:#1a6b4a;font-weight:700;background:transparent;border:none;outline:none;width:100%;font-size:14px;text-align:center;">
         ${grainOpts.map(o => `<option value="${o}"${o===grainVal(val)?'selected':''}>${o}</option>`).join('')}
       </select>`;
       const num = (id, val) =>
@@ -347,7 +347,7 @@
       // Jenis dropdown
       const jenisOpts = ['','+0.3','DS','BS'];
       const jenisVal = (val) => (val || '').toString().trim().toUpperCase();
-      const jenisSel = (val) => `<select name="jenis_${n}" style="background:transparent;border:none;outline:none;width:100%;font-size:11px;text-align:center;">
+      const jenisSel = (val) => `<select name="jenis_${n}" style="background:transparent;border:none;outline:none;width:100%;font-size:14px;text-align:center;">
         ${jenisOpts.map(o => `<option value="${o}"${o===jenisVal(val)?'selected':''}>${o}</option>`).join('')}
       </select>`;
       if (v.merge_group) tr.classList.add('row-merged');
@@ -1093,7 +1093,7 @@
       const banner = document.getElementById('merge-banner');
       const applyBtn = document.createElement('button');
       applyBtn.textContent = '✓ Terapkan';
-      applyBtn.style.cssText = 'background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;';
+      applyBtn.style.cssText = 'background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;';
       applyBtn.onclick = applyMerge;
       banner.insertBefore(applyBtn, banner.querySelector('button'));
 
