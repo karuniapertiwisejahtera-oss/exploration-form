@@ -13,23 +13,23 @@
     }
     .prep-table {
       border-collapse: separate; border-spacing: 0;
-      font-size: 14px; white-space: nowrap;
+      font-size: 18px; white-space: nowrap;
     }
     .prep-table th, .prep-table td {
       border-right: 1px solid #bbb; border-bottom: 1px solid #bbb;
       padding: 4px 5px; text-align: center; vertical-align: middle;
     }
     .prep-table thead th {
-      background: #c5d8f7; font-weight: 700; font-size: 13px;
+      background: #c5d8f7; font-weight: 700; font-size: 16px;
       line-height: 1.2; position: sticky; z-index: 3;
-      padding: 2px 4px; height: 30px; max-height: 30px;
+      padding: 2px 4px; height: 38px; max-height: 38px;
       overflow: hidden;
     }
     /* Paksa semua baris header sama tinggi, tidak ada gap */
-    .prep-table thead tr { height: 30px; }
+    .prep-table thead tr { height: 38px; }
     .prep-table thead tr:nth-child(1) th { top: 0; border-top: 1px solid #bbb; }
-    .prep-table thead tr:nth-child(2) th { top: 30px; }
-    .prep-table thead tr:nth-child(3) th { top: 60px; }
+    .prep-table thead tr:nth-child(2) th { top: 38px; }
+    .prep-table thead tr:nth-child(3) th { top: 76px; }
     .prep-table thead th.g10  { background: #b3e5fc; color: #01579b; }
     .prep-table thead th.g2   { background: #c8e6c9; color: #1b5e20; }
     .prep-table thead th.g06  { background: #fff9c4; color: #f57f17; }
@@ -72,29 +72,29 @@
       position: sticky; background: #e8f4fd; z-index: 2;
     }
     .prep-table thead th.col-freeze { background: #b8d4f0; z-index: 5; }
-    .prep-table .cf1 { left: 0;     min-width: 70px; width:70px; }
-    .prep-table .cf2 { left: 71px;  min-width: 70px; width:70px; }
-    .prep-table .cf3 { left: 142px; min-width: 72px; width:72px; }
-    .prep-table .cf4 { left: 215px; min-width: 110px; width:110px; border-left: 2px solid #888 !important; }
-    .prep-table .cf5 { left: 296px; min-width: 110px; width:110px; border-right: 2px solid #888 !important; }
+    .prep-table .cf1 { left: 0;     min-width:90px; width:90px; }
+    .prep-table .cf2 { left: 91px;  min-width:90px; width:90px; }
+    .prep-table .cf3 { left: 183px; min-width:92px; width:92px; }
+    .prep-table .cf4 { left: 277px; min-width:140px; width:140px; border-left: 2px solid #888 !important; }
+    .prep-table .cf5 { left: 379px; min-width:140px; width:140px; border-right: 2px solid #888 !important; }
 
     /* Kolom non-freeze */
-    .prep-table th.c-std  { min-width: 60px; width:60px; }
-    .prep-table th.c-wide { min-width: 120px; width:120px; } /* colspan=2: 44+44 */
-    .prep-table th.c-sid  { min-width: 110px; width:110px; }
-    .prep-table th.c-rem  { min-width: 180px; width:180px; }
-    .prep-table th.c-cum  { min-width: 75px; width:75px; background: #fff3e0; }
-    .prep-table th.c-send { min-width: 75px; width:75px; background: #e8f5e9; }
+    .prep-table th.c-std  { min-width:75px; width:75px; }
+    .prep-table th.c-wide { min-width:150px; width:150px; } /* colspan=2: 44+44 */
+    .prep-table th.c-sid  { min-width:140px; width:140px; }
+    .prep-table th.c-rem  { min-width:220px; width:220px; }
+    .prep-table th.c-cum  { min-width:95px; width:95px; background: #fff3e0; }
+    .prep-table th.c-send { min-width:95px; width:95px; background: #e8f5e9; }
     /* Lebar data cell ikut header */
     .prep-table td { min-width: 44px; }
 
     /* Sticky top offset sesuai height 22px per row */
-    .prep-table thead tr:nth-child(2) th { top: 30px; }
-    .prep-table thead tr:nth-child(3) th { top: 60px; }
+    .prep-table thead tr:nth-child(2) th { top: 38px; }
+    .prep-table thead tr:nth-child(3) th { top: 76px; }
 
     /* Input dalam tabel */
     .prep-table td input, .prep-table td select {
-      width: 100%; border: none; outline: none; font-size: 14px;
+      width: 100%; border: none; outline: none; font-size: 18px;
       text-align: center; padding: 1px 2px; background: transparent;
       box-sizing: border-box; min-width: 0; text-transform: uppercase;
     }
@@ -129,7 +129,7 @@
     /* Tombol gabung */
     .btn-merge {
       background: #ff9800; color: white; border: none;
-      border-radius: 4px; padding: 2px 5px; font-size: 13px;
+      border-radius: 4px; padding: 2px 5px; font-size: 16px;
       cursor: pointer; white-space: nowrap;
     }
     .btn-merge.active { background: #e65100; }
@@ -150,17 +150,17 @@
     .merge-banner.show { display: flex; }
     .merge-banner button {
       background: white; color: #e65100; border: none;
-      border-radius: 6px; padding: 4px 10px; font-size: 14px;
+      border-radius: 6px; padding: 4px 10px; font-size: 18px;
       font-weight: 700; cursor: pointer; margin-left: auto;
     }
 
     /* Info grid */
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; margin-bottom: 10px; }
-    .info-row { display: flex; align-items: center; gap: 4px; font-size: 14px; }
-    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 13px; }
+    .info-row { display: flex; align-items: center; gap: 4px; font-size: 18px; }
+    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 16px; }
     .info-row input {
       flex: 1; border: none; border-bottom: 1px solid #999; outline: none;
-      font-size: 13px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
+      font-size: 16px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
       text-transform: uppercase;
     }
 
@@ -174,11 +174,11 @@
       background: #1a6b4a; color: white; padding: 7px 14px; border-radius: 8px;
       font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
     }
-    #csv-filename { font-size: 14px; color: #555; flex: 1; }
+    #csv-filename { font-size: 18px; color: #555; flex: 1; }
     #csv-input { display: none; }
     .btn-add-row {
       margin-top: 8px; width: 100%; background: #4db6ac; color: white;
-      border: none; padding: 9px; border-radius: 8px; font-size: 13px;
+      border: none; padding: 9px; border-radius: 8px; font-size: 16px;
       font-weight: 600; cursor: pointer;
     }
     .btn-add { background: #4db6ac; color: white; }
@@ -334,7 +334,7 @@
       // Grain size dropdown
       const grainOpts = ['','GVL','CS','FS','CLY'];
       const grainVal = (val) => (val || '').toString().trim().toUpperCase();
-      const grainSel = (val) => `<select id="grain_${n}" name="grain_${n}" class="auto" style="color:#1a6b4a;font-weight:700;background:transparent;border:none;outline:none;width:100%;font-size:14px;text-align:center;">
+      const grainSel = (val) => `<select id="grain_${n}" name="grain_${n}" class="auto" style="color:#1a6b4a;font-weight:700;background:transparent;border:none;outline:none;width:100%;font-size:18px;text-align:center;">
         ${grainOpts.map(o => `<option value="${o}"${o===grainVal(val)?'selected':''}>${o}</option>`).join('')}
       </select>`;
       const num = (id, val) =>
@@ -347,7 +347,7 @@
       // Jenis dropdown
       const jenisOpts = ['','+0.3','DS','BS'];
       const jenisVal = (val) => (val || '').toString().trim().toUpperCase();
-      const jenisSel = (val) => `<select name="jenis_${n}" style="background:transparent;border:none;outline:none;width:100%;font-size:14px;text-align:center;">
+      const jenisSel = (val) => `<select name="jenis_${n}" style="background:transparent;border:none;outline:none;width:100%;font-size:18px;text-align:center;">
         ${jenisOpts.map(o => `<option value="${o}"${o===jenisVal(val)?'selected':''}>${o}</option>`).join('')}
       </select>`;
       if (v.merge_group) tr.classList.add('row-merged');
@@ -1093,7 +1093,7 @@
       const banner = document.getElementById('merge-banner');
       const applyBtn = document.createElement('button');
       applyBtn.textContent = '✓ Terapkan';
-      applyBtn.style.cssText = 'background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:14px;font-weight:700;cursor:pointer;';
+      applyBtn.style.cssText = 'background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:18px;font-weight:700;cursor:pointer;';
       applyBtn.onclick = applyMerge;
       banner.insertBefore(applyBtn, banner.querySelector('button'));
 
