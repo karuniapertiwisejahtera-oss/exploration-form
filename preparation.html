@@ -1255,7 +1255,12 @@
         const firstRow = rowNums[0];
 
         const fcEl = document.getElementById('from_cum_' + firstRow);
-        if (!fcEl || fcEl.value === '') return;
+        const sampNo = get('samp_no', firstRow);
+        const isQRow = /^Q\d+$/i.test(sampNo);
+        const allCLY = rowNums.every(n => get('grain', n).toUpperCase() === 'CLY');
+        const hasFrac = rowNums.some(n => FRACTIONS.some(f => get(f.tot, n) !== ''));
+        // Skip jika: bukan Q-row, bukan CLY, tidak ada fraksi, dan from_cum kosong
+        if (!isQRow && !allCLY && !hasFrac && (!fcEl || fcEl.value === '')) return;
         intervalCounter++;
 
         // Recovery_Sampling = average Rec_Length dari semua baris dalam grup
@@ -1338,6 +1343,26 @@
           rows.push(row.join(','));
           firstFrac = false;
         });
+
+        // CLY interval atau Q-row: jika tidak ada fraksi yang ditulis, tulis 1 baris blank
+        if (firstFrac && (allCLY || isQRow)) {
+          rowCounter++;
+          const idCol = holeId ? holeId + rowCounter : String(rowCounter);
+          const dFrom = isQRow ? '' : depthFrom;
+          const dTo   = isQRow ? '' : depthTo;
+          const rAvg2 = isQRow ? '' : recAvg;
+          const cWt2  = isQRow ? '' : coreWt;
+          const ins2  = isQRow ? '' : insitu;
+          const sid2  = get('sample_id', firstRow);
+          const row = [
+            q(rowCounter), q(idCol), q(deposit), q(sheetNoAuto), q(holeId),
+            q(dFrom), q(dTo), q(rAvg2), q(cWt2), q(ins2),
+            q(''), q(''), q(''),
+            q(''), q(sid2), q(''),
+            q(''), q(''), q(remarks), q('')
+          ];
+          rows.push(row.join(','));
+        }
 
         // Baris QAQC jika ada — tanpa label Fraksi, kosong Depth s/d Berat_Kering
         if (qaqcSid) {
