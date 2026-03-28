@@ -75,6 +75,13 @@
       <button onclick="exportAllData()" style="margin-top:10px;width:100%;background:#1a73e8;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
         ☁️ Upload Semua ke Google Drive
       </button>
+      <button onclick="exportBackup()" style="margin-top:8px;width:100%;background:#1a6b4a;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+        📥 Export Backup (JSON)
+      </button>
+      <label style="margin-top:8px;display:block;width:100%;background:#ff9800;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;box-sizing:border-box;">
+        📤 Import Backup (JSON)
+        <input type="file" id="import-backup-input" accept=".json" style="display:none;" onchange="importBackup(this)">
+      </label>
     </div>
   </div>
 
@@ -249,6 +256,52 @@
           <span style="color:${clickable?'#1a6b4a':'#ccc'};font-weight:600;">${count} record${clickable?' 👁':''}</span>
         </div>`;
       }).join('');
+    }
+
+    // ===== BACKUP EXPORT / IMPORT =====
+    function exportBackup() {
+      const backup = {};
+      FORMS.forEach(f => { backup[f.key] = DB.getAll(f.key); });
+      const json = JSON.stringify(backup, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      a.download = 'backup_exploration_' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('✓ Backup berhasil diexport!');
+    }
+
+    function importBackup(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const backup = JSON.parse(e.target.result);
+          let count = 0;
+          FORMS.forEach(f => {
+            if (backup[f.key] && Array.isArray(backup[f.key])) {
+              backup[f.key].forEach(rec => {
+                // Cek apakah record sudah ada (berdasarkan id)
+                const existing = DB.getAll(f.key);
+                if (!existing.find(r => r.id === rec.id)) {
+                  localStorage.setItem(f.key, JSON.stringify([...existing, rec]));
+                  count++;
+                }
+              });
+            }
+          });
+          input.value = '';
+          showToast('✓ ' + count + ' record berhasil diimport!');
+          // Refresh tampilan jika data view sedang terbuka
+          document.getElementById('dataview-overlay').style.display = 'none';
+        } catch(err) {
+          showToast('Error: ' + err.message, 'error');
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
     }
 
     async function exportAllData() {
