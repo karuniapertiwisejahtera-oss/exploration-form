@@ -1404,17 +1404,55 @@
       const dupes = checkDuplicateSampleIDs();
       if (dupes.length > 0) {
         const list = dupes.join(', ');
-        if (!confirm(`\u26a0\ufe0f Sample_ID duplikat ditemukan:\n\\n\nLanjutkan submit?`)) return;
+        if (!confirm('⚠️ Sample_ID duplikat ditemukan:\n' + list + '\n\nLanjutkan submit?')) return;
       }
       saveData();
 
       const csv = generateExportCSV();
       if (!csv || csv.split('\r\n').length < 2) { showToast('Tidak ada data untuk disubmit', 'error'); return; }
 
-      const holeId   = (document.getElementById('h-holeid').value || 'unknown').toUpperCase();
-      const fileName = 'Prep_' + holeId.replace(/\s+/g, '_') + '.csv';
+      const holeId = (document.getElementById('h-holeid').value || 'unknown').toUpperCase();
+      const fileName = 'Prep_' + holeId.replace(/\s+/g, '_') + '.xls';
 
-      downloadCSV(fileName, csv);
+      // Parse CSV ke array of arrays
+      const rows = csv.split('\r\n').map(line => {
+        const result = []; let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i];
+          if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+          else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+          else cur += c;
+        }
+        result.push(cur); return result;
+      });
+
+      // Kolom Fraksi = index 10 (0-based)
+      const FRAKSI_COL = 10;
+
+      // Build XLS HTML
+      let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+      html += '<head><meta charset="UTF-8"><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Sheet1</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body><table>';
+      rows.forEach((row, ri) => {
+        html += '<tr>';
+        row.forEach((cell, ci) => {
+          if (ri === 0) {
+            html += '<th>' + cell + '</th>';
+          } else if (ci === FRAKSI_COL) {
+            // Kolom Fraksi: paksa sebagai text agar + terbaca
+            html += '<td style="mso-number-format:\\@">' + cell + '</td>';
+          } else {
+            html += '<td>' + cell + '</td>';
+          }
+        });
+        html += '</tr>';
+      });
+      html += '</table></body></html>';
+
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = fileName; a.click();
+      URL.revokeObjectURL(url);
       showToast('✓ ' + fileName + ' berhasil didownload!');
     }
 
