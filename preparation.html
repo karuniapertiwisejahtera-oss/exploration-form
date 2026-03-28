@@ -1226,14 +1226,16 @@
       const holeId   = (document.getElementById('h-holeid').value   || '').toUpperCase();
       const deposit  = (document.getElementById('h-deposit').value  || '').toUpperCase();
 
+      // Baca urutan baris dari DOM (bukan dari rowCount) agar urutan setelah insertBefore terjaga
       const groups = {};
-      for (let i = 1; i <= rowCount; i++) {
-        const tr = document.getElementById('prep-row-' + i);
-        if (!tr) continue;
+      const groupOrder = [];
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      domRows.forEach(tr => {
+        const i = parseInt(tr.dataset.row);
         const mg = tr.dataset.mergeGroup || ('_single_' + i);
-        if (!groups[mg]) groups[mg] = [];
+        if (!groups[mg]) { groups[mg] = []; groupOrder.push(mg); }
         groups[mg].push(i);
-      }
+      });
 
       const get = (id, n) => {
         const el = document.querySelector(`[name="${id}_${n}"]`);
@@ -1265,8 +1267,9 @@
 
       let intervalCounter = 0;
       let rowCounter = 0; // No. berurut per baris fraksi
-      Object.entries(groups).forEach(([mg, rowNums]) => {
-        rowNums.sort((a,b) => a-b);
+      groupOrder.forEach(mg => {
+        const rowNums = groups[mg];
+        // rowNums sudah dalam urutan DOM; sort hanya untuk sub-baris dalam grup gabung
         const firstRow = rowNums[0];
 
         const fcEl = document.getElementById('from_cum_' + firstRow);
