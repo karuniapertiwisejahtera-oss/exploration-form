@@ -1545,6 +1545,8 @@
 
       // Kolom Fraksi = index 10 (0-based)
       const FRAKSI_COL = 10;
+      // Kolom yang perlu format 2 desimal: Depth_From(5), Depth_To(6), Recovery_sampling(7)
+      const TWO_DEC_COLS = new Set([5, 6, 7]);
 
       // Build XLS HTML
       let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
@@ -1554,8 +1556,9 @@
         row.forEach((cell, ci) => {
           if (ri === 0) {
             html += '<th>' + cell + '</th>';
+          } else if (TWO_DEC_COLS.has(ci)) {
+            html += '<td style="mso-number-format:"0.00">' + cell + '</td>';
           } else if (ci === FRAKSI_COL) {
-            // Kolom Fraksi: paksa sebagai text agar + terbaca
             html += '<td style="mso-number-format:\\@">' + cell + '</td>';
           } else {
             html += '<td>' + cell + '</td>';
