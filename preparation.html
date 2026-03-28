@@ -363,7 +363,7 @@
         <td class="td-cum"><input type="number" name="from_cum_${n}" id="from_cum_${n}" value="${v.from_cum != null ? v.from_cum : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td class="td-cum"><input type="number" name="to_cum_${n}"   id="to_cum_${n}"   value="${v.to_cum   != null ? v.to_cum   : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td><button class="btn-merge" onclick="startMerge(${n}, this)" title="Pilih baris untuk digabung">🔗</button></td>
-        <td><button class="btn-del-row" onclick="deleteRow(${n})" title="Hapus baris" style="background:#ef5350;color:white;border:none;border-radius:4px;padding:2px 5px;font-size:10px;cursor:pointer;">✕</button></td>
+        <td style="text-align:center;"><button class="btn-merge" onclick="startMerge(${n}, this)" title="Pilih baris untuk digabung">🔗</button><input type="checkbox" class="merge-check" id="merge-check-${n}" style="display:none;margin-left:4px;" onchange="toggleMergeRow(${n}, this)"></td>
         <td>${txt('samp_no', v.samp_no)}</td>
         <td>${num('dry_wt', v.dry_wt)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
@@ -914,6 +914,19 @@
     // selectedRows = set nomor baris yang dipilih untuk digabung dengan mergeSourceRow
     let selectedRows = new Set();
 
+    function toggleMergeRow(rowNum, cb) {
+      const tr = document.getElementById('prep-row-' + rowNum);
+      if (!tr) return;
+      if (cb.checked) {
+        selectedRows.add(rowNum);
+        tr.classList.add('row-selected-merge');
+      } else {
+        if (rowNum === mergeSourceRow) { cb.checked = true; return; }
+        selectedRows.delete(rowNum);
+        tr.classList.remove('row-selected-merge');
+      }
+    }
+
     function startMerge(rowNum, btn) {
       // Jika sudah ada mode merge aktif, batalkan dulu
       if (mergeSourceRow !== null) cancelMerge();
@@ -922,6 +935,13 @@
       selectedRows = new Set([rowNum]); // sumber otomatis terpilih
 
       document.body.classList.add('merge-mode');
+      // Tampilkan checkbox di semua baris
+      document.querySelectorAll('.merge-check').forEach(function(cb) {
+        cb.style.display = 'inline-block'; cb.checked = false;
+      });
+      // Centang checkbox baris sumber
+      const srcCb = document.getElementById('merge-check-' + rowNum);
+      if (srcCb) srcCb.checked = true;
       document.getElementById('merge-banner').classList.add('show');
       btn.classList.add('active');
 
@@ -937,7 +957,7 @@
       // Abaikan klik pada tombol gabung itu sendiri
       if (e.target.classList.contains('btn-merge')) return;
       // Abaikan klik pada input
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.tagName === 'INPUT') return; // checkbox ditangani toggleMergeRow
 
       const tr = e.target.closest('tr');
       if (!tr || !tr.dataset.row) return;
@@ -948,14 +968,20 @@
         if (n === mergeSourceRow) return;
         selectedRows.delete(n);
         tr.classList.remove('row-selected-merge');
+        const cb1 = document.getElementById('merge-check-' + n); if (cb1) cb1.checked = false;
       } else {
         selectedRows.add(n);
+        const cb2 = document.getElementById('merge-check-' + n); if (cb2) cb2.checked = true;
         tr.classList.add('row-selected-merge');
       }
     }
 
     function cancelMerge() {
       document.body.classList.remove('merge-mode');
+      // Sembunyikan semua checkbox
+      document.querySelectorAll('.merge-check').forEach(function(cb) {
+        cb.style.display = 'none'; cb.checked = false;
+      });
       document.getElementById('merge-banner').classList.remove('show');
       document.getElementById('prep-tbody').removeEventListener('click', onRowClick);
 
