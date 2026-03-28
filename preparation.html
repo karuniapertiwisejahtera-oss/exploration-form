@@ -467,20 +467,19 @@
       addRow({ samp_no: 'Q' + qNum, jenis: jenis, sample_id: nextSID });
       const qTr = document.getElementById('prep-row-' + rowCount);
       if (qTr) qTr.classList.add('row-qaqc');
-      // Sisipkan baris Q setelah baris terakhir yang punya Original Sample_ID terisi
-      let lastSampRow = rowCount; // default: posisi saat ini (akhir)
-      for (let i = 1; i <= rowCount - 1; i++) {
-        const sidEl2 = document.querySelector('[name="sample_id_' + i + '"]');
-        if (sidEl2 && sidEl2.value.trim()) {
-          lastSampRow = i;
-        }
-      }
-      // Jika baris Q bukan sudah di posisi yang benar, pindahkan
-      if (lastSampRow < rowCount - 1 && qTr) {
-        const tbody = document.getElementById('prep-tbody');
-        const refTr = document.getElementById('prep-row-' + (lastSampRow + 1));
-        if (refTr) tbody.insertBefore(qTr, refTr);
-        else tbody.appendChild(qTr);
+      // Sisipkan baris Q setelah baris terakhir yang punya Original Sample_ID (urutan DOM)
+      const tbody2 = document.getElementById('prep-tbody');
+      const allDomRows = Array.from(tbody2.querySelectorAll('tr[data-row]'));
+      let insertAfterTr = null;
+      allDomRows.forEach(tr => {
+        const rn = tr.dataset.row;
+        const sidEl2 = document.querySelector('[name="sample_id_' + rn + '"]');
+        if (sidEl2 && sidEl2.value.trim()) insertAfterTr = tr;
+      });
+      if (insertAfterTr && qTr && insertAfterTr !== qTr) {
+        const nextSibling = insertAfterTr.nextSibling;
+        if (nextSibling && nextSibling !== qTr) tbody2.insertBefore(qTr, nextSibling);
+        else if (!nextSibling) tbody2.appendChild(qTr);
       }
       // Auto-copy qaqc_sid ke sample_id saat diisi (jika sample_id belum terisi manual)
       const newRow = rowCount;
