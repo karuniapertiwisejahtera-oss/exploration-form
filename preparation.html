@@ -362,7 +362,7 @@
         <td class="td-cum"><input type="number" name="from_cum_${n}" id="from_cum_${n}" value="${v.from_cum != null ? v.from_cum : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td class="td-cum"><input type="number" name="to_cum_${n}"   id="to_cum_${n}"   value="${v.to_cum   != null ? v.to_cum   : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td><button class="btn-merge" onclick="startMerge(${n}, this)" title="Pilih baris untuk digabung">🔗</button></td>
-        <td><button class="btn-del-row" onclick="deleteRow(, this)" title="Hapus baris" style="background:#ef5350;color:white;border:none;border-radius:4px;padding:2px 5px;font-size:10px;cursor:pointer;">✕</button></td>
+        <td><button class="btn-del-row" onclick="deleteRow(${n})" title="Hapus baris" style="background:#ef5350;color:white;border:none;border-radius:4px;padding:2px 5px;font-size:10px;cursor:pointer;">✕</button></td>
         <td>${txt('samp_no', v.samp_no)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
         <td>${txt('sample_id', v.sample_id)}</td>
