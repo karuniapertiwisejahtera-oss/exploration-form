@@ -1295,71 +1295,72 @@
         // DS/BS: kosongkan Depth_From s/d Berat_Kering, Sample_id_to_Lab = QAQC
         const isQAQCInterval = jenisUpper === 'DS' || jenisUpper === 'BS';
 
-        // Baris vertikal per fraksi — skip jika Total kosong
-        let firstFrac = true;
-        FRACTIONS.forEach((frac) => {
-          const totVal = get(frac.tot, firstRow);
-          if (!totVal) return; // skip fraksi kosong
-          rowCounter++;
-          const noPad = String(rowCounter);
-          const idCol = holeId ? holeId + noPad : noPad;
-          const sidVal = get(frac.sid, firstRow);
+        // Iterasi setiap sub-baris dalam grup
+        let firstSubRow = true;
+        rowNums.forEach(subRow => {
+          const subSampleId  = get('sample_id', subRow);
+          const subSidToLab  = subSampleId;
+          const subRemarks   = get('remarks', subRow);
+          const subJenis     = get('jenis', subRow).trim().toUpperCase();
+          const subIsQAQC    = subJenis === 'DS' || subJenis === 'BS';
+          const subQaqcSid   = get('qaqc_sid', subRow);
+          const subQaqcLab   = subQaqcSid;
+          const subAllCLY    = get('grain', subRow).toUpperCase() === 'CLY';
+          const subIsQRow    = /^Q\d+$/i.test(get('samp_no', subRow));
 
-          // Kolom tetap per baris
-          const fixedAll = [
-            rowCounter, idCol, deposit, sheetNoAuto, holeId,
-            isQAQCInterval ? '' : depthFrom,
-            isQAQCInterval ? '' : depthTo,
-            isQAQCInterval ? '' : recAvg,
-            isQAQCInterval ? '' : coreWt,
-            isQAQCInterval ? '' : insitu
-          ];
+          // Fraksi yang ada Total-nya untuk sub-baris ini
+          let firstFrac = true;
+          FRACTIONS.forEach((frac) => {
+            const totVal = get(frac.tot, subRow);
+            if (!totVal) return; // skip fraksi kosong
+            rowCounter++;
+            const idCol = holeId ? holeId + rowCounter : String(rowCounter);
+            const sidVal = get(frac.sid, subRow);
+            const fixedAll = [
+              rowCounter, idCol, deposit, sheetNoAuto, holeId,
+              subIsQAQC ? '' : depthFrom,
+              subIsQAQC ? '' : depthTo,
+              subIsQAQC ? '' : recAvg,
+              subIsQAQC ? '' : coreWt,
+              subIsQAQC ? '' : insitu
+            ];
+            let sidToLabRow = '';
+            if (subIsQAQC) {
+              sidToLabRow = subQaqcLab;
+            } else if (firstFrac) {
+              sidToLabRow = subSidToLab;
+            }
+            const totNum = parseFloat(totVal) || 0;
+            const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
+            const row = [
+              ...fixedAll.map(v => q(v)),
+              q(frac.label), q(sidVal), q(washVal),
+              q(''), q(sidToLabRow), q(''),
+              q(''), q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), q('')
+            ];
+            rows.push(row.join(','));
+            firstFrac = false;
+          });
 
-          // Sample_id_to_Lab:
-          // - DS/BS interval: semua baris pakai QAQC Sample_ID
-          // - baris pertama interval normal: pakai sampleId utama
-          // - fraksi +0.3: jika remarks = '+0.3' pakai QAQC, selain itu pakai sid +0.3
-          // - baris lain: kosong
-          let sidToLabRow = '';
-          if (isQAQCInterval) {
-            sidToLabRow = qaqcSidLab; // semua baris DS/BS pakai QAQC
-          } else if (firstFrac) {
-            sidToLabRow = sidToLab;
+          // CLY atau Q-row tanpa fraksi: tulis 1 baris blank
+          if (firstFrac && (subAllCLY || subIsQRow)) {
+            rowCounter++;
+            const idCol2 = holeId ? holeId + rowCounter : String(rowCounter);
+            const row = [
+              q(rowCounter), q(idCol2), q(deposit), q(sheetNoAuto), q(holeId),
+              subIsQRow ? q('') : q(depthFrom),
+              subIsQRow ? q('') : q(depthTo),
+              subIsQRow ? q('') : q(recAvg),
+              subIsQRow ? q('') : q(coreWt),
+              subIsQRow ? q('') : q(insitu),
+              q(''), q(''), q(''),
+              q(''), subIsQRow ? q(subSampleId) : q(''), q(''),
+              q(''), q(''), firstSubRow ? q(subRemarks) : q(''), q('')
+            ];
+            rows.push(row.join(','));
           }
-
-          // DS/BS: kosongkan Washing_weight dan Berat_Kering juga
-          const totNum = parseFloat(totVal) || 0;
-          const washVal = isQAQCInterval ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
-
-          const row = [
-            ...fixedAll.map(v => q(v)),
-            q(frac.label), q(sidVal), q(washVal),
-            q(''), q(sidToLabRow), q(''),
-            q(''), q(''), firstFrac ? q(remarks) : q(''), q('')
-          ];
-          rows.push(row.join(','));
-          firstFrac = false;
+          firstSubRow = false;
         });
-
-        // CLY interval atau Q-row: jika tidak ada fraksi yang ditulis, tulis 1 baris blank
-        if (firstFrac && (allCLY || isQRow)) {
-          rowCounter++;
-          const idCol = holeId ? holeId + rowCounter : String(rowCounter);
-          const dFrom = isQRow ? '' : depthFrom;
-          const dTo   = isQRow ? '' : depthTo;
-          const rAvg2 = isQRow ? '' : recAvg;
-          const cWt2  = isQRow ? '' : coreWt;
-          const ins2  = isQRow ? '' : insitu;
-          const sid2 = isQRow ? get('sample_id', firstRow) : '';
-          const row = [
-            q(rowCounter), q(idCol), q(deposit), q(sheetNoAuto), q(holeId),
-            q(dFrom), q(dTo), q(rAvg2), q(cWt2), q(ins2),
-            q(''), q(''), q(''),
-            q(''), q(sid2), q(''),
-            q(''), q(''), q(remarks), q('')
-          ];
-          rows.push(row.join(','));
-        }
 
         // Baris QAQC jika ada — tanpa label Fraksi, kosong Depth s/d Berat_Kering
         if (qaqcSid) {
