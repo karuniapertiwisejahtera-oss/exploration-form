@@ -1307,6 +1307,9 @@
           const subQaqcLab   = subQaqcSid;
           const subAllCLY    = get('grain', subRow).toUpperCase() === 'CLY';
           const subIsQRow    = /^Q\d+$/i.test(get('samp_no', subRow));
+          // Skip sub-baris yang tidak punya fraksi, bukan CLY, dan bukan Q-row
+          const subHasFrac = FRACTIONS.some(f => get(f.tot, subRow) !== '');
+          if (!subHasFrac && !subAllCLY && !subIsQRow) return;
 
           // Fraksi yang ada Total-nya untuk sub-baris ini
           let firstFrac = true;
