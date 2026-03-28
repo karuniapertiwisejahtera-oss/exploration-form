@@ -1316,13 +1316,14 @@
             rowCounter++;
             const idCol = holeId ? holeId + rowCounter : String(rowCounter);
             const sidVal = get(frac.sid, subRow);
+            const isFirstRecord = firstFrac && firstSubRow;
             const fixedAll = [
               rowCounter, idCol, deposit, sheetNoAuto, holeId,
               subIsQAQC ? '' : depthFrom,
               subIsQAQC ? '' : depthTo,
               subIsQAQC ? '' : recAvg,
-              subIsQAQC ? '' : coreWt,
-              subIsQAQC ? '' : insitu
+              (subIsQAQC || !isFirstRecord) ? '' : coreWt,
+              (subIsQAQC || !isFirstRecord) ? '' : insitu
             ];
             let sidToLabRow = '';
             if (subIsQAQC) {
