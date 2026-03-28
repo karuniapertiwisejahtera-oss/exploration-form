@@ -1321,7 +1321,7 @@
               rowCounter, idCol, deposit, sheetNoAuto, holeId,
               subIsQAQC ? '' : depthFrom,
               subIsQAQC ? '' : depthTo,
-              subIsQAQC ? '' : recAvg,
+              (subIsQAQC || !isFirstRecord) ? '' : recAvg,
               (subIsQAQC || !isFirstRecord) ? '' : coreWt,
               (subIsQAQC || !isFirstRecord) ? '' : insitu
             ];
