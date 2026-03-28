@@ -1339,7 +1339,7 @@
             const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
             const row = [
               ...fixedAll.map(v => q(v)),
-              frac.label, q(sidVal), q(washVal),
+              q(frac.label), q(sidVal), q(washVal),
               q(''), q(sidToLabRow), q(''),
               q(''), q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), q('')
             ];
