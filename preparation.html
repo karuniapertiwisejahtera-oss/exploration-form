@@ -1362,25 +1362,6 @@
           }
           firstSubRow = false;
         });
-
-        // Baris QAQC jika ada — tanpa label Fraksi, kosong Depth s/d Berat_Kering
-        if (qaqcSid) {
-          rowCounter++;
-          const qaqcNoPad = String(rowCounter);
-          const qaqcIdCol = holeId ? holeId + qaqcNoPad : qaqcNoPad;
-          const qaqcWt = get('qaqc_wt', firstRow);
-          const qaqcFixed = [
-            rowCounter, qaqcIdCol, deposit, sheetNoAuto, holeId,
-            '', '', '', '', ''  // Depth s/d Insitu kosong
-          ];
-          const row = [
-            ...qaqcFixed.map(v => q(v)),
-            q(''), q(''), q(qaqcWt),
-            q(''), q(qaqcSidLab), q(''),
-            q(''), q(''), q(''), q('')
-          ];
-          rows.push(row.join(','));
-        }
       });
 
       return rows.join('\r\n');
