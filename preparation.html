@@ -467,11 +467,11 @@
       addRow({ samp_no: 'Q' + qNum, jenis: jenis, sample_id: nextSID });
       const qTr = document.getElementById('prep-row-' + rowCount);
       if (qTr) qTr.classList.add('row-qaqc');
-      // Sisipkan baris Q setelah baris terakhir yang punya Samp_No terisi (bukan Q)
+      // Sisipkan baris Q setelah baris terakhir yang punya Original Sample_ID terisi
       let lastSampRow = rowCount; // default: posisi saat ini (akhir)
       for (let i = 1; i <= rowCount - 1; i++) {
-        const snEl2 = document.querySelector('[name="samp_no_' + i + '"]');
-        if (snEl2 && snEl2.value.trim() && !/^Q\d+$/i.test(snEl2.value.trim())) {
+        const sidEl2 = document.querySelector('[name="sample_id_' + i + '"]');
+        if (sidEl2 && sidEl2.value.trim()) {
           lastSampRow = i;
         }
       }
