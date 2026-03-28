@@ -1239,8 +1239,8 @@
         const recAvg = recCount > 0 ? parseFloat((recSum / recCount).toFixed(4)) : '';
 
         // Core_Weight = Core_Wt baris pertama (bukan sum)
-        const coreWt = get('core_wt', firstRow) || '';
-
+        // Core_Weight = jumlah Core_Wt semua baris dalam grup
+        let coreWtSum = 0; rowNums.forEach(n => { const v = parseFloat(get('core_wt', n)); if (v > 0) coreWtSum += v; }); const coreWt = coreWtSum > 0 ? parseFloat(coreWtSum.toFixed(4)) : '';
         // Sampling_Insitu_Weight = Core_Weight / Recovery_Sampling
         const insitu = (coreWt && recAvg && recAvg > 0)
           ? parseFloat((coreWt / recAvg).toFixed(4)) : '';
