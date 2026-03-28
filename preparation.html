@@ -1335,7 +1335,7 @@
           const rv = getF('rec', n);
           if (rv > 0) { recSum += rv; recCount++; }
         });
-        const recAvg = recCount > 0 ? parseFloat((recSum / recCount).toFixed(4)) : '';
+        const recAvg = recCount > 0 ? parseFloat((recSum / recCount).toFixed(2)) : '';
 
         // Core_Weight = Core_Wt baris pertama (bukan sum)
         // Core_Weight = jumlah Core_Wt semua baris dalam grup
@@ -1344,8 +1344,8 @@
         const insitu = (coreWt && recAvg && recAvg > 0)
           ? parseFloat((coreWt / recAvg).toFixed(4)) : '';
 
-        const depthFrom  = get('from_cum', firstRow);
-        const depthTo    = get('to_cum',   firstRow);
+        const depthFrom  = get('from_cum', firstRow) !== '' ? parseFloat(parseFloat(get('from_cum', firstRow)).toFixed(2)) : '';
+        const depthTo    = get('to_cum',   firstRow) !== '' ? parseFloat(parseFloat(get('to_cum',   firstRow)).toFixed(2)) : '';
         const sampleId   = get('sample_id', firstRow);   // kolom Sample_ID (setelah Send_Cum)
         const sidToLab   = sampleId ? 'GS' + sampleId.slice(2) : '';  // Sample_id_to_Lab
         const remarks    = get('remarks', firstRow);
