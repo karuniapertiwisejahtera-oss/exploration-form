@@ -1353,7 +1353,7 @@
           const rAvg2 = isQRow ? '' : recAvg;
           const cWt2  = isQRow ? '' : coreWt;
           const ins2  = isQRow ? '' : insitu;
-          const sid2  = get('sample_id', firstRow);
+          const sid2 = isQRow ? get('sample_id', firstRow) : '';
           const row = [
             q(rowCounter), q(idCol), q(deposit), q(sheetNoAuto), q(holeId),
             q(dFrom), q(dTo), q(rAvg2), q(cWt2), q(ins2),
