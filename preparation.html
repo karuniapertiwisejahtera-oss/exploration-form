@@ -769,6 +769,33 @@
     }
 
     // Pasang listener pada kolom Total untuk trigger kalkulasi Rec
+    // ===== CEK SELISIH CORE WT vs DRY WT =====
+    function checkDryWtAlert(rowNum) {
+      const tr = document.getElementById('prep-row-' + rowNum);
+      if (!tr) return;
+      const mg = tr.dataset.mergeGroup || ('_single_' + rowNum);
+      // Kumpulkan semua baris dalam grup
+      const groupRows = [];
+      for (let i = 1; i <= rowCount; i++) {
+        const t = document.getElementById('prep-row-' + i);
+        if (t && (t.dataset.mergeGroup || ('_single_' + i)) === mg) groupRows.push(i);
+      }
+      let totalCoreWt = 0, totalDryWt = 0;
+      groupRows.forEach(i => {
+        const cEl = document.querySelector('[name="core_wt_' + i + '"]');
+        const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+        if (cEl && cEl.value) totalCoreWt += parseFloat(cEl.value) || 0;
+        if (dEl && dEl.value) totalDryWt  += parseFloat(dEl.value) || 0;
+      });
+      if (totalCoreWt > 0 && totalDryWt > 0) {
+        const selisih = Math.abs(totalCoreWt - totalDryWt);
+        const pct = selisih / totalCoreWt * 100;
+        if (pct > 20) {
+          showToast('⚠️ Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
+        }
+      }
+    }
+
     function attachTotListeners(n) {
       ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
@@ -782,6 +809,11 @@
       ['a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'].forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (el) el.addEventListener('input', () => { el.dataset.autoRec = 'false'; });
+      });
+      // Listener dry_wt dan core_wt untuk cek selisih >20%
+      ['dry_wt','core_wt'].forEach(field => {
+        const el = document.querySelector([name="${field}_${n}"]);
+        if (el) el.addEventListener('change', () => checkDryWtAlert(n));
       });
     }
 
@@ -1424,6 +1456,32 @@
       if (dupes.length > 0) {
         const list = dupes.join(', ');
         if (!confirm('⚠️ Sample_ID duplikat ditemukan:\n' + list + '\n\nLanjutkan submit?')) return;
+      }
+      // Cek selisih Core Wt vs Dry Wt untuk semua grup
+      const dryWtWarnings = [];
+      const checkedGroups = new Set();
+      for (let i = 1; i <= rowCount; i++) {
+        const tr = document.getElementById('prep-row-' + i);
+        if (!tr) continue;
+        const mg = tr.dataset.mergeGroup || ('_single_' + i);
+        if (checkedGroups.has(mg)) continue;
+        checkedGroups.add(mg);
+        let totalCoreWt = 0, totalDryWt = 0;
+        for (let j = 1; j <= rowCount; j++) {
+          const t = document.getElementById('prep-row-' + j);
+          if (!t || (t.dataset.mergeGroup || ('_single_' + j)) !== mg) continue;
+          const cEl = document.querySelector('[name="core_wt_' + j + '"]');
+          const dEl = document.querySelector('[name="dry_wt_' + j + '"]');
+          if (cEl && cEl.value) totalCoreWt += parseFloat(cEl.value) || 0;
+          if (dEl && dEl.value) totalDryWt  += parseFloat(dEl.value) || 0;
+        }
+        if (totalCoreWt > 0 && totalDryWt > 0) {
+          const pct = Math.abs(totalCoreWt - totalDryWt) / totalCoreWt * 100;
+          if (pct > 20) dryWtWarnings.push('Grup ' + mg + ': ' + pct.toFixed(1) + '%');
+        }
+      }
+      if (dryWtWarnings.length > 0) {
+        if (!confirm('⚠️ Selisih Core Wt & Dry Wt >20% pada:\n' + dryWtWarnings.join('\n') + '\n\nLanjutkan submit?')) return;
       }
       saveData();
 
