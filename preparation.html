@@ -1375,6 +1375,19 @@
         const grpDryWtKg = grpDryWt > 0 ? parseFloat((grpDryWt / 1000).toFixed(6)) : '';
         const grpDevSieve = (grpTotalWet > 0 && grpDryWt > 0) ? parseFloat(((grpTotalWet - grpDryWt) / 1000).toFixed(6)) : '';
         const grpH2O = (coreWt && grpDryWt > 0) ? parseFloat(((parseFloat(coreWt)*1000 - grpDryWt) / (parseFloat(coreWt)*1000) * 100).toFixed(4)) : '';
+        // Ore = kode grain size dominan berdasarkan total Rec_Length
+        const GRAIN_MAP = { 'GVL': 'CMR', 'CS': 'CS', 'FS': 'FS', 'CLY': 'CLY' };
+        const grainTotals = {};
+        rowNums.forEach(function(n) {
+          const g = get('grain', n).toUpperCase();
+          const r = parseFloat(get('rec', n)) || 0;
+          if (g) grainTotals[g] = (grainTotals[g] || 0) + r;
+        });
+        let dominantGrain = '', maxRec = 0;
+        Object.keys(grainTotals).forEach(function(g) {
+          if (grainTotals[g] > maxRec) { maxRec = grainTotals[g]; dominantGrain = g; }
+        });
+        const grpOre = GRAIN_MAP[dominantGrain] || dominantGrain;
         rowNums.forEach(subRow => {
           const subSampleId  = get('sample_id', subRow);
           const subSidToLab  = subSampleId;
@@ -1419,7 +1432,7 @@
               ...fixedAll.map(v => q(v)),
               q(frac.label), q(sidVal), q(washVal),
               q(dryWtVal), q(sidToLabRow), q(''),
-              isFirstRecord ? q(grpDevSieve) : q(''), isFirstRecord ? q(grpH2O) : q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), q('')
+              isFirstRecord ? q(grpDevSieve) : q(''), isFirstRecord ? q(grpH2O) : q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), isFirstRecord ? q(grpOre) : q('')
             ];
             rows.push(row.join(','));
             firstFrac = false;
