@@ -439,11 +439,11 @@
 
       // Cari Sample_ID terakhir yang terisi untuk auto-fill Original Sample_ID
       let lastSID = '';
-      const allSIDFields = ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'];
+      // Hanya ambil dari kolom Original Sample_ID dan QAQC (prefix GS)
       for (let i = 1; i <= rowCount; i++) {
-        allSIDFields.forEach(function(f) {
+        ['sample_id','qaqc_sid'].forEach(function(f) {
           const el = document.querySelector('[name="' + f + '_' + i + '"]');
-          if (el && el.value.trim()) lastSID = el.value.trim().toUpperCase();
+          if (el && el.value.trim() && /^GS/i.test(el.value.trim())) lastSID = el.value.trim().toUpperCase();
         });
       }
       // Hitung nomor berikutnya dari lastSID
@@ -453,7 +453,7 @@
         if (m) {
           const used = new Set();
           for (let i = 1; i <= rowCount; i++) {
-            allSIDFields.forEach(function(f) {
+            ['sample_id','qaqc_sid'].forEach(function(f) {
               const el = document.querySelector('[name="' + f + '_' + i + '"]');
               if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
             });
