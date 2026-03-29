@@ -825,7 +825,6 @@
           if (fEl) { fEl.classList.remove('cell-warn','cell-error'); fEl.title = ''; clearCellTooltip(fEl); }
         });
       });
-      });
       // Cek 1: selisih Core Wt vs Dry Wt >20%
       if (totalCoreWt > 0 && totalDryWt > 0) {
         const pct = Math.abs(totalCoreWt - totalDryWt) / totalCoreWt * 100;
