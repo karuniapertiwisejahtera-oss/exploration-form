@@ -110,7 +110,7 @@
   <div class="action-bar">
     <button class="btn btn-save" onclick="saveData()">💾 Save</button>
     <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
-    <button class="btn btn-upload" onclick="uploadData()">☁️ Upload</button>
+    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
   </div>
 
   <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -183,6 +183,35 @@
       saveData();
       const json = JSON.stringify(DB.getAll('inspection'), null, 2);
       await uploadToDrive(`inspection_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+
+    function submitData() {
+      saveData();
+      const data = getFormData('inspection-form');
+      Object.assign(data, checkState);
+      const tgl  = data.tanggal || new Date().toISOString().slice(0,10);
+      const filename = `Inspection_${tgl}.xls`;
+
+      const allItems = [
+        ...machineItems.map((item,i) => ({ section:'Mesin', item, val: checkState['mesin_'+i]||'' })),
+        ...safetyItems.map((item,i)   => ({ section:'K3',   item, val: checkState['k3_'+i]||'' })),
+        ...behaviorItems.map((item,i) => ({ section:'Behavior', item, val: checkState['behavior_'+i]||'' }))
+      ];
+
+      let rows = '<tr><th>Kategori</th><th>Item</th><th>Status</th></tr>';
+      allItems.forEach(r => {
+        rows += `<tr><td>${r.section}</td><td>${r.item}</td><td>${r.val}</td></tr>`;
+      });
+      rows += `<tr><td colspan="3"></td></tr><tr><td colspan="3"><b>Catatan:</b> ${data.catatan||''}</td></tr>`;
+
+      const info = `<tr><td colspan="3"><b>Tanggal:</b> ${data.tanggal||''} | <b>Shift:</b> ${data.shift||''} | <b>Inspektor:</b> ${data.inspektor||''} | <b>Lokasi:</b> ${data.lokasi||''}</td></tr><tr><td colspan="3"></td></tr>`;
+      const html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>${info}${rows}</table></body></html>`;
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      showToast('✓ ' + filename + ' berhasil didownload!');
     }
 
     buildChecklist('machine-checks', machineItems, 'mesin');

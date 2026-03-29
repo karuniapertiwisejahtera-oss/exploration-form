@@ -105,7 +105,7 @@
   <div class="action-bar">
     <button class="btn btn-save" onclick="saveData()">💾 Save</button>
     <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
-    <button class="btn btn-upload" onclick="uploadData()">☁️ Upload</button>
+    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
   </div>
 
   <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -152,6 +152,41 @@
       DB.save('daily_sheet', data);
       const json = JSON.stringify(DB.getAll('daily_sheet'), null, 2);
       await uploadToDrive(`daily_sheet_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+
+    function submitData() {
+      const data = getFormData('daily-sheet-form');
+      data.row_count = rowCount;
+      DB.save('daily_sheet', data);
+
+      const tgl  = data.tanggal || new Date().toISOString().slice(0,10);
+      const hole = (data.hole_no || 'unknown').replace(/\s+/g,'_');
+      const filename = `DailySheet_${hole}_${tgl}.xls`;
+
+      // Build XLS
+      const headers = ['No','Waktu Mulai','Waktu Selesai','Aktivitas','Dari (m)','Ke (m)','Ket'];
+      let rows = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+      for (let i = 1; i <= rowCount; i++) {
+        rows += '<tr>';
+        rows += `<td>${i}</td>`;
+        rows += `<td>${data['waktu_mulai_'+i]||''}</td>`;
+        rows += `<td>${data['waktu_selesai_'+i]||''}</td>`;
+        rows += `<td>${data['aktivitas_'+i]||''}</td>`;
+        rows += `<td>${data['dari_'+i]||''}</td>`;
+        rows += `<td>${data['ke_'+i]||''}</td>`;
+        rows += `<td>${data['ket_'+i]||''}</td>`;
+        rows += '</tr>';
+      }
+
+      const info = `<tr><td colspan="7"><b>Tanggal:</b> ${data.tanggal||''} | <b>Shift:</b> ${data.shift||''} | <b>Hole No:</b> ${data.hole_no||''} | <b>Driller:</b> ${data.driller||''} | <b>Lokasi:</b> ${data.lokasi||''} | <b>Mesin:</b> ${data.mesin||''}</td></tr><tr><td colspan="7"></td></tr>`;
+
+      const html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>${info}${rows}</table></body></html>`;
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      showToast('✓ ' + filename + ' berhasil didownload!');
     }
 
     // Default 3 baris

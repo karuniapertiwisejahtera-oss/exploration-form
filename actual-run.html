@@ -405,8 +405,8 @@
       showToast('Form dikosongkan');
     }
 
-    async function submitData() {
-      if (!confirm('Submit data? PDF akan diupload ke Google Drive.')) return;
+    function submitData() {
+      if (!confirm('Submit data? PDF akan didownload ke HP.')) return;
 
       const data = getFormData('actual-run-form');
       data.row_count = rowCount;
@@ -416,14 +416,12 @@
 
       const kode     = (data.kode_ttk_bor || 'unknown').replace(/\s+/g, '_');
       const filename = `Act_Run_${kode}.pdf`;
-      const FOLDER_ID = '18jxhdFCqLAJBpzf3w2OlWOjSNEjPoKfQ';
 
       showToast('Membuat PDF...');
       try {
         const pdf  = generatePDF(data);
-        const blob = pdf.output('blob');
-        const fileId = await uploadFileToFolder(filename, blob, 'application/pdf', FOLDER_ID);
-        if (fileId) showToast('✓ PDF berhasil diupload ke Google Drive!');
+        pdf.save(filename);
+        showToast('✓ ' + filename + ' berhasil didownload!');
       } catch(e) {
         showToast('Error: ' + e.message, 'error');
       }

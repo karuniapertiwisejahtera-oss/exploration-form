@@ -101,7 +101,7 @@
   <div class="action-bar">
     <button class="btn btn-save" onclick="saveData()">💾 Save</button>
     <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
-    <button class="btn btn-upload" onclick="uploadData()">☁️ Upload</button>
+    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
   </div>
 
   <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -198,6 +198,40 @@
       saveData();
       const json = JSON.stringify(DB.getAll('logging'), null, 2);
       await uploadToDrive(`logging_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+
+    function submitData() {
+      saveData();
+      const data = getFormData('logging-form');
+      const hid  = (data.hole_id || 'unknown').replace(/\s+/g,'_');
+      const tgl  = data.tanggal || new Date().toISOString().slice(0,10);
+      const filename = `Logging_${hid}_${tgl}.xls`;
+
+      let rows = '<tr><th>No</th><th>Dari (m)</th><th>Ke (m)</th><th>Litologi</th><th>Warna</th><th>RQD (%)</th><th>Recovery (%)</th><th>Deskripsi</th></tr>';
+      for (let i = 1; i <= entryCount; i++) {
+        rows += `<tr>
+          <td>${i}</td>
+          <td>${data['log_'+i+'_dari']||''}</td>
+          <td>${data['log_'+i+'_ke']||''}</td>
+          <td>${data['log_'+i+'_litologi']||''}</td>
+          <td>${data['log_'+i+'_warna']||''}</td>
+          <td>${data['log_'+i+'_rqd']||''}</td>
+          <td>${data['log_'+i+'_recovery']||''}</td>
+          <td>${data['log_'+i+'_deskripsi']||''}</td>
+        </tr>`;
+      }
+
+      const info = `<tr><td colspan="8"><b>Hole ID:</b> ${data.hole_id||''} | <b>Tanggal:</b> ${data.tanggal||''} | <b>Geologist:</b> ${data.geologist||''} | <b>Proyek:</b> ${data.proyek||''}</td></tr>
+        <tr><td colspan="8"><b>Koordinat X:</b> ${data.coord_x||''} | <b>Y:</b> ${data.coord_y||''} | <b>Elevasi:</b> ${data.elevasi||''} m | <b>Azimuth:</b> ${data.azimuth||''}°</td></tr>
+        <tr><td colspan="8"></td></tr>`;
+
+      const html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>${info}${rows}</table></body></html>`;
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      showToast('✓ ' + filename + ' berhasil didownload!');
     }
 
     // Default 2 interval

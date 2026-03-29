@@ -129,8 +129,8 @@
       }
     }
 
-    async function submitData() {
-      if (!confirm('Submit data? PDF akan diupload ke Google Drive.')) return;
+    function submitData() {
+      if (!confirm('Submit data? PDF akan didownload ke HP.')) return;
 
       const data = getFormData('core-loss-form');
       DB.save('core_loss', data);
@@ -138,16 +138,11 @@
       const kode     = (data.hole_no || 'unknown').replace(/\s+/g, '_');
       const filename = `CL_${kode}.pdf`;
 
-      const ROOT_FOLDER = '1e5xBWUtcF4tAuF93e5p8fcJXWSVtDBcT';
-      const folderId = await pickFolder(ROOT_FOLDER, 'Pilih Folder Tujuan Core Loss');
-      if (!folderId) return;
-
       showToast('Membuat PDF...');
       try {
-        const pdf    = generateCoreLossPDF(data);
-        const blob   = pdf.output('blob');
-        const fileId = await uploadFileToFolder(filename, blob, 'application/pdf', folderId);
-        if (fileId) showToast('✓ PDF berhasil diupload ke Google Drive!');
+        const pdf = generateCoreLossPDF(data);
+        pdf.save(filename);
+        showToast('✓ ' + filename + ' berhasil didownload!');
       } catch(e) {
         showToast('Error: ' + e.message, 'error');
       }
