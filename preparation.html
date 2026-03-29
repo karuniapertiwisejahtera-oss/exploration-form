@@ -117,6 +117,10 @@
     .prep-table tr.row-qaqc td input,
     .prep-table tr.row-qaqc td select { color: maroon !important; font-weight: 700; }
 
+    /* Cell warning/error highlight */
+    .prep-table td input.cell-warn  { background: #fff3e0 !important; outline: 2px solid #ff9800 !important; }
+    .prep-table td input.cell-error { background: #ffebee !important; outline: 2px solid #e53935 !important; }
+
     /* Baris yang tergabung — hilangkan border bawah antar baris dalam grup, TANPA garis oranye */
     .prep-table tr.row-merged td {
       border-bottom: 1px dashed #ccc !important;
@@ -501,21 +505,23 @@
       showToast('Baris QAQC ' + jenis + ' ditambahkan');
     }
 
-    // Kunci Total & Rec saja pada baris non-pertama dalam grup gabung (Sample_ID tetap bisa diisi)
+    // Kunci hanya kolom Rec pada baris non-pertama dalam grup gabung
     function updateFracLock() {
       for (let i = 1; i <= rowCount; i++) {
         const tr = document.getElementById('prep-row-' + i);
         if (!tr) continue;
-        const lockCells = tr.querySelectorAll('td.frac-cell input[type="number"], td.frac-cell select.col-jenis');
+        // Hanya kunci input Rec (readonly) — Total tetap bisa diisi manual
+        const recFields = ['a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'];
+        const recEls = recFields.map(f => document.querySelector('[name="' + f + '_' + i + '"]')).filter(Boolean);
         // Kunci jika baris ada dalam grup gabung DAN from_cum tersembunyi (bukan baris pertama)
         const fcEl = document.getElementById('from_cum_' + i);
         const inMerge = tr.dataset.mergeGroup && fcEl && fcEl.closest('td').style.visibility === 'hidden';
         if (inMerge) {
           tr.classList.add('row-frac-locked');
-          lockCells.forEach(el => { el.disabled = true; });
+          recEls.forEach(el => { el.disabled = true; });
         } else {
           tr.classList.remove('row-frac-locked');
-          lockCells.forEach(el => { el.disabled = false; });
+          recEls.forEach(el => { el.disabled = false; });
         }
       }
     }
@@ -774,7 +780,6 @@
       const tr = document.getElementById('prep-row-' + rowNum);
       if (!tr) return;
       const mg = tr.dataset.mergeGroup || ('_single_' + rowNum);
-      // Kumpulkan semua baris dalam grup
       const groupRows = [];
       for (let i = 1; i <= rowCount; i++) {
         const t = document.getElementById('prep-row-' + i);
@@ -792,17 +797,48 @@
           if (fEl && fEl.value) totalWet += parseFloat(fEl.value) || 0;
         });
       });
+      // Reset semua cell warning di grup
+      groupRows.forEach(function(i) {
+        const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+        const cEl = document.querySelector('[name="core_wt_' + i + '"]');
+        if (dEl) dEl.classList.remove('cell-warn','cell-error');
+        if (cEl) cEl.classList.remove('cell-warn','cell-error');
+        FRAC_TOTS.forEach(function(f) {
+          const fEl = document.querySelector('[name="' + f + '_' + i + '"]');
+          if (fEl) fEl.classList.remove('cell-warn','cell-error');
+        });
+      });
       // Cek 1: selisih Core Wt vs Dry Wt >20%
       if (totalCoreWt > 0 && totalDryWt > 0) {
         const pct = Math.abs(totalCoreWt - totalDryWt) / totalCoreWt * 100;
-        if (pct > 20) showToast('⚠️ Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
+        if (pct > 20) {
+          groupRows.forEach(function(i) {
+            const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+            const cEl = document.querySelector('[name="core_wt_' + i + '"]');
+            if (dEl) dEl.classList.add('cell-warn');
+            if (cEl) cEl.classList.add('cell-warn');
+          });
+          showToast('⚠️ Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
+        }
       }
-      // Cek 2: Wet Total semua fraksi > Dry Wt
+      // Cek 2: Wet Total > Dry Wt
       if (totalDryWt > 0 && totalWet > totalDryWt) {
-        showToast('⚠️ Jumlah Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
+        groupRows.forEach(function(i) {
+          FRAC_TOTS.forEach(function(f) {
+            const fEl = document.querySelector('[name="' + f + '_' + i + '"]');
+            if (fEl && fEl.value) fEl.classList.add('cell-error');
+          });
+          const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+          if (dEl) dEl.classList.add('cell-error');
+        });
+        showToast('⚠️ Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
       }
       // Cek 3: Selisih Wet Total vs Dry Wt > 500
       if (totalDryWt > 0 && totalWet > 0 && Math.abs(totalWet - totalDryWt) > 500) {
+        groupRows.forEach(function(i) {
+          const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+          if (dEl) dEl.classList.add('cell-warn');
+        });
         showToast('⚠️ Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
       }
     }
@@ -812,9 +848,7 @@
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (!el) return;
         el.addEventListener('change', () => calcRec(n));
-        el.addEventListener('input',  () => {
-          if (el.dataset.autoRec === 'true') el.dataset.autoRec = 'false';
-        });
+        el.addEventListener('input',  () => { calcRec(n); });
       });
       // Rec fields: jika diedit manual → hapus flag autoRec
       ['a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'].forEach(field => {
@@ -824,6 +858,7 @@
       // Listener dry_wt dan core_wt untuk cek selisih >20%
       ['dry_wt','core_wt'].forEach(function(field) {
         const el = document.querySelector('[name="' + field + '_' + n + '"]');
+        if (el) el.addEventListener('input', function() { checkDryWtAlert(n); });
         if (el) el.addEventListener('change', function() { checkDryWtAlert(n); });
       });
       // Listener fraksi Total untuk cek Wet Total vs Dry Wt
