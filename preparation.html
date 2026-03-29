@@ -776,6 +776,24 @@
 
     // Pasang listener pada kolom Total untuk trigger kalkulasi Rec
     // ===== CEK SELISIH CORE WT vs DRY WT =====
+    function setCellTooltip(el, msg, cls) {
+      if (!el) return;
+      el.classList.add(cls || 'cell-warn');
+      el.title = msg;
+      const td = el.closest('td');
+      if (!td) return;
+      let tip = td.querySelector('.cell-tooltip');
+      if (!tip) { tip = document.createElement('div'); tip.className = 'cell-tooltip'; td.appendChild(tip); }
+      tip.textContent = msg;
+    }
+    function clearCellTooltip(el) {
+      if (!el) return;
+      const td = el.closest('td');
+      if (!td) return;
+      const tip = td.querySelector('.cell-tooltip');
+      if (tip) tip.remove();
+    }
+
     function checkDryWtAlert(rowNum) {
       const tr = document.getElementById('prep-row-' + rowNum);
       if (!tr) return;
@@ -797,16 +815,16 @@
           if (fEl && fEl.value) totalWet += parseFloat(fEl.value) || 0;
         });
       });
-      // Reset semua cell warning di grup
+      // Reset semua cell warning dan tooltip di grup
       groupRows.forEach(function(i) {
         const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
         const cEl = document.querySelector('[name="core_wt_' + i + '"]');
-        if (dEl) dEl.classList.remove('cell-warn','cell-error');
-        if (cEl) cEl.classList.remove('cell-warn','cell-error');
+        [dEl, cEl].forEach(function(el) { if (el) { el.classList.remove('cell-warn','cell-error'); el.title = ''; clearCellTooltip(el); } });
         FRAC_TOTS.forEach(function(f) {
           const fEl = document.querySelector('[name="' + f + '_' + i + '"]');
-          if (fEl) fEl.classList.remove('cell-warn','cell-error');
+          if (fEl) { fEl.classList.remove('cell-warn','cell-error'); fEl.title = ''; clearCellTooltip(fEl); }
         });
+      });
       });
       // Cek 1: selisih Core Wt vs Dry Wt >20%
       if (totalCoreWt > 0 && totalDryWt > 0) {
@@ -815,8 +833,8 @@
           groupRows.forEach(function(i) {
             const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
             const cEl = document.querySelector('[name="core_wt_' + i + '"]');
-            if (dEl) dEl.classList.add('cell-warn');
-            if (cEl) cEl.classList.add('cell-warn');
+            if (dEl) setCellTooltip(dEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
+            if (cEl) setCellTooltip(cEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
           });
           showToast('⚠️ Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
         }
@@ -826,10 +844,10 @@
         groupRows.forEach(function(i) {
           FRAC_TOTS.forEach(function(f) {
             const fEl = document.querySelector('[name="' + f + '_' + i + '"]');
-            if (fEl && fEl.value) fEl.classList.add('cell-error');
+            if (fEl && fEl.value) setCellTooltip(fEl, 'Wet Total > Dry Wt', 'cell-error');
           });
           const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
-          if (dEl) dEl.classList.add('cell-error');
+            if (dEl) setCellTooltip(dEl, 'Wet Total > Dry Wt', 'cell-error');
         });
         showToast('⚠️ Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
       }
@@ -837,7 +855,7 @@
       if (totalDryWt > 0 && totalWet > 0 && Math.abs(totalWet - totalDryWt) > 500) {
         groupRows.forEach(function(i) {
           const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
-          if (dEl) dEl.classList.add('cell-warn');
+            if (dEl) setCellTooltip(dEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
         });
         showToast('⚠️ Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
       }
