@@ -62,78 +62,76 @@
 
       <!-- ===== HEADER INFO ===== -->
       <div class="form-section">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tipe Daily Sheet</label>
-            <select id="tipe-sel" name="tipe" onchange="onTipeChange()" style="font-weight:700;color:#1a6b4a;">
-              <option value="Drilling">Drilling</option>
-              <option value="Preparation">Preparation</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Shift</label>
-            <select name="shift">
-              <option value="">Pilih</option>
-              <option>Pagi (06:00-18:00)</option>
-              <option>Malam (18:00-06:00)</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tanggal</label>
-            <input type="date" name="tanggal">
-          </div>
-          <div class="form-group">
-            <label>Hole No</label>
-            <input type="text" name="hole_no" placeholder="Hole No">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Driller / PIC</label>
-            <input type="text" name="driller" placeholder="Nama Driller / PIC">
-          </div>
-          <div class="form-group">
-            <label>Lokasi</label>
-            <input type="text" name="lokasi" placeholder="Lokasi">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Mesin</label>
-            <select name="mesin" id="mesin-sel" onchange="onMesinChange()">
-              <option value="">— Pilih Mesin —</option>
-              <option>LF-90</option>
-              <option>LF-90D</option>
-              <option>CS-1000</option>
-              <option>CS-1500</option>
-              <option>HYDRACORE 3000</option>
-            </select>
-          </div>
-        </div>
-      </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;">
 
-      <!-- ===== CREW ===== -->
-      <div class="form-section">
-        <div class="form-section-title">Data Crew</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Asisten Driller</label>
-            <input type="text" name="asisten_driller" placeholder="Nama Asisten Driller">
+          <!-- Kolom Kiri -->
+          <div>
+            <div class="form-group">
+              <label>Tipe Daily Sheet</label>
+              <select id="tipe-sel" name="tipe" onchange="onTipeChange()" style="font-weight:700;color:#1a6b4a;width:100%;">
+                <option value="Drilling">Drilling</option>
+                <option value="Preparation">Preparation</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tanggal</label>
+              <input type="date" name="tanggal" style="width:100%;">
+            </div>
+            <div class="form-group">
+              <label>Mesin</label>
+              <select name="mesin" id="mesin-sel" onchange="onMesinChange()" style="width:100%;">
+                <option value="">— Pilih Mesin —</option>
+                <option>LF-90</option>
+                <option>LF-90D</option>
+                <option>CS-1000</option>
+                <option>CS-1500</option>
+                <option>HYDRACORE 3000</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Hole ID</label>
+              <input type="text" name="hole_no" placeholder="Hole ID" style="width:100%;">
+            </div>
+            <div class="form-group">
+              <label>Lokasi</label>
+              <input type="text" name="lokasi" placeholder="Lokasi" style="width:100%;">
+            </div>
           </div>
+
+          <!-- Kolom Kanan -->
+          <div>
+            <div class="form-group">
+              <label>Shift</label>
+              <select name="shift" style="width:100%;">
+                <option value="">Pilih</option>
+                <option>Pagi (06:00-18:00)</option>
+                <option>Malam (18:00-06:00)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Driller / PIC</label>
+              <input type="text" name="driller" placeholder="Nama Driller / PIC" style="width:100%;">
+            </div>
+            <div class="form-group">
+              <label>Asisten Driller</label>
+              <input type="text" name="asisten_driller" placeholder="Nama Asisten Driller" style="width:100%;">
+            </div>
+            <div class="form-group">
+              <label>Crew</label>
+              <table class="crew-table" style="margin-top:4px;">
+                <thead>
+                  <tr>
+                    <th style="width:28px;">No</th>
+                    <th>Nama Crew</th>
+                  </tr>
+                </thead>
+                <tbody id="crew-body"></tbody>
+              </table>
+              <button type="button" onclick="addCrewRow()" style="margin-top:4px;background:#2e9e6e;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;">+ Tambah Crew</button>
+            </div>
+          </div>
+
         </div>
-        <table class="crew-table">
-          <thead>
-            <tr>
-              <th style="width:32px;">No</th>
-              <th>Nama Crew</th>
-              <th style="width:90px;">Jabatan</th>
-            </tr>
-          </thead>
-          <tbody id="crew-body"></tbody>
-        </table>
-        <button type="button" onclick="addCrewRow()" style="margin-top:6px;background:#2e9e6e;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer;">+ Tambah Crew</button>
       </div>
 
       <!-- ===== KEDALAMAN ===== -->
@@ -161,8 +159,8 @@
                 <th style="width:28px;">No</th>
                 <th style="width:72px;">Mulai</th>
                 <th style="width:72px;">Selesai</th>
-                <th>Aktivitas</th>
-                <th style="width:60px;">Ket</th>
+                <th style="width:160px;">Aktivitas</th>
+                <th>Keterangan</th>
               </tr>
             </thead>
             <tbody id="activity-body"></tbody>
@@ -335,9 +333,8 @@
       const tbody = document.getElementById('crew-body');
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${crewCount}</td>
+        <td style="text-align:center;font-size:10px;color:#999;">${crewCount}</td>
         <td><input type="text" name="crew_nama_${crewCount}" placeholder="Nama Crew"></td>
-        <td><input type="text" name="crew_jabatan_${crewCount}" placeholder="Jabatan"></td>
       `;
       tbody.appendChild(tr);
     }
