@@ -201,7 +201,25 @@
       font-weight: 600; cursor: pointer;
     }
     .btn-add { background: #4db6ac; color: white; }
-  </style>
+  
+    /* ===== PRINT / PDF ===== */
+    @media print {
+      body * { visibility: hidden; }
+      .print-area, .print-area * { visibility: visible; }
+      .print-area {
+        position: absolute; top: 0; left: 0; width: 100%;
+      }
+      .print-header { margin-bottom: 10px; font-size: 11px; }
+      .print-header table { width: 100%; border-collapse: collapse; }
+      .print-header td { padding: 2px 6px; font-size: 11px; }
+      .prep-wrap { max-height: none !important; overflow: visible !important; }
+      .prep-table { font-size: 9px; }
+      .prep-table th, .prep-table td { padding: 2px 3px; }
+      .btn-merge, .btn-del-row, .merge-check { display: none !important; }
+      .prep-table th.col-freeze, .prep-table td.col-freeze { position: static !important; }
+      @page { size: landscape; margin: 8mm; }
+    }
+</style>
 </head>
 <body>
   <div class="page-header">
@@ -209,6 +227,7 @@
     <h1>Sample Preparation Form</h1>
   </div>
 
+  <div class="print-area">
   <div class="form-container">
     <div class="form-section">
 
@@ -311,9 +330,9 @@
     </div>
   </div>
 
+  </div><!-- /print-area -->
   <div class="action-bar">
     <button class="btn" style="background:#1a6b4a;color:white;" onclick="openWeightInput()">&#9878; Input Weight</button>
-    <button class="btn btn-add"    onclick="addRow()">+ Baris</button>
     <button class="btn" style="background:#e91e8c;color:white;" onclick="addQAQCRow('DS')">+ DS</button>
     <button class="btn" style="background:#9c27b0;color:white;" onclick="addQAQCRow('BS')">+ BS</button>
     <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
@@ -1772,7 +1791,15 @@
       const a    = document.createElement('a');
       a.href = url; a.download = fileName; a.click();
       URL.revokeObjectURL(url);
-      showToast('✓ ' + fileName + ' berhasil didownload!');
+      showToast('✓ ' + fileName + ' didownload! Menyiapkan PDF...');
+
+      // Download PDF via print dialog (setelah XLS selesai)
+      setTimeout(function() { printFormPDF(); }, 800);
+    }
+
+    // ===== PRINT PDF =====
+    function printFormPDF() {
+      window.print();
     }
 
     // ===== RESTORE MERGE VISIBILITY SETELAH LOAD =====
