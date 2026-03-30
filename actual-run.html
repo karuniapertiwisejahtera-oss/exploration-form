@@ -71,8 +71,13 @@
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 5px 8px;
+      gap: 2px 8px;
       margin-bottom: 10px;
+      background: linear-gradient(135deg, #f0f9f4, #e8f5ee);
+      border: 1.5px solid #a8d5b5;
+      border-radius: 8px;
+      padding: 8px 10px;
+      box-shadow: 0 1px 4px rgba(26,107,74,0.08);
     }
 
     .info-row {
@@ -80,26 +85,38 @@
       align-items: center;
       gap: 3px;
       min-width: 0;
+      padding: 3px 6px;
+      border-radius: 4px;
+      transition: background 0.15s;
     }
+    .info-row:hover { background: #f0f7f4; }
 
     .info-row label {
       font-weight: 700;
       white-space: nowrap;
       font-size: 12px;
       flex-shrink: 0;
+      color: #1a6b4a;
     }
 
     .info-row input {
       flex: 1;
       border: none;
-      border-bottom: 1px solid #999;
+      border-bottom: 2px solid #a8d5b5;
       outline: none;
       font-size: 12px;
-      padding: 2px 2px;
+      padding: 2px 4px;
       background: transparent;
       min-width: 0;
-      text-transform: uppercase;width: 0;
+      text-transform: uppercase;
+      color: #1a2e22;
+      font-weight: 600;
       width: 0;
+    }
+    .info-row input:focus {
+      border-bottom-color: #1a6b4a;
+      background: #f0f7f4;
+      border-radius: 3px 3px 0 0;
     }
 
     /* date input lebih compact */
@@ -113,26 +130,37 @@
       justify-content: flex-end;
       align-items: center;
       gap: 6px;
-      font-size: 9.5px;
+      font-size: 10px;
+      font-weight: 600;
+      color: #1a6b4a;
       margin-bottom: 8px;
     }
 
     .page-info input {
       width: 28px;
       border: none;
-      border-bottom: 1px solid #999;
+      border-bottom: 2px solid #a8d5b5;
       text-align: center;
-      font-size: 9.5px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #1a6b4a;
       outline: none;
       padding: 1px 2px;
+      background: transparent;
     }
 
     .form-title {
       text-align: center;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 800;
-      text-decoration: underline;
-      margin-bottom: 8px;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #1a6b4a, #2e9e6e);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(26,107,74,0.25);
       color: #111;
     }
 
