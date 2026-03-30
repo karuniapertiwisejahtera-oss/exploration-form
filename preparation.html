@@ -754,7 +754,7 @@
       };
       const set = (name, val) => {
         const el = document.querySelector(`[name="${name}_${rowNum}"]`);
-        if (el && (el.value === '' || el.dataset.autoRec === 'true')) {
+        if (el) {
           el.value = val !== '' ? val : '';
           el.dataset.autoRec = val !== '' ? 'true' : 'false';
         }
@@ -766,7 +766,14 @@
       const tm06 = get('m06_tot');  // +0.3-0.6 mm
       const sum3 = t10 + t2 + t06 + tm06;
 
-      if (sum3 === 0) return; // belum ada data
+      if (sum3 === 0) {
+        // Kosongkan semua Rec jika semua Total kosong
+        ['a10_rec','a2_rec','a06_rec','m06_rec'].forEach(function(f) {
+          const el = document.querySelector('[name="' + f + '_' + rowNum + '"]');
+          if (el) { el.value = ''; el.dataset.autoRec = 'false'; }
+        });
+        return;
+      }
 
       // Jika sum < 500 → ×250, selain itu → ×500
       const mult = sum3 >= 1000 ? 1000 : (sum3 >= 500 ? 500 : 250);
