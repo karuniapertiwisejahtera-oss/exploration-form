@@ -120,6 +120,17 @@
     /* Cell warning/error highlight */
     .prep-table td input.cell-warn  { background: #fff3e0 !important; outline: 2px solid #ff9800 !important; }
     .prep-table td input.cell-error { background: #ffebee !important; outline: 2px solid #e53935 !important; }
+    /* Popup tooltip cell bermasalah */
+    .cell-popup {
+      position: fixed; z-index: 9999;
+      padding: 7px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      pointer-events: none; max-width: 240px;
+      line-height: 1.4; white-space: normal;
+    }
+    .cell-popup.warn  { background: #e65100; }
+    .cell-popup.error { background: #c62828; }
 
     /* Baris yang tergabung — hilangkan border bawah antar baris dalam grup, TANPA garis oranye */
     .prep-table tr.row-merged td {
@@ -776,22 +787,49 @@
 
     // Pasang listener pada kolom Total untuk trigger kalkulasi Rec
     // ===== CEK SELISIH CORE WT vs DRY WT =====
+    // Popup singleton
+    let _cellPopup = null;
+    function _getPopup() {
+      if (!_cellPopup) {
+        _cellPopup = document.createElement('div');
+        _cellPopup.className = 'cell-popup';
+        _cellPopup.style.display = 'none';
+        document.body.appendChild(_cellPopup);
+      }
+      return _cellPopup;
+    }
+    function _showPopup(el, msg, cls) {
+      const popup = _getPopup();
+      popup.textContent = msg;
+      popup.className = 'cell-popup ' + (cls === 'cell-error' ? 'error' : 'warn');
+      const rect = el.getBoundingClientRect();
+      popup.style.display = 'block';
+      popup.style.left = rect.left + 'px';
+      popup.style.top  = (rect.top - popup.offsetHeight - 8) + 'px';
+    }
+    function _hidePopup() {
+      const popup = _getPopup();
+      popup.style.display = 'none';
+    }
+
     function setCellTooltip(el, msg, cls) {
       if (!el) return;
       el.classList.add(cls || 'cell-warn');
-      el.title = msg;
-      const td = el.closest('td');
-      if (!td) return;
-      let tip = td.querySelector('.cell-tooltip');
-      if (!tip) { tip = document.createElement('div'); tip.className = 'cell-tooltip'; td.appendChild(tip); }
-      tip.textContent = msg;
+      el.dataset.cellMsg = msg;
+      el.dataset.cellCls = cls || 'cell-warn';
+      // Pasang listener popup jika belum
+      if (!el._popupBound) {
+        el.addEventListener('mouseenter', function() { _showPopup(el, el.dataset.cellMsg, el.dataset.cellCls); });
+        el.addEventListener('focus',      function() { _showPopup(el, el.dataset.cellMsg, el.dataset.cellCls); });
+        el.addEventListener('mouseleave', _hidePopup);
+        el.addEventListener('blur',       _hidePopup);
+        el._popupBound = true;
+      }
     }
     function clearCellTooltip(el) {
       if (!el) return;
-      const td = el.closest('td');
-      if (!td) return;
-      const tip = td.querySelector('.cell-tooltip');
-      if (tip) tip.remove();
+      delete el.dataset.cellMsg;
+      delete el.dataset.cellCls;
     }
 
     function checkDryWtAlert(rowNum) {
