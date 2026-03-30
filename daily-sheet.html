@@ -259,10 +259,13 @@
         sel.innerHTML = '<option value="">— Pilih —</option>' + buildAktivitasOpts();
         if (cur) sel.value = cur;
       });
+      // Refresh checklist sesuai tipe
+      const mesin = document.getElementById('mesin-sel') ? document.getElementById('mesin-sel').value : '';
+      initChecklist(mesin);
     }
 
     // ===== CHECKLIST ALAT =====
-    const ALAT_LIST = [
+    const ALAT_DRILLING = [
       'ROD HQ3 3 meter','ROD HQ3 1.5 meter','Core Barrel','Locking Coupling',
       'Pipa Adaptor','Overshoot','Inner Tube','Back Hand','Safety Inner',
       'Safety Bowl (Mangkok Safety)','Kuda-Kuda','Water Pass','Sepatu Jacking',
@@ -272,6 +275,21 @@
       'Polymer','Sign Board Utama','Sign Board "Muster Point"',
       'Sign Board "Penunjuk Arah Rig"','Sign Board "Tanda Bahaya"','','',' '
     ];
+
+    const ALAT_PREPARATION = [
+      'Tray','Etriber Stainlis','Ayakan Besar Mesh +10','Ayakan Besar Mesh +2',
+      'Ayakan Besar Mesh +0.6','Ayakan Besar Mesh +0.3','Arko','Kipas Angin',
+      'Skop','Pacul','Kalkulator','Mistar','Spliter 1 Set','Ember Plastik',
+      'Selang Air 10 M','Ayakan Kecil +0.3','Apar','Sendok Semen',
+      'Timbangan Digital','Whiteboard','Shieve Shaker Besar','Shieve Shaker Kecil',
+      'Steker','Apron','','','','','','','','','','',''
+    ];
+
+    function getAlatList() {
+      const tipe = document.getElementById('tipe-sel') ? document.getElementById('tipe-sel').value : 'Drilling';
+      return tipe === 'Preparation' ? ALAT_PREPARATION : ALAT_DRILLING;
+    }
+
 
     // Jumlah default per mesin (bisa dikustomisasi)
     const MESIN_QTY = {
@@ -290,7 +308,7 @@
       const tbody = document.getElementById('chk-body');
       tbody.innerHTML = '';
       const qtys = MESIN_QTY[mesin] || [];
-      ALAT_LIST.forEach((nama, i) => {
+      getAlatList().forEach((nama, i) => {
         const no = i + 1;
         const qty = qtys[i] !== undefined ? qtys[i] : '';
         const tr = document.createElement('tr');
@@ -399,7 +417,7 @@
 
       // Checklist
       html += `<tr><th>No</th><th>Nama Alat</th><th>Jumlah</th><th>Baik</th><th>Rusak</th><th>Keterangan</th></tr>`;
-      for (let i = 1; i <= ALAT_LIST.length; i++) {
+      for (let i = 1; i <= getAlatList().length; i++) {
         html += `<tr><td>${i}</td><td>${data['alat_nama_'+i]||''}</td><td>${data['alat_qty_'+i]||''}</td><td>${data['alat_baik_'+i]||''}</td><td>${data['alat_rusak_'+i]||''}</td><td>${data['alat_ket_'+i]||''}</td></tr>`;
       }
       html += `<tr><td colspan="6"></td></tr>`;
