@@ -42,6 +42,7 @@
     .run-table col.c-ttd     { width: 15%; }
 
     .run-table td input {
+      text-transform: uppercase;
       width: 100%;
       border: none;
       outline: none;
@@ -97,6 +98,7 @@
       padding: 2px 2px;
       background: transparent;
       min-width: 0;
+      text-transform: uppercase;width: 0;
       width: 0;
     }
 
@@ -484,14 +486,14 @@
           doc.setFont('helvetica', 'bold');
           doc.text(lbl, margin, y + i * 6);
           doc.setFont('helvetica', 'normal');
-          doc.text(leftValues[i] || '—', margin + 28, y + i * 6);
+          doc.text((leftValues[i] || '—').toString().toUpperCase(), margin + 28, y + i * 6);
           doc.setLineWidth(0.2);
           doc.line(margin + 28, y + i * 6 + 0.5, margin + 80, y + i * 6 + 0.5);
 
           doc.setFont('helvetica', 'bold');
           doc.text(rightLabels[i], pageW / 2 + 2, y + i * 6);
           doc.setFont('helvetica', 'normal');
-          doc.text(rightValues[i] || '—', pageW / 2 + 38, y + i * 6);
+          doc.text((rightValues[i] || '—').toString().toUpperCase(), pageW / 2 + 38, y + i * 6);
           doc.line(pageW / 2 + 38, y + i * 6 + 0.5, pageW - margin, y + i * 6 + 0.5);
         });
         y += 28;
@@ -549,7 +551,7 @@
           ];
           cols.forEach((col, ci) => {
             doc.rect(x, y, col.w, rowH);
-            if (vals[ci]) doc.text(String(vals[ci]), x + col.w / 2, y + rowH / 2 + 1, { align: 'center' });
+            if (vals[ci]) doc.text(String(vals[ci]).toUpperCase(), x + col.w / 2, y + rowH / 2 + 1, { align: 'center' });
             x += col.w;
           });
           y += rowH;
@@ -558,14 +560,14 @@
         // ---- TANDA TANGAN (halaman terakhir saja) ----
         if (page === totalPages - 1) {
           y += 8;
-          const signW = 70;
-          const signH = 25;
+          const signW = 50;
+          const signH = 18;
 
           // Driller
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(8);
           doc.text('Driller', margin + signW / 2, y, { align: 'center' });
-          doc.text(data.driller_nama || '', margin + signW / 2, y + 5, { align: 'center' });
+          doc.text((data.driller_nama || '').toUpperCase(), margin + signW / 2, y + 5, { align: 'center' });
           doc.rect(margin, y + 7, signW, signH);
 
           // Gambar TTD driller jika ada
@@ -578,7 +580,7 @@
           // Geos Lap
           const gx = margin + signW + 20;
           doc.text('Geos Lap', gx + signW / 2, y, { align: 'center' });
-          doc.text(data.geos_nama || '', gx + signW / 2, y + 5, { align: 'center' });
+          doc.text((data.geos_nama || '').toUpperCase(), gx + signW / 2, y + 5, { align: 'center' });
           doc.rect(gx, y + 7, signW, signH);
 
           if (data.ttd_geos && data.ttd_geos.startsWith('data:image')) {
