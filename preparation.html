@@ -136,8 +136,15 @@
     .prep-table tr.row-merged td {
       border-bottom: 1px dashed #ccc !important;
     }
-    /* Baris terakhir dalam grup — tampilkan border bawah solid kembali */
+    /* Baris terakhir dalam grup — border bawah solid tebal */
     .prep-table tr.row-merged-last td {
+      border-bottom: 2px solid #888 !important;
+    }
+    /* Kolom From_Cum & To_Cum: border atas pada baris pertama grup, border bawah pada baris terakhir */
+    .prep-table tr.row-merged-first td.td-cum {
+      border-top: 2px solid #888 !important;
+    }
+    .prep-table tr.row-merged-last td.td-cum {
       border-bottom: 2px solid #888 !important;
     }
 
@@ -477,7 +484,7 @@
         const mg = tr.dataset.mergeGroup;
         // Lepas dari grup tanpa confirm
         document.querySelectorAll('tr[data-merge-group="' + mg + '"]').forEach(function(r) {
-          r.classList.remove('row-merged', 'row-merged-last');
+          r.classList.remove('row-merged', 'row-merged-last', 'row-merged-first');
           delete r.dataset.mergeGroup;
           const n = r.dataset.row;
           const fcEl = document.getElementById('from_cum_' + n);
@@ -1175,7 +1182,8 @@
         const tr = document.getElementById('prep-row-' + n);
         if (!tr) return;
         tr.classList.add('row-merged');
-        tr.classList.remove('row-merged-last');
+        tr.classList.remove('row-merged-last', 'row-merged-first');
+        if (idx === 0) tr.classList.add('row-merged-first');
         tr.dataset.mergeGroup = groupId;
 
         const fcEl = document.getElementById('from_cum_' + n);
@@ -1214,7 +1222,7 @@
     function unmerge(groupId) {
       if (!confirm('Lepas gabungan baris ini?')) return;
       document.querySelectorAll(`tr[data-merge-group="${groupId}"]`).forEach(tr => {
-        tr.classList.remove('row-merged', 'row-merged-last');
+        tr.classList.remove('row-merged', 'row-merged-last', 'row-merged-first');
         delete tr.dataset.mergeGroup;
         const n = tr.dataset.row;
         const fcEl = document.getElementById('from_cum_' + n);
@@ -1773,8 +1781,9 @@
           const btnEl = tr ? tr.querySelector('.btn-merge') : null;
           // Pastikan class row-merged ada
           if (tr) tr.classList.add('row-merged');
-          // Tandai baris terakhir grup
+          // Tandai baris pertama dan terakhir grup
           if (n === lastRow && tr) tr.classList.add('row-merged-last');
+          if (idx === 0 && tr) tr.classList.add('row-merged-first');
           if (idx === 0) {
             if (fcEl) fcEl.closest('td').style.visibility = 'visible';
             if (tcEl) tcEl.closest('td').style.visibility = 'visible';
