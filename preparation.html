@@ -1389,14 +1389,25 @@
         const el = document.querySelector('[name="' + k + '"]');
         if (el) data[k] = el.value;
       });
-      data.row_count = rowCount;
-      // Simpan merge group per baris
-      for (let i = 1; i <= rowCount; i++) {
-        const tr = document.getElementById('prep-row-' + i);
-        if (tr && tr.dataset.mergeGroup) data['merge_group_' + i] = tr.dataset.mergeGroup;
-      }
-      document.querySelectorAll('#prep-table input, #prep-table select').forEach(el => {
-        if (el.name) data[el.name] = el.value;
+
+      // Simpan berdasarkan urutan DOM agar baris Q tetap pada posisi yang benar
+      const FIELDS = [
+        'from','to','len','rec','grain','core_wt','from_cum','to_cum',
+        'samp_no','send_cum','sample_id','dry_wt',
+        'a10_tot','a10_rec','a10_sid','a2_tot','a2_rec','a2_sid',
+        'a06_tot','a06_rec','a06_sid','m06_tot','m06_rec','m06_sid',
+        'p03_tot','p03_rec','p03_sid','qaqc_sid','qaqc_wt','jenis','remarks'
+      ];
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      data.row_count = domRows.length;
+      domRows.forEach((tr, idx) => {
+        const pos = idx + 1;
+        const origN = tr.dataset.row;
+        if (tr.dataset.mergeGroup) data['merge_group_' + pos] = tr.dataset.mergeGroup;
+        FIELDS.forEach(field => {
+          const el = document.querySelector('[name="' + field + '_' + origN + '"]');
+          data[field + '_' + pos] = el ? el.value : '';
+        });
       });
       if (window._editRecordId) {
         DB.delete('preparation', window._editRecordId);
