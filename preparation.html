@@ -854,7 +854,7 @@
       if (totalDryWt > 0 && totalWet > 0 && Math.abs(totalWet - totalDryWt) > 500) {
         groupRows.forEach(function(i) {
           const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
-            if (dEl) setCellTooltip(dEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
+            if (dEl) setCellTooltip(dEl, 'Selisih Wet Total & Dry Wt > 500', 'cell-warn');
         });
         showToast('⚠️ Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
       }
