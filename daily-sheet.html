@@ -316,8 +316,8 @@
           <td>${no}</td>
           <td class="nama-alat"><input type="text" name="alat_nama_${no}" value="${nama}"></td>
           <td><input type="number" name="alat_qty_${no}" value="${qty}" min="0"></td>
-          <td><input type="checkbox" name="alat_baik_${no}"></td>
-          <td><input type="checkbox" name="alat_rusak_${no}"></td>
+          <td><input type="number" name="alat_baik_${no}" min="0" style="width:40px;border:none;outline:none;font-size:11px;text-align:center;background:transparent;"></td>
+          <td><input type="number" name="alat_rusak_${no}" min="0" style="width:40px;border:none;outline:none;font-size:11px;text-align:center;background:transparent;"></td>
           <td><input type="text" name="alat_ket_${no}" placeholder="-"></td>
         `;
         tbody.appendChild(tr);
@@ -367,10 +367,6 @@
       const data = getFormData('daily-sheet-form');
       data.row_count = rowCount;
       data.crew_count = crewCount;
-      // Simpan status checkbox
-      document.querySelectorAll('#chk-body input[type=checkbox]').forEach(cb => {
-        data[cb.name] = cb.checked ? '1' : '0';
-      });
       DB.save('daily_sheet', data);
       showToast('Daily Sheet tersimpan!');
     }
@@ -391,9 +387,6 @@
     function submitData() {
       const data = getFormData('daily-sheet-form');
       data.row_count = rowCount;
-      document.querySelectorAll('#chk-body input[type=checkbox]').forEach(cb => {
-        data[cb.name] = cb.checked ? '✓' : '';
-      });
       DB.save('daily_sheet', data);
 
       const tgl  = data.tanggal || new Date().toISOString().slice(0,10);
