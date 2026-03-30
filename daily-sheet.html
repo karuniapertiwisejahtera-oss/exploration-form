@@ -8,6 +8,13 @@
   <style>
     .sheet-scroll { overflow-x: auto; }
     .sheet-table { min-width: 600px; }
+    .sheet-table td select.aktivitas-sel {
+      width: 100%; border: none; outline: none; font-size: 11px;
+      background: transparent; cursor: pointer; padding: 2px;
+      color: #c0392b; font-weight: 600;
+    }
+    .sheet-table td select.aktivitas-sel option { color: #c0392b; font-weight: 600; }
+    .sheet-table td select.aktivitas-sel option[value=""] { color: #999; font-weight: 400; }
   </style>
 </head>
 <body>
@@ -113,6 +120,33 @@
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
   <script>
+    const AKTIVITAS_LIST = [
+      'Travel',
+      'Safety Talk',
+      'Waiting Transportation',
+      'Engine Check',
+      'Fueling',
+      'Drilling',
+      'Water Problem',
+      'Waiting Corebox',
+      'Pull out Rod',
+      'Waiting Dozer',
+      'Moving & Setting',
+      'Resting',
+      'Technical Problem',
+      'Mechanical Problem',
+      'Wait Supv',
+      'Permit',
+      'Weather Condition',
+      'Day Off',
+      'Mobilization',
+      'Reporting',
+    ];
+
+    const AKTIVITAS_OPTS = AKTIVITAS_LIST.map(a =>
+      `<option value="${a}">${a}</option>`
+    ).join('');
+
     let rowCount = 0;
 
     function addRow() {
@@ -124,7 +158,12 @@
         <td style="text-align:center;font-size:11px;color:#999;">${rowCount}</td>
         <td><input type="time" name="waktu_mulai_${rowCount}"></td>
         <td><input type="time" name="waktu_selesai_${rowCount}"></td>
-        <td><input type="text" name="aktivitas_${rowCount}" placeholder="Aktivitas"></td>
+        <td>
+          <select name="aktivitas_${rowCount}" class="aktivitas-sel">
+            <option value="">— Pilih Aktivitas —</option>
+            ${AKTIVITAS_OPTS}
+          </select>
+        </td>
         <td><input type="number" name="dari_${rowCount}" placeholder="0"></td>
         <td><input type="number" name="ke_${rowCount}" placeholder="0"></td>
         <td><input type="text" name="ket_${rowCount}" placeholder="-"></td>
