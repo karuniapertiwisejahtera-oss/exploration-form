@@ -486,8 +486,8 @@
           const n = r.dataset.row;
           const fcEl = document.getElementById('from_cum_' + n);
           const tcEl = document.getElementById('to_cum_' + n);
-          if (fcEl) { fcEl.value = ''; fcEl.closest('td').style.visibility = 'visible'; }
-          if (tcEl) { tcEl.value = ''; tcEl.closest('td').style.visibility = 'visible'; }
+          if (fcEl) { fcEl.value = ''; fcEl.style.visibility = 'visible'; }
+          if (tcEl) { tcEl.value = ''; tcEl.style.visibility = 'visible'; }
           const btnEl = r.querySelector('.btn-merge');
           if (btnEl) { btnEl.textContent = '🔗'; btnEl.style.visibility = 'visible'; btnEl.onclick = function() { startMerge(parseInt(n), btnEl); }; }
         });
@@ -585,7 +585,7 @@
         const recEls = recFields.map(f => document.querySelector('[name="' + f + '_' + i + '"]')).filter(Boolean);
         // Kunci jika baris ada dalam grup gabung DAN from_cum tersembunyi (bukan baris pertama)
         const fcEl = document.getElementById('from_cum_' + i);
-        const inMerge = tr.dataset.mergeGroup && fcEl && fcEl.closest('td').style.visibility === 'hidden';
+        const inMerge = tr.dataset.mergeGroup && fcEl && fcEl.style.visibility === 'hidden';
         if (inMerge) {
           tr.classList.add('row-frac-locked');
           recEls.forEach(el => { el.disabled = true; });
@@ -626,7 +626,7 @@
         const fcEl = document.getElementById('from_cum_' + i);
         const snEl = document.querySelector(`[name="samp_no_${i}"]`);
         if (!snEl) continue;
-        const hasCum = fcEl && fcEl.closest('td').style.visibility !== 'hidden' && fcEl.value !== '';
+        const hasCum = fcEl && fcEl.style.visibility !== 'hidden' && fcEl.value !== '';
         if (!hasCum) continue;
 
         const tr = document.getElementById('prep-row-' + i);
@@ -1189,13 +1189,13 @@
 
         if (idx === 0) {
           // Baris pertama: tampilkan From_Cum & To_Cum, tombol jadi unlock
-          if (fcEl) { fcEl.value = fromCum; fcEl.closest('td').style.visibility = 'visible'; }
-          if (tcEl) { tcEl.value = toCum;   tcEl.closest('td').style.visibility = 'visible'; }
+          if (fcEl) { fcEl.value = fromCum; fcEl.style.visibility = 'visible'; }
+          if (tcEl) { tcEl.value = toCum;   tcEl.style.visibility = 'visible'; }
           if (btnEl) { btnEl.textContent = '🔓'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.classList.remove('active'); }
         } else {
           // Baris lain: sembunyikan From_Cum & To_Cum
-          if (fcEl) { fcEl.value = fromCum; fcEl.closest('td').style.visibility = 'hidden'; }
-          if (tcEl) { tcEl.value = toCum;   tcEl.closest('td').style.visibility = 'hidden'; }
+          if (fcEl) { fcEl.value = fromCum; fcEl.style.visibility = 'hidden'; }
+          if (tcEl) { tcEl.value = toCum;   tcEl.style.visibility = 'hidden'; }
           if (btnEl) { btnEl.style.visibility = 'hidden'; }
         }
       });
@@ -1224,8 +1224,8 @@
         const n = tr.dataset.row;
         const fcEl = document.getElementById('from_cum_' + n);
         const tcEl = document.getElementById('to_cum_' + n);
-        if (fcEl) { fcEl.value = ''; fcEl.closest('td').style.visibility = 'visible'; }
-        if (tcEl) { tcEl.value = ''; tcEl.closest('td').style.visibility = 'visible'; }
+        if (fcEl) { fcEl.value = ''; fcEl.style.visibility = 'visible'; }
+        if (tcEl) { tcEl.value = ''; tcEl.style.visibility = 'visible'; }
         // Hapus Samp_No yang terisi otomatis
         const snEl = document.querySelector(`[name="samp_no_${n}"]`);
         if (snEl && snEl.dataset.auto === 'true') { snEl.value = ''; }
@@ -1793,12 +1793,12 @@
           if (n === lastRow && tr) tr.classList.add('row-merged-last');
           if (idx === 0 && tr) tr.classList.add('row-merged-first');
           if (idx === 0) {
-            if (fcEl) fcEl.closest('td').style.visibility = 'visible';
-            if (tcEl) tcEl.closest('td').style.visibility = 'visible';
+            if (fcEl) fcEl.style.visibility = 'visible';
+            if (tcEl) tcEl.style.visibility = 'visible';
             if (btnEl) { btnEl.textContent = '🔓'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.style.visibility = 'visible'; }
           } else {
-            if (fcEl) fcEl.closest('td').style.visibility = 'hidden';
-            if (tcEl) tcEl.closest('td').style.visibility = 'hidden';
+            if (fcEl) fcEl.style.visibility = 'hidden';
+            if (tcEl) tcEl.style.visibility = 'hidden';
             if (btnEl) btnEl.style.visibility = 'hidden';
           }
         });
