@@ -6,15 +6,49 @@
   <title>Daily Sheet Control</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .sheet-scroll { overflow-x: auto; }
-    .sheet-table { min-width: 600px; }
-    .sheet-table td select.aktivitas-sel {
-      width: 100%; border: none; outline: none; font-size: 11px;
-      background: transparent; cursor: pointer; padding: 2px;
-      color: #c0392b; font-weight: 600;
+    .sheet-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .sheet-table { min-width: 560px; width: 100%; border-collapse: collapse; font-size: 11px; }
+    .sheet-table th, .sheet-table td {
+      border: 1px solid #ccc; padding: 4px 5px; text-align: center; vertical-align: middle;
     }
+    .sheet-table thead th { background: #1a6b4a; color: white; font-size: 10px; }
+    .sheet-table td input, .sheet-table td select {
+      width: 100%; border: none; outline: none; font-size: 11px;
+      background: transparent; padding: 1px 2px; text-align: center; text-transform: uppercase;
+    }
+    .sheet-table td select.aktivitas-sel { color: #c0392b; font-weight: 600; cursor: pointer; }
     .sheet-table td select.aktivitas-sel option { color: #c0392b; font-weight: 600; }
     .sheet-table td select.aktivitas-sel option[value=""] { color: #999; font-weight: 400; }
+
+    /* Crew table */
+    .crew-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 6px; }
+    .crew-table th, .crew-table td {
+      border: 1px solid #ccc; padding: 4px 6px; text-align: center;
+    }
+    .crew-table thead th { background: #2e9e6e; color: white; font-size: 10px; }
+    .crew-table td input { width: 100%; border: none; outline: none; font-size: 11px; background: transparent; text-transform: uppercase; }
+
+    /* Checklist table */
+    .chk-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .chk-table th, .chk-table td { border: 1px solid #ccc; padding: 3px 5px; }
+    .chk-table thead th { background: #1a6b4a; color: white; font-size: 10px; text-align: center; }
+    .chk-table td { text-align: center; }
+    .chk-table td.nama-alat { text-align: left; }
+    .chk-table td input[type=number] { width: 50px; border: none; outline: none; font-size: 11px; text-align: center; background: transparent; }
+    .chk-table td input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #1a6b4a; }
+    .chk-table td input[type=text] { width: 100%; border: none; outline: none; font-size: 11px; background: transparent; }
+
+    /* Sign section */
+    .sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    .sign-box { border: 1px solid #ccc; border-radius: 6px; padding: 8px; font-size: 11px; }
+    .sign-box label { font-weight: 700; color: #1a6b4a; font-size: 11px; display: block; margin-bottom: 4px; }
+    .sign-box input { width: 100%; border: none; border-bottom: 1px solid #aaa; outline: none; font-size: 11px; padding: 2px; background: transparent; text-transform: uppercase; margin-bottom: 4px; }
+
+    .depth-row { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .depth-row .depth-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #1a6b4a; }
+    .depth-row .depth-item input { border: none; border-bottom: 2px solid #1a6b4a; outline: none; font-size: 13px; font-weight: 700; width: 80px; text-align: center; padding: 2px; background: transparent; }
+
+    .note-box { background: #fffde7; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 10px; font-size: 10px; color: #555; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -25,6 +59,8 @@
 
   <div class="form-container">
     <form id="daily-sheet-form">
+
+      <!-- ===== HEADER INFO ===== -->
       <div class="form-section">
         <div class="form-row">
           <div class="form-group">
@@ -57,55 +93,119 @@
           </div>
           <div class="form-group">
             <label>Mesin</label>
-            <input type="text" name="mesin" placeholder="No Mesin">
+            <select name="mesin" id="mesin-sel" onchange="onMesinChange()">
+              <option value="">— Pilih Mesin —</option>
+              <option>LF-90</option>
+              <option>LF-90D</option>
+              <option>CS-1000</option>
+              <option>CS-1500</option>
+              <option>HYDRACORE 3000</option>
+            </select>
           </div>
         </div>
       </div>
 
-      <!-- Tabel Aktivitas -->
+      <!-- ===== CREW ===== -->
+      <div class="form-section">
+        <div class="form-section-title">Data Crew</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Asisten Driller</label>
+            <input type="text" name="asisten_driller" placeholder="Nama Asisten Driller">
+          </div>
+        </div>
+        <table class="crew-table">
+          <thead>
+            <tr>
+              <th style="width:32px;">No</th>
+              <th>Nama Crew</th>
+              <th style="width:90px;">Jabatan</th>
+            </tr>
+          </thead>
+          <tbody id="crew-body"></tbody>
+        </table>
+        <button type="button" onclick="addCrewRow()" style="margin-top:6px;background:#2e9e6e;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:11px;cursor:pointer;">+ Tambah Crew</button>
+      </div>
+
+      <!-- ===== KEDALAMAN ===== -->
+      <div class="form-section">
+        <div class="form-section-title">Kedalaman</div>
+        <div class="depth-row">
+          <div class="depth-item">
+            <span>Dari (m):</span>
+            <input type="number" name="depth_dari" placeholder="0" step="0.01">
+          </div>
+          <div class="depth-item">
+            <span>Ke (m):</span>
+            <input type="number" name="depth_ke" placeholder="0" step="0.01">
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TABEL AKTIVITAS ===== -->
       <div class="form-section">
         <div class="form-section-title">Aktivitas Harian</div>
         <div class="sheet-scroll">
           <table class="sheet-table">
             <thead>
               <tr>
-                <th>No</th>
-                <th>Waktu Mulai</th>
-                <th>Waktu Selesai</th>
+                <th style="width:28px;">No</th>
+                <th style="width:72px;">Mulai</th>
+                <th style="width:72px;">Selesai</th>
                 <th>Aktivitas</th>
-                <th>Dari (m)</th>
-                <th>Ke (m)</th>
-                <th>Ket</th>
+                <th style="width:60px;">Ket</th>
               </tr>
             </thead>
             <tbody id="activity-body"></tbody>
           </table>
         </div>
-        <button type="button" onclick="addRow()" style="margin-top:10px;background:var(--teal);color:white;border:none;padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;width:100%;">
-          + Tambah Baris
-        </button>
+        <button type="button" onclick="addRow()" style="margin-top:8px;background:#1a6b4a;color:white;border:none;padding:8px 16px;border-radius:8px;font-size:12px;cursor:pointer;width:100%;">+ Tambah Baris</button>
       </div>
 
-      <!-- Summary -->
+      <!-- ===== CHECKLIST ALAT ===== -->
       <div class="form-section">
-        <div class="form-section-title">Ringkasan</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Total Kedalaman (m)</label>
-            <input type="number" name="total_kedalaman" placeholder="0">
-          </div>
-          <div class="form-group">
-            <label>Total Jam Kerja</label>
-            <input type="number" name="total_jam" placeholder="0">
-          </div>
+        <div class="form-section-title">Checklist Peralatan</div>
+        <div class="sheet-scroll">
+          <table class="chk-table" id="chk-table">
+            <thead>
+              <tr>
+                <th style="width:28px;">No</th>
+                <th class="nama-alat">Nama Alat</th>
+                <th style="width:52px;">Jumlah</th>
+                <th style="width:38px;">Baik</th>
+                <th style="width:38px;">Rusak</th>
+                <th>Keterangan</th>
+              </tr>
+            </thead>
+            <tbody id="chk-body"></tbody>
+          </table>
         </div>
+      </div>
+
+      <!-- ===== CATATAN & TANDA TANGAN ===== -->
+      <div class="form-section">
+        <div class="form-section-title">Catatan & Tanda Tangan</div>
         <div class="form-row single">
           <div class="form-group">
             <label>Catatan</label>
-            <textarea name="catatan" placeholder="Catatan harian..."></textarea>
+            <textarea name="catatan" placeholder="Catatan harian..." rows="3"></textarea>
           </div>
         </div>
+        <div class="sign-grid">
+          <div class="sign-box">
+            <label>Diisi oleh : Driller / Asisten</label>
+            <input type="text" name="sign_driller_nama" placeholder="Nama">
+            <input type="text" name="sign_driller_id" placeholder="No ID">
+          </div>
+          <div class="sign-box">
+            <label>Disetujui oleh : Supervisor / Geost</label>
+            <input type="text" name="sign_supv_nama" placeholder="Nama">
+            <input type="text" name="sign_supv_id" placeholder="No ID">
+          </div>
+        </div>
+        <div class="note-box">* Pastikan semua item terisi sesuai dengan kondisi actual dan re check agar tidak terjadi kesalahan data.</div>
       </div>
+
     </form>
   </div>
 
@@ -115,111 +215,166 @@
     <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
   </div>
 
-  <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
   <script>
+    // ===== AKTIVITAS =====
     const AKTIVITAS_LIST = [
-      'Travel',
-      'Safety Talk',
-      'Waiting Transportation',
-      'Engine Check',
-      'Fueling',
-      'Drilling',
-      'Water Problem',
-      'Waiting Corebox',
-      'Pull out Rod',
-      'Waiting Dozer',
-      'Moving & Setting',
-      'Resting',
-      'Technical Problem',
-      'Mechanical Problem',
-      'Wait Supv',
-      'Permit',
-      'Weather Condition',
-      'Day Off',
-      'Mobilization',
-      'Reporting',
+      'Travel','Safety Talk','Waiting Transportation','Engine Check','Fueling',
+      'Drilling','Water Problem','Waiting Corebox','Pull out Rod','Waiting Dozer',
+      'Moving & Setting','Resting','Technical Problem','Mechanical Problem',
+      'Wait Supv','Permit','Weather Condition','Day Off','Mobilization','Reporting'
+    ];
+    const AKTIVITAS_OPTS = AKTIVITAS_LIST.map(a => `<option value="${a}">${a}</option>`).join('');
+
+    // ===== CHECKLIST ALAT =====
+    const ALAT_LIST = [
+      'ROD HQ3 3 meter','ROD HQ3 1.5 meter','Core Barrel','Locking Coupling',
+      'Pipa Adaptor','Overshoot','Inner Tube','Back Hand','Safety Inner',
+      'Safety Bowl (Mangkok Safety)','Kuda-Kuda','Water Pass','Sepatu Jacking',
+      'Meteran','First Aid Kit','Fire Extinguisher + Braket','Tenda Terpal + Pengikat',
+      'Tali/Pita Barikade','Cangkul','Skop','Parang','Batu Gosok/Batu Asah',
+      'Kunci Pipa 36"','Kunci Parmali','Kunci-Kunci Pas','Palu','Jerigen Solar',
+      'Polymer','Sign Board Utama','Sign Board "Muster Point"',
+      'Sign Board "Penunjuk Arah Rig"','Sign Board "Tanda Bahaya"','','',' '
     ];
 
-    const AKTIVITAS_OPTS = AKTIVITAS_LIST.map(a =>
-      `<option value="${a}">${a}</option>`
-    ).join('');
+    // Jumlah default per mesin (bisa dikustomisasi)
+    const MESIN_QTY = {
+      'LF-90':         [20,10,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
+      'LF-90D':        [20,10,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
+      'CS-1000':       [15,8,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
+      'CS-1500':       [18,10,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
+      'HYDRACORE 3000':[25,12,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
+    };
 
     let rowCount = 0;
+    let crewCount = 0;
 
+    // ===== INIT CHECKLIST =====
+    function initChecklist(mesin) {
+      const tbody = document.getElementById('chk-body');
+      tbody.innerHTML = '';
+      const qtys = MESIN_QTY[mesin] || [];
+      ALAT_LIST.forEach((nama, i) => {
+        const no = i + 1;
+        const qty = qtys[i] !== undefined ? qtys[i] : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${no}</td>
+          <td class="nama-alat"><input type="text" name="alat_nama_${no}" value="${nama}"></td>
+          <td><input type="number" name="alat_qty_${no}" value="${qty}" min="0"></td>
+          <td><input type="checkbox" name="alat_baik_${no}"></td>
+          <td><input type="checkbox" name="alat_rusak_${no}"></td>
+          <td><input type="text" name="alat_ket_${no}" placeholder="-"></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function onMesinChange() {
+      const mesin = document.getElementById('mesin-sel').value;
+      initChecklist(mesin);
+    }
+
+    // ===== CREW =====
+    function addCrewRow() {
+      crewCount++;
+      const tbody = document.getElementById('crew-body');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${crewCount}</td>
+        <td><input type="text" name="crew_nama_${crewCount}" placeholder="Nama Crew"></td>
+        <td><input type="text" name="crew_jabatan_${crewCount}" placeholder="Jabatan"></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    // ===== AKTIVITAS =====
     function addRow() {
       rowCount++;
       const tbody = document.getElementById('activity-body');
       const tr = document.createElement('tr');
-      tr.id = `row-${rowCount}`;
       tr.innerHTML = `
-        <td style="text-align:center;font-size:11px;color:#999;">${rowCount}</td>
+        <td style="color:#999;font-size:10px;">${rowCount}</td>
         <td><input type="time" name="waktu_mulai_${rowCount}"></td>
         <td><input type="time" name="waktu_selesai_${rowCount}"></td>
         <td>
           <select name="aktivitas_${rowCount}" class="aktivitas-sel">
-            <option value="">— Pilih Aktivitas —</option>
+            <option value="">— Pilih —</option>
             ${AKTIVITAS_OPTS}
           </select>
         </td>
-        <td><input type="number" name="dari_${rowCount}" placeholder="0"></td>
-        <td><input type="number" name="ke_${rowCount}" placeholder="0"></td>
         <td><input type="text" name="ket_${rowCount}" placeholder="-"></td>
       `;
       tbody.appendChild(tr);
     }
 
+    // ===== SAVE =====
     function saveData() {
       const data = getFormData('daily-sheet-form');
       data.row_count = rowCount;
+      data.crew_count = crewCount;
+      // Simpan status checkbox
+      document.querySelectorAll('#chk-body input[type=checkbox]').forEach(cb => {
+        data[cb.name] = cb.checked ? '1' : '0';
+      });
       DB.save('daily_sheet', data);
       showToast('Daily Sheet tersimpan!');
     }
 
+    // ===== CLEAR =====
     function clearData() {
       clearForm('daily-sheet-form');
       document.getElementById('activity-body').innerHTML = '';
-      rowCount = 0;
+      document.getElementById('crew-body').innerHTML = '';
+      rowCount = 0; crewCount = 0;
+      initChecklist('');
+      addRow(); addRow(); addRow();
+      addCrewRow(); addCrewRow();
       showToast('Form dikosongkan');
     }
 
-    async function uploadData() {
-      const data = getFormData('daily-sheet-form');
-      data.row_count = rowCount;
-      DB.save('daily_sheet', data);
-      const json = JSON.stringify(DB.getAll('daily_sheet'), null, 2);
-      await uploadToDrive(`daily_sheet_${new Date().toISOString().slice(0,10)}.json`, json);
-    }
-
+    // ===== SUBMIT (XLS) =====
     function submitData() {
       const data = getFormData('daily-sheet-form');
       data.row_count = rowCount;
+      document.querySelectorAll('#chk-body input[type=checkbox]').forEach(cb => {
+        data[cb.name] = cb.checked ? '✓' : '';
+      });
       DB.save('daily_sheet', data);
 
       const tgl  = data.tanggal || new Date().toISOString().slice(0,10);
       const hole = (data.hole_no || 'unknown').replace(/\s+/g,'_');
       const filename = `DailySheet_${hole}_${tgl}.xls`;
 
-      // Build XLS
-      const headers = ['No','Waktu Mulai','Waktu Selesai','Aktivitas','Dari (m)','Ke (m)','Ket'];
-      let rows = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+      // Header info
+      let html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>`;
+      html += `<tr><td colspan="6"><b>DAILY SHEET CONTROL</b></td></tr>`;
+      html += `<tr><td><b>Tanggal:</b></td><td>${data.tanggal||''}</td><td><b>Shift:</b></td><td>${data.shift||''}</td><td><b>Hole No:</b></td><td>${data.hole_no||''}</td></tr>`;
+      html += `<tr><td><b>Driller:</b></td><td>${data.driller||''}</td><td><b>Asisten:</b></td><td>${data.asisten_driller||''}</td><td><b>Mesin:</b></td><td>${data.mesin||''}</td></tr>`;
+      html += `<tr><td><b>Lokasi:</b></td><td>${data.lokasi||''}</td><td><b>Dari (m):</b></td><td>${data.depth_dari||''}</td><td><b>Ke (m):</b></td><td>${data.depth_ke||''}</td></tr>`;
+      html += `<tr><td colspan="6"></td></tr>`;
+
+      // Aktivitas
+      html += `<tr><th>No</th><th>Waktu Mulai</th><th>Waktu Selesai</th><th>Aktivitas</th><th colspan="2">Ket</th></tr>`;
       for (let i = 1; i <= rowCount; i++) {
-        rows += '<tr>';
-        rows += `<td>${i}</td>`;
-        rows += `<td>${data['waktu_mulai_'+i]||''}</td>`;
-        rows += `<td>${data['waktu_selesai_'+i]||''}</td>`;
-        rows += `<td>${data['aktivitas_'+i]||''}</td>`;
-        rows += `<td>${data['dari_'+i]||''}</td>`;
-        rows += `<td>${data['ke_'+i]||''}</td>`;
-        rows += `<td>${data['ket_'+i]||''}</td>`;
-        rows += '</tr>';
+        html += `<tr><td>${i}</td><td>${data['waktu_mulai_'+i]||''}</td><td>${data['waktu_selesai_'+i]||''}</td><td>${data['aktivitas_'+i]||''}</td><td colspan="2">${data['ket_'+i]||''}</td></tr>`;
       }
+      html += `<tr><td colspan="6"></td></tr>`;
 
-      const info = `<tr><td colspan="7"><b>Tanggal:</b> ${data.tanggal||''} | <b>Shift:</b> ${data.shift||''} | <b>Hole No:</b> ${data.hole_no||''} | <b>Driller:</b> ${data.driller||''} | <b>Lokasi:</b> ${data.lokasi||''} | <b>Mesin:</b> ${data.mesin||''}</td></tr><tr><td colspan="7"></td></tr>`;
+      // Checklist
+      html += `<tr><th>No</th><th>Nama Alat</th><th>Jumlah</th><th>Baik</th><th>Rusak</th><th>Keterangan</th></tr>`;
+      for (let i = 1; i <= ALAT_LIST.length; i++) {
+        html += `<tr><td>${i}</td><td>${data['alat_nama_'+i]||''}</td><td>${data['alat_qty_'+i]||''}</td><td>${data['alat_baik_'+i]||''}</td><td>${data['alat_rusak_'+i]||''}</td><td>${data['alat_ket_'+i]||''}</td></tr>`;
+      }
+      html += `<tr><td colspan="6"></td></tr>`;
 
-      const html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>${info}${rows}</table></body></html>`;
+      // Catatan & TTD
+      html += `<tr><td colspan="3"><b>Catatan:</b> ${data.catatan||''}</td><td colspan="3"></td></tr>`;
+      html += `<tr><td colspan="3"><b>Driller/Asisten:</b> ${data.sign_driller_nama||''} | No ID: ${data.sign_driller_id||''}</td><td colspan="3"><b>Supervisor/Geost:</b> ${data.sign_supv_nama||''} | No ID: ${data.sign_supv_id||''}</td></tr>`;
+      html += `</table></body></html>`;
+
       const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
@@ -228,8 +383,10 @@
       showToast('✓ ' + filename + ' berhasil didownload!');
     }
 
-    // Default 3 baris
+    // ===== INIT =====
+    initChecklist('');
     addRow(); addRow(); addRow();
+    addCrewRow(); addCrewRow();
   </script>
 </body>
 </html>
