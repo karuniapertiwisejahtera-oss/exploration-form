@@ -513,27 +513,32 @@
       }
       qNum++;
 
-      // Cari Sample_ID terakhir yang terisi untuk auto-fill Original Sample_ID
+      // Cari Sample_ID terakhir yang terisi untuk auto-fill Original Sample_ID (berdasarkan urutan DOM)
       let lastSID = '';
-      // Hanya ambil dari kolom Original Sample_ID dan QAQC (prefix GS)
-      for (let i = 1; i <= rowCount; i++) {
-        ['sample_id','qaqc_sid'].forEach(function(f) {
-          const el = document.querySelector('[name="' + f + '_' + i + '"]');
+      const ALL_SID_FIELDS_Q = ['sample_id','qaqc_sid','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
+      Array.from(document.querySelectorAll('#prep-tbody tr[data-row]')).forEach(function(tr) {
+        const rn = tr.dataset.row;
+        ALL_SID_FIELDS_Q.forEach(function(f) {
+          const el = document.querySelector('[name="' + f + '_' + rn + '"]');
           if (el && el.value.trim() && /^GS/i.test(el.value.trim())) lastSID = el.value.trim().toUpperCase();
         });
-      }
+      });
       // Hitung nomor berikutnya dari lastSID
       let nextSID = '';
       if (lastSID) {
         const m = lastSID.match(/^([A-Z]+)(\d+)$/);
         if (m) {
+          // Kumpulkan semua Sample ID yang sudah terpakai (semua field)
           const used = new Set();
-          for (let i = 1; i <= rowCount; i++) {
-            ['sample_id','qaqc_sid'].forEach(function(f) {
-              const el = document.querySelector('[name="' + f + '_' + i + '"]');
+          const ALL_SID_FIELDS = ['sample_id','qaqc_sid','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
+          const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+          domRows.forEach(function(tr) {
+            const rn = tr.dataset.row;
+            ALL_SID_FIELDS.forEach(function(f) {
+              const el = document.querySelector('[name="' + f + '_' + rn + '"]');
               if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
             });
-          }
+          });
           let next = parseInt(m[2]) + 1;
           while (used.has(m[1] + String(next).padStart(m[2].length, '0'))) next++;
           nextSID = m[1] + String(next).padStart(m[2].length, '0');
