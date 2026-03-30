@@ -64,8 +64,11 @@
       <div class="form-section">
         <div class="form-row">
           <div class="form-group">
-            <label>Tanggal</label>
-            <input type="date" name="tanggal">
+            <label>Tipe Daily Sheet</label>
+            <select id="tipe-sel" name="tipe" onchange="onTipeChange()" style="font-weight:700;color:#1a6b4a;">
+              <option value="Drilling">Drilling</option>
+              <option value="Preparation">Preparation</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Shift</label>
@@ -78,19 +81,25 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Hole No</label>
-            <input type="text" name="hole_no" placeholder="Hole No">
+            <label>Tanggal</label>
+            <input type="date" name="tanggal">
           </div>
           <div class="form-group">
-            <label>Driller</label>
-            <input type="text" name="driller" placeholder="Nama Driller">
+            <label>Hole No</label>
+            <input type="text" name="hole_no" placeholder="Hole No">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
+            <label>Driller / PIC</label>
+            <input type="text" name="driller" placeholder="Nama Driller / PIC">
+          </div>
+          <div class="form-group">
             <label>Lokasi</label>
             <input type="text" name="lokasi" placeholder="Lokasi">
           </div>
+        </div>
+        <div class="form-row">
           <div class="form-group">
             <label>Mesin</label>
             <select name="mesin" id="mesin-sel" onchange="onMesinChange()">
@@ -219,13 +228,38 @@
   <script src="js/drive.js"></script>
   <script>
     // ===== AKTIVITAS =====
-    const AKTIVITAS_LIST = [
+    const AKTIVITAS_DRILLING = [
       'Travel','Safety Talk','Waiting Transportation','Engine Check','Fueling',
       'Drilling','Water Problem','Waiting Corebox','Pull out Rod','Waiting Dozer',
       'Moving & Setting','Resting','Technical Problem','Mechanical Problem',
       'Wait Supv','Permit','Weather Condition','Day Off','Mobilization','Reporting'
     ];
-    const AKTIVITAS_OPTS = AKTIVITAS_LIST.map(a => `<option value="${a}">${a}</option>`).join('');
+
+    const AKTIVITAS_PREPARATION = [
+      'Travel','Safety Talk','Waiting Transportation','PM Check',
+      'Sample Weighing','Preparation','Sieving & Fractination',
+      'Drying Process','Weighing of Fraction','Labeling',
+      'Resting','Technical Problem','Mechanical Problem',
+      'Wait Supv','Permit','Day Off','Reporting'
+    ];
+
+    function getAktivitasList() {
+      const tipe = document.getElementById('tipe-sel').value;
+      return tipe === 'Preparation' ? AKTIVITAS_PREPARATION : AKTIVITAS_DRILLING;
+    }
+
+    function buildAktivitasOpts() {
+      return getAktivitasList().map(a => `<option value="${a}">${a}</option>`).join('');
+    }
+
+    function onTipeChange() {
+      // Update semua dropdown aktivitas yang sudah ada
+      document.querySelectorAll('select.aktivitas-sel').forEach(sel => {
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">— Pilih —</option>' + buildAktivitasOpts();
+        if (cur) sel.value = cur;
+      });
+    }
 
     // ===== CHECKLIST ALAT =====
     const ALAT_LIST = [
@@ -302,7 +336,7 @@
         <td>
           <select name="aktivitas_${rowCount}" class="aktivitas-sel">
             <option value="">— Pilih —</option>
-            ${AKTIVITAS_OPTS}
+            ${buildAktivitasOpts()}
           </select>
         </td>
         <td><input type="text" name="ket_${rowCount}" placeholder="-"></td>
