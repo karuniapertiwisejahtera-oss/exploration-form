@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -132,7 +132,7 @@
     .cell-popup.warn  { background: #e65100; }
     .cell-popup.error { background: #c62828; }
 
-    /* Baris yang tergabung — hilangkan border bawah antar baris dalam grup, TANPA garis oranye */
+    /* Baris yang tergabung — hilangkan border bawah antar baris dalam grup */
     .prep-table tr.row-merged td {
       border-bottom: 1px dashed #ccc !important;
     }
@@ -206,20 +206,15 @@
     @media print {
       body * { visibility: hidden; }
       .print-area, .print-area * { visibility: visible; }
-      .print-area {
-        position: absolute; top: 0; left: 0; width: 100%;
-      }
-      .print-header { margin-bottom: 10px; font-size: 11px; }
-      .print-header table { width: 100%; border-collapse: collapse; }
-      .print-header td { padding: 2px 6px; font-size: 11px; }
+      .print-area { position: absolute; top: 0; left: 0; width: 100%; }
       .prep-wrap { max-height: none !important; overflow: visible !important; }
       .prep-table { font-size: 9px; }
       .prep-table th, .prep-table td { padding: 2px 3px; }
-      .btn-merge, .btn-del-row, .merge-check { display: none !important; }
+      .btn-merge, .btn-del-row { display: none !important; }
       .prep-table th.col-freeze, .prep-table td.col-freeze { position: static !important; }
       @page { size: landscape; margin: 8mm; }
     }
-</style>
+  </style>
 </head>
 <body>
   <div class="page-header">
@@ -227,7 +222,6 @@
     <h1>Sample Preparation Form</h1>
   </div>
 
-  <div class="print-area">
   <div class="form-container">
     <div class="form-section">
 
@@ -330,7 +324,6 @@
     </div>
   </div>
 
-  </div><!-- /print-area -->
   <div class="action-bar">
     <button class="btn" style="background:#1a6b4a;color:white;" onclick="openWeightInput()">&#9878; Input Weight</button>
     <button class="btn" style="background:#e91e8c;color:white;" onclick="addQAQCRow('DS')">+ DS</button>
@@ -550,8 +543,7 @@
           // Kumpulkan semua Sample ID yang sudah terpakai (semua field)
           const used = new Set();
           const ALL_SID_FIELDS = ['sample_id','qaqc_sid','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
-          const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
-          domRows.forEach(function(tr) {
+          Array.from(document.querySelectorAll('#prep-tbody tr[data-row]')).forEach(function(tr) {
             const rn = tr.dataset.row;
             ALL_SID_FIELDS.forEach(function(f) {
               const el = document.querySelector('[name="' + f + '_' + rn + '"]');
@@ -1792,14 +1784,7 @@
       a.href = url; a.download = fileName; a.click();
       URL.revokeObjectURL(url);
       showToast('✓ ' + fileName + ' didownload! Menyiapkan PDF...');
-
-      // Download PDF via print dialog (setelah XLS selesai)
-      setTimeout(function() { printFormPDF(); }, 800);
-    }
-
-    // ===== PRINT PDF =====
-    function printFormPDF() {
-      window.print();
+      setTimeout(function() { window.print(); }, 800);
     }
 
     // ===== RESTORE MERGE VISIBILITY SETELAH LOAD =====
