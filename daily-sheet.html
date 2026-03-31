@@ -438,6 +438,10 @@
       const data = getFormData('daily-sheet-form');
       data.row_count = rowCount;
       data.crew_count = crewCount;
+      if (window._editRecordId) {
+        DB.delete('daily_sheet', window._editRecordId);
+        window._editRecordId = null;
+      }
       DB.save('daily_sheet', data);
       showToast('Daily Sheet tersimpan!');
     }
@@ -651,6 +655,67 @@
     initChecklist('');
     addRow(); addRow(); addRow();
     addCrewRow(); addCrewRow();
+
+    // ===== RESTORE SAAT EDIT =====
+    window.addEventListener('load', () => {
+      const mode = sessionStorage.getItem('form_mode');
+      const id   = sessionStorage.getItem('edit_record_id');
+      if (mode === 'edit' && id) {
+        const rec = DB.getAll('daily_sheet').find(r => String(r.id) === id);
+        if (rec) {
+          // Restore header fields
+          ['tipe','tanggal','hole_no','lokasi','driller','asisten_driller','mesin',
+           'depth_dari','depth_ke','catatan',
+           'sign_driller_nama','sign_driller_id','sign_supv_nama','sign_supv_id'
+          ].forEach(k => {
+            const el = document.querySelector('[name="'+k+'"]');
+            if (el && rec[k] !== undefined) el.value = rec[k];
+          });
+
+          // Update mesin options sesuai tipe
+          updateMesinOptions();
+          const mesinEl = document.querySelector('[name="mesin"]');
+          if (mesinEl && rec.mesin) mesinEl.value = rec.mesin;
+
+          // Restore aktivitas
+          document.getElementById('activity-body').innerHTML = '';
+          rowCount = 0;
+          const rc = parseInt(rec.row_count) || 0;
+          for (let i = 1; i <= rc; i++) {
+            addRow();
+            ['waktu_mulai','waktu_selesai','aktivitas','ket'].forEach(f => {
+              const el = document.querySelector('[name="'+f+'_'+rowCount+'"]');
+              if (el && rec[f+'_'+i] !== undefined) el.value = rec[f+'_'+i];
+            });
+          }
+
+          // Restore crew
+          document.getElementById('crew-body').innerHTML = '';
+          crewCount = 0;
+          const cc = parseInt(rec.crew_count) || 0;
+          for (let i = 1; i <= cc; i++) {
+            addCrewRow();
+            const el = document.querySelector('[name="crew_nama_'+crewCount+'"]');
+            if (el && rec['crew_nama_'+i]) el.value = rec['crew_nama_'+i];
+          }
+
+          // Restore checklist
+          onTipeChange();
+          const alatList = getAlatList();
+          for (let i = 1; i <= alatList.length; i++) {
+            ['alat_nama','alat_qty','alat_baik','alat_rusak','alat_ket'].forEach(f => {
+              const el = document.querySelector('[name="'+f+'_'+i+'"]');
+              if (el && rec[f+'_'+i] !== undefined) el.value = rec[f+'_'+i];
+            });
+          }
+
+          window._editRecordId = rec.id;
+          showToast('Mode Edit aktif');
+        }
+      }
+      sessionStorage.removeItem('form_mode');
+      sessionStorage.removeItem('edit_record_id');
+    });
   </script>
 </body>
 </html>
