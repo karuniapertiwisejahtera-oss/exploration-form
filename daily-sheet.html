@@ -298,12 +298,16 @@
 
 
     // Jumlah default per mesin (bisa dikustomisasi)
+    // Urutan sesuai ALAT_DRILLING: ROD3m,ROD1.5m,CoreBarrel,LockCoupling,PipaAdaptor,
+    // Overshoot,InnerTube,BackHand,SafetyInner,SafetyBowl,KudaKuda,WaterPass,SepatuJacking,
+    // Meteran,FirstAid,FireExt,TendaTerpal,TaliBarikade,Cangkul,Skop,Parang,BatuGosok,
+    // KunciPipa,KunciParmali,KunciPas,Palu,JerigenSolar,Polymer,SignUtama,SignMuster,
+    // SignPenunjuk,SignBahaya,kosong,kosong,kosong
     const MESIN_QTY = {
-      'LF-90':         [20,10,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
-      'LF-90D':        [20,10,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
-      'CS-1000':       [15,8,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
-      'CS-1500':       [18,10,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
-      'HYDRACORE 3000':[25,12,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
+      'KPR-01': [20,3,1,1,1,1,1,1,1,1,1,'','','',''  ,1,3,1,1,1,1,'',2,2,1,2,2,'','','','','','','',''],
+      'KPR-02': [32,2,1,1,1,1,1,1,1,1,1,'',2,1,''   ,'',5,1,1,1,1,'','',2,2,1,3,1,1,'','','','','',''],
+      'KPR-03': [20,10,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
+      'KPR-04': [20,10,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,2,2,2,1,1,1,1,1,2,1,1,1,1,1,'','',''],
     };
 
     let rowCount = 0;
