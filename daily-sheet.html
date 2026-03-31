@@ -29,13 +29,17 @@
     .crew-table td input { width: 100%; border: none; outline: none; font-size: 11px; background: transparent; text-transform: uppercase; }
 
     /* Checklist table */
-    .chk-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .chk-table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
     .chk-table th, .chk-table td { border: 1px solid #ccc; padding: 3px 5px; }
     .chk-table thead th { background: #1a6b4a; color: white; font-size: 10px; text-align: center; }
     .chk-table td { text-align: center; }
-    .chk-table td.nama-alat { text-align: left; }
-    .chk-table td input[type=number] { width: 50px; border: none; outline: none; font-size: 11px; text-align: center; background: transparent; }
-    .chk-table td input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #1a6b4a; }
+    .chk-table td.nama-alat { text-align: left; word-break: break-word; white-space: normal; }
+    .chk-table th.col-nama { width: auto; }
+    .chk-table th.col-no   { width: 28px; }
+    .chk-table th.col-qty  { width: 44px; }
+    .chk-table th.col-cond { width: 38px; }
+    .chk-table th.col-ket  { width: 80px; }
+    .chk-table td input[type=number] { width: 100%; border: none; outline: none; font-size: 11px; text-align: center; background: transparent; }
     .chk-table td input[type=text] { width: 100%; border: none; outline: none; font-size: 11px; background: transparent; }
 
     /* Sign section */
@@ -139,7 +143,7 @@
             </div>
             <div class="form-group">
               <label>Lokasi</label>
-              <input type="text" name="lokasi" placeholder="Lokasi" style="width:100%;">
+              <input type="text" name="lokasi" placeholder="Lokasi" value="BOMBANA" style="width:100%;">
             </div>
           </div>
 
@@ -213,12 +217,12 @@
           <table class="chk-table" id="chk-table">
             <thead>
               <tr>
-                <th style="width:28px;">No</th>
-                <th class="nama-alat">Nama Alat</th>
-                <th style="width:52px;">Jumlah</th>
-                <th style="width:38px;">Baik</th>
-                <th style="width:38px;">Rusak</th>
-                <th>Keterangan</th>
+                <th class="col-no">No</th>
+                <th class="col-nama nama-alat">Nama Alat</th>
+                <th class="col-qty">Jumlah</th>
+                <th class="col-cond">Baik</th>
+                <th class="col-cond">Rusak</th>
+                <th class="col-ket">Keterangan</th>
               </tr>
             </thead>
             <tbody id="chk-body"></tbody>
@@ -400,6 +404,13 @@
       tbody.appendChild(tr);
     }
 
+    // ===== FORMAT WAKTU OTOMATIS =====
+    function fmtWaktu(el) {
+      let v = el.value.replace(/\D/g, '').slice(0, 4);
+      if (v.length >= 3) v = v.slice(0,2) + ':' + v.slice(2);
+      el.value = v;
+    }
+
     // ===== AKTIVITAS =====
     function addRow() {
       rowCount++;
@@ -407,8 +418,8 @@
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td style="color:#999;font-size:10px;">${rowCount}</td>
-        <td><input type="text" name="waktu_mulai_${rowCount}" placeholder="00:00" style="width:55px;text-align:center;"></td>
-        <td><input type="text" name="waktu_selesai_${rowCount}" placeholder="00:00" style="width:55px;text-align:center;"></td>
+        <td><input type="text" name="waktu_mulai_${rowCount}" placeholder="00:00" maxlength="5" style="width:55px;text-align:center;" oninput="fmtWaktu(this)"></td>
+        <td><input type="text" name="waktu_selesai_${rowCount}" placeholder="00:00" maxlength="5" style="width:55px;text-align:center;" oninput="fmtWaktu(this)"></td>
         <td>
           <select name="aktivitas_${rowCount}" class="aktivitas-sel">
             <option value="">— Pilih —</option>
@@ -468,7 +479,7 @@
       const headerHTML = `
         <div class="pdf-header">
           <h2>DAILY SHEET CONTROL — ${tipe.toUpperCase()}</h2>
-          <div class="pdf-sub">PT. Karunia Pertiwi Sejahtera &nbsp;|&nbsp; ${tgl}</div>
+          <div class="pdf-sub">PT. KASMAR POLEANG RAYA &nbsp;|&nbsp; ${tgl}</div>
         </div>
         <div class="pdf-info-box">
           <div class="pdf-info-grid">
