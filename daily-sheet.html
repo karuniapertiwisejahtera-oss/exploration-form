@@ -707,11 +707,11 @@
             if (el && rec['crew_nama_'+i]) el.value = rec['crew_nama_'+i];
           }
 
-          // Restore checklist
+          // Restore checklist - nama alat dari array terbaru, hanya qty/baik/rusak/ket dari data
           onTipeChange();
           const alatList = getAlatList();
           for (let i = 1; i <= alatList.length; i++) {
-            ['alat_nama','alat_qty','alat_baik','alat_rusak','alat_ket'].forEach(f => {
+            ['alat_qty','alat_baik','alat_rusak','alat_ket'].forEach(f => {
               const el = document.querySelector('[name="'+f+'_'+i+'"]');
               if (el && rec[f+'_'+i] !== undefined) el.value = rec[f+'_'+i];
             });
