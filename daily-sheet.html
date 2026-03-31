@@ -49,6 +49,52 @@
     .depth-row .depth-item input { border: none; border-bottom: 2px solid #1a6b4a; outline: none; font-size: 13px; font-weight: 700; width: 80px; text-align: center; padding: 2px; background: transparent; }
 
     .note-box { background: #fffde7; border: 1px solid #ffe082; border-radius: 6px; padding: 8px 10px; font-size: 10px; color: #555; margin-top: 8px; }
+
+    /* ===== PRINT PDF ===== */
+    #print-area { display: none; }
+    @media print {
+      body > *:not(#print-area) { display: none !important; }
+      #print-area { display: block !important; }
+      @page { size: A4 portrait; margin: 10mm 12mm; }
+
+      .pdf-page { page-break-after: always; font-family: Arial, sans-serif; font-size: 10px; }
+      .pdf-page:last-child { page-break-after: avoid; }
+
+      /* Header PDF */
+      .pdf-header {
+        background: #1a6b4a; color: white; padding: 8px 12px;
+        border-radius: 6px 6px 0 0; margin-bottom: 0;
+      }
+      .pdf-header h2 { font-size: 13px; font-weight: 800; margin: 0 0 2px 0; letter-spacing: 0.5px; }
+      .pdf-header .pdf-sub { font-size: 9px; opacity: 0.85; }
+      .pdf-info-box {
+        background: #f0f9f4; border: 1.5px solid #a8d5b5;
+        border-top: none; border-radius: 0 0 6px 6px;
+        padding: 6px 10px; margin-bottom: 8px;
+      }
+      .pdf-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 20px; }
+      .pdf-info-row { display: flex; gap: 4px; font-size: 9.5px; padding: 1px 0; }
+      .pdf-info-row .lbl { font-weight: 700; color: #1a6b4a; white-space: nowrap; min-width: 70px; }
+      .pdf-info-row .val { color: #1a2e22; font-weight: 600; border-bottom: 1px solid #a8d5b5; flex: 1; }
+
+      /* Tables */
+      .pdf-table { width: 100%; border-collapse: collapse; font-size: 9px; margin-top: 6px; }
+      .pdf-table th { background: #1a6b4a; color: white; padding: 3px 4px; text-align: center; border: 1px solid #1a6b4a; }
+      .pdf-table td { border: 1px solid #ccc; padding: 2px 4px; text-align: center; }
+      .pdf-table td.left { text-align: left; }
+      .pdf-section-title {
+        font-size: 10px; font-weight: 800; color: #1a6b4a;
+        border-bottom: 2px solid #1a6b4a; padding-bottom: 2px; margin: 8px 0 4px 0;
+        text-transform: uppercase; letter-spacing: 0.5px;
+      }
+
+      /* Sign */
+      .pdf-sign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+      .pdf-sign-box { border: 1px solid #ccc; border-radius: 4px; padding: 6px 8px; font-size: 9px; }
+      .pdf-sign-box .sign-title { font-weight: 700; color: #1a6b4a; margin-bottom: 4px; }
+      .pdf-sign-line { border-bottom: 1px solid #888; margin: 16px 0 2px 0; }
+      .pdf-note { font-size: 8px; color: #777; margin-top: 6px; font-style: italic; }
+    }
   </style>
 </head>
 <body>
@@ -212,6 +258,8 @@
     <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
     <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
   </div>
+
+  <div id="print-area"></div>
 
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
@@ -399,43 +447,125 @@
       data.row_count = rowCount;
       DB.save('daily_sheet', data);
 
-      const tgl  = data.tanggal || new Date().toISOString().slice(0,10);
-      const hole = (data.hole_no || 'unknown').replace(/\s+/g,'_');
-      const filename = `DailySheet_${hole}_${tgl}.xls`;
+      const tipe  = data.tipe || 'Drilling';
+      const tgl   = data.tanggal || '—';
+      const hole  = (data.hole_no || '—').toUpperCase();
+      const mesin = (data.mesin || '—').toUpperCase();
+      const lokasi= (data.lokasi || '—').toUpperCase();
+      const driller = (data.driller || '—').toUpperCase();
+      const asisten = (data.asisten_driller || '—').toUpperCase();
+      const dari  = data.depth_dari || '—';
+      const ke    = data.depth_ke || '—';
 
-      // Header info
-      let html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>`;
-      html += `<tr><td colspan="6"><b>DAILY SHEET CONTROL</b></td></tr>`;
-      html += `<tr><td><b>Tanggal:</b></td><td>${data.tanggal||''}</td><td><b>Shift:</b></td><td>${data.shift||''}</td><td><b>Hole No:</b></td><td>${data.hole_no||''}</td></tr>`;
-      html += `<tr><td><b>Driller:</b></td><td>${data.driller||''}</td><td><b>Asisten:</b></td><td>${data.asisten_driller||''}</td><td><b>Mesin:</b></td><td>${data.mesin||''}</td></tr>`;
-      html += `<tr><td><b>Lokasi:</b></td><td>${data.lokasi||''}</td><td><b>Dari (m):</b></td><td>${data.depth_dari||''}</td><td><b>Ke (m):</b></td><td>${data.depth_ke||''}</td></tr>`;
-      html += `<tr><td colspan="6"></td></tr>`;
+      // Kumpulkan crew
+      let crewList = '';
+      for (let i = 1; i <= crewCount; i++) {
+        const nm = (data['crew_nama_'+i] || '').toUpperCase();
+        if (nm) crewList += `<tr><td>${i}</td><td class="left">${nm}</td></tr>`;
+      }
 
-      // Aktivitas
-      html += `<tr><th>No</th><th>Waktu Mulai</th><th>Waktu Selesai</th><th>Aktivitas</th><th colspan="2">Ket</th></tr>`;
+      // Header HTML (dipakai di kedua halaman)
+      const headerHTML = `
+        <div class="pdf-header">
+          <h2>DAILY SHEET CONTROL — ${tipe.toUpperCase()}</h2>
+          <div class="pdf-sub">PT. Karunia Pertiwi Sejahtera &nbsp;|&nbsp; ${tgl}</div>
+        </div>
+        <div class="pdf-info-box">
+          <div class="pdf-info-grid">
+            <div>
+              <div class="pdf-info-row"><span class="lbl">Hole ID</span><span class="val">${hole}</span></div>
+              <div class="pdf-info-row"><span class="lbl">Mesin</span><span class="val">${mesin}</span></div>
+              <div class="pdf-info-row"><span class="lbl">Lokasi</span><span class="val">${lokasi}</span></div>
+              <div class="pdf-info-row"><span class="lbl">Kedalaman</span><span class="val">${dari} — ${ke} m</span></div>
+            </div>
+            <div>
+              <div class="pdf-info-row"><span class="lbl">Driller / PIC</span><span class="val">${driller}</span></div>
+              <div class="pdf-info-row"><span class="lbl">Assistant</span><span class="val">${asisten}</span></div>
+              ${crewList ? `<div class="pdf-info-row"><span class="lbl">Crew</span><span class="val">${
+                Array.from({length: crewCount}, (_,i) => (data['crew_nama_'+(i+1)]||'').toUpperCase()).filter(Boolean).join(', ')
+              }</span></div>` : ''}
+            </div>
+          </div>
+        </div>`;
+
+      // ===== HALAMAN 1: AKTIVITAS =====
+      let aktRows = '';
       for (let i = 1; i <= rowCount; i++) {
-        html += `<tr><td>${i}</td><td>${data['waktu_mulai_'+i]||''}</td><td>${data['waktu_selesai_'+i]||''}</td><td>${data['aktivitas_'+i]||''}</td><td colspan="2">${data['ket_'+i]||''}</td></tr>`;
+        const akt = (data['aktivitas_'+i] || '').toUpperCase();
+        const ket = (data['ket_'+i] || '').toUpperCase();
+        const mulai = data['waktu_mulai_'+i] || '';
+        const selesai = data['waktu_selesai_'+i] || '';
+        if (!akt && !mulai) continue;
+        aktRows += `<tr><td>${i}</td><td>${mulai}</td><td>${selesai}</td><td style="color:#c0392b;font-weight:600;">${akt}</td><td class="left">${ket}</td></tr>`;
       }
-      html += `<tr><td colspan="6"></td></tr>`;
 
-      // Checklist
-      html += `<tr><th>No</th><th>Nama Alat</th><th>Jumlah</th><th>Baik</th><th>Rusak</th><th>Keterangan</th></tr>`;
-      for (let i = 1; i <= getAlatList().length; i++) {
-        html += `<tr><td>${i}</td><td>${data['alat_nama_'+i]||''}</td><td>${data['alat_qty_'+i]||''}</td><td>${data['alat_baik_'+i]||''}</td><td>${data['alat_rusak_'+i]||''}</td><td>${data['alat_ket_'+i]||''}</td></tr>`;
+      // ===== HALAMAN 2: CHECKLIST =====
+      const alatList = getAlatList();
+      let chkRows = '';
+      for (let i = 1; i <= alatList.length; i++) {
+        const nama = (data['alat_nama_'+i] || alatList[i-1] || '').toUpperCase();
+        const qty  = data['alat_qty_'+i] || '';
+        const baik = data['alat_baik_'+i] || '';
+        const rusak= data['alat_rusak_'+i] || '';
+        const ket  = (data['alat_ket_'+i] || '').toUpperCase();
+        chkRows += `<tr><td>${i}</td><td class="left">${nama}</td><td>${qty}</td><td>${baik}</td><td>${rusak}</td><td class="left">${ket}</td></tr>`;
       }
-      html += `<tr><td colspan="6"></td></tr>`;
 
-      // Catatan & TTD
-      html += `<tr><td colspan="3"><b>Catatan:</b> ${data.catatan||''}</td><td colspan="3"></td></tr>`;
-      html += `<tr><td colspan="3"><b>Driller/Asisten:</b> ${data.sign_driller_nama||''} | No ID: ${data.sign_driller_id||''}</td><td colspan="3"><b>Supervisor/Geost:</b> ${data.sign_supv_nama||''} | No ID: ${data.sign_supv_id||''}</td></tr>`;
-      html += `</table></body></html>`;
+      const catatan = (data.catatan || '').toUpperCase();
+      const signDriller = (data.sign_driller_nama || '').toUpperCase();
+      const signDrillerID = (data.sign_driller_id || '').toUpperCase();
+      const signSupv = (data.sign_supv_nama || '').toUpperCase();
+      const signSupvID = (data.sign_supv_id || '').toUpperCase();
 
-      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-      showToast('✓ ' + filename + ' berhasil didownload!');
+      const printArea = document.getElementById('print-area');
+      printArea.innerHTML = `
+        <!-- HALAMAN 1: AKTIVITAS -->
+        <div class="pdf-page">
+          ${headerHTML}
+          <div class="pdf-section-title">Aktivitas Harian</div>
+          <table class="pdf-table">
+            <thead><tr><th style="width:24px;">No</th><th style="width:44px;">Mulai</th><th style="width:44px;">Selesai</th><th style="width:130px;">Aktivitas</th><th>Keterangan</th></tr></thead>
+            <tbody>${aktRows || '<tr><td colspan="5" style="color:#999;">—</td></tr>'}</tbody>
+          </table>
+          <div class="pdf-section-title" style="margin-top:10px;">Catatan</div>
+          <div style="border:1px solid #ccc;border-radius:4px;padding:6px 8px;min-height:30px;font-size:9px;">${catatan}</div>
+          <div class="pdf-sign-grid" style="margin-top:10px;">
+            <div class="pdf-sign-box">
+              <div class="sign-title">Diisi oleh : Driller / Assistant</div>
+              <div class="pdf-sign-line"></div>
+              <div>Nama : ${signDriller}</div>
+              <div>No ID : ${signDrillerID}</div>
+            </div>
+            <div class="pdf-sign-box">
+              <div class="sign-title">Disetujui oleh : Supervisor / Geost</div>
+              <div class="pdf-sign-line"></div>
+              <div>Nama : ${signSupv}</div>
+              <div>No ID : ${signSupvID}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HALAMAN 2: CHECKLIST -->
+        <div class="pdf-page">
+          ${headerHTML}
+          <div class="pdf-section-title">Checklist Peralatan</div>
+          <table class="pdf-table">
+            <thead>
+              <tr>
+                <th style="width:24px;">No</th><th>Nama Alat</th>
+                <th style="width:44px;">Jumlah</th>
+                <th style="width:36px;">Baik</th>
+                <th style="width:36px;">Rusak</th>
+                <th style="width:100px;">Keterangan</th>
+              </tr>
+            </thead>
+            <tbody>${chkRows}</tbody>
+          </table>
+          <div class="pdf-note">* Pastikan semua item terisi sesuai dengan kondisi actual dan re check agar tidak terjadi kesalahan data.</div>
+        </div>
+      `;
+
+      window.print();
     }
 
     // ===== INIT =====
