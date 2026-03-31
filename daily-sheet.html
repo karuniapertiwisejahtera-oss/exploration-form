@@ -242,6 +242,8 @@
     }
 
     function onTipeChange() {
+      // Update dropdown mesin sesuai tipe
+      updateMesinOptions();
       // Update semua dropdown aktivitas yang sudah ada
       document.querySelectorAll('select.aktivitas-sel').forEach(sel => {
         const cur = sel.value;
@@ -251,6 +253,17 @@
       // Refresh checklist sesuai tipe
       const mesin = document.getElementById('mesin-sel') ? document.getElementById('mesin-sel').value : '';
       initChecklist(mesin);
+    }
+
+    function updateMesinOptions() {
+      const tipe = document.getElementById('tipe-sel').value;
+      const sel = document.getElementById('mesin-sel');
+      const cur = sel.value;
+      const opts = tipe === 'Preparation'
+        ? ['SIV-01','SIV-02','SIV-03']
+        : ['KPR-01','KPR-02','KPR-03','KPR-04'];
+      sel.innerHTML = '<option value="">— Pilih Mesin —</option>' +
+        opts.map(o => `<option${o===cur?' selected':''}>${o}</option>`).join('');
     }
 
     // ===== CHECKLIST ALAT =====
@@ -417,6 +430,7 @@
     }
 
     // ===== INIT =====
+    updateMesinOptions();
     initChecklist('');
     addRow(); addRow(); addRow();
     addCrewRow(); addCrewRow();
