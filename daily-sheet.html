@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Daily Sheet Control</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     .sheet-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .sheet-table { min-width: 560px; width: 100%; border-collapse: collapse; font-size: 11px; }
@@ -458,124 +460,195 @@
       data.row_count = rowCount;
       DB.save('daily_sheet', data);
 
-      const tipe  = data.tipe || 'Drilling';
-      const tgl   = data.tanggal || '—';
-      const hole  = (data.hole_no || '—').toUpperCase();
-      const mesin = (data.mesin || '—').toUpperCase();
-      const lokasi= (data.lokasi || '—').toUpperCase();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const margin = 12;
+      const contentW = pageW - margin * 2;
+
+      const tipe    = (data.tipe || 'Drilling').toUpperCase();
+      const tgl     = data.tanggal || '—';
+      const hole    = (data.hole_no || '—').toUpperCase();
+      const mesin   = (data.mesin || '—').toUpperCase();
+      const lokasi  = (data.lokasi || '—').toUpperCase();
       const driller = (data.driller || '—').toUpperCase();
       const asisten = (data.asisten_driller || '—').toUpperCase();
-      const dari  = data.depth_dari || '—';
-      const ke    = data.depth_ke || '—';
+      const dari    = data.depth_dari || '—';
+      const ke      = data.depth_ke || '—';
+      const catatan = (data.catatan || '').toUpperCase();
+      const signDriller   = (data.sign_driller_nama || '').toUpperCase();
+      const signDrillerID = (data.sign_driller_id || '').toUpperCase();
+      const signSupv      = (data.sign_supv_nama || '').toUpperCase();
+      const signSupvID    = (data.sign_supv_id || '').toUpperCase();
 
-      // Kumpulkan crew
-      let crewList = '';
+      // Crew list
+      const crewNames = [];
       for (let i = 1; i <= crewCount; i++) {
         const nm = (data['crew_nama_'+i] || '').toUpperCase();
-        if (nm) crewList += `<tr><td>${i}</td><td class="left">${nm}</td></tr>`;
+        if (nm) crewNames.push(nm);
       }
 
-      // Header HTML (dipakai di kedua halaman)
-      const headerHTML = `
-        <div class="pdf-header">
-          <h2>DAILY SHEET CONTROL — ${tipe.toUpperCase()}</h2>
-          <div class="pdf-sub">PT. KASMAR POLEANG RAYA &nbsp;|&nbsp; ${tgl}</div>
-        </div>
-        <div class="pdf-info-box">
-          <div class="pdf-info-grid">
-            <div>
-              <div class="pdf-info-row"><span class="lbl">Hole ID</span><span class="val">${hole}</span></div>
-              <div class="pdf-info-row"><span class="lbl">Mesin</span><span class="val">${mesin}</span></div>
-              <div class="pdf-info-row"><span class="lbl">Lokasi</span><span class="val">${lokasi}</span></div>
-              <div class="pdf-info-row"><span class="lbl">Kedalaman</span><span class="val">${dari} — ${ke} m</span></div>
-            </div>
-            <div>
-              <div class="pdf-info-row"><span class="lbl">Driller / PIC</span><span class="val">${driller}</span></div>
-              <div class="pdf-info-row"><span class="lbl">Assistant</span><span class="val">${asisten}</span></div>
-              ${crewList ? `<div class="pdf-info-row"><span class="lbl">Crew</span><span class="val">${
-                Array.from({length: crewCount}, (_,i) => (data['crew_nama_'+(i+1)]||'').toUpperCase()).filter(Boolean).join(', ')
-              }</span></div>` : ''}
-            </div>
-          </div>
-        </div>`;
+      function drawHeader(doc, y) {
+        // Background judul
+        doc.setFillColor(26, 107, 74);
+        doc.rect(margin, y, contentW, 10, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('DAILY SHEET CONTROL — ' + tipe, pageW / 2, y + 7, { align: 'center' });
+
+        // Sub judul
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'normal');
+        doc.text('PT. KASMAR POLEANG RAYA  |  ' + tgl, pageW / 2, y + 13, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+
+        // Info box background
+        doc.setFillColor(240, 249, 244);
+        doc.rect(margin, y + 14, contentW, 22, 'F');
+        doc.setDrawColor(168, 213, 181);
+        doc.setLineWidth(0.4);
+        doc.rect(margin, y + 14, contentW, 22);
+        // Aksen kiri
+        doc.setFillColor(26, 107, 74);
+        doc.rect(margin, y + 14, 2, 22, 'F');
+        doc.setDrawColor(0, 0, 0);
+
+        const iy = y + 19;
+        const rowH = 5;
+        const lx = margin + 4, vx = margin + 36;
+        const rx = pageW / 2 + 4, rvx = pageW / 2 + 36;
+
+        const leftRows  = [['Hole ID', hole], ['Mesin', mesin], ['Lokasi', lokasi], ['Kedalaman', dari + ' — ' + ke + ' m']];
+        const rightRows = [['Driller / PIC', driller], ['Assistant', asisten], ['Crew', crewNames.join(', ') || '—']];
+
+        leftRows.forEach(([lbl, val], i) => {
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 107, 74);
+          doc.text(lbl, lx, iy + i * rowH);
+          doc.setFont('helvetica', 'normal'); doc.setTextColor(20, 20, 20);
+          doc.text(val, vx, iy + i * rowH);
+          doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
+          doc.line(vx, iy + i * rowH + 0.8, margin + contentW / 2 - 4, iy + i * rowH + 0.8);
+        });
+        rightRows.forEach(([lbl, val], i) => {
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 107, 74);
+          doc.text(lbl, rx, iy + i * rowH);
+          doc.setFont('helvetica', 'normal'); doc.setTextColor(20, 20, 20);
+          doc.text(val, rvx, iy + i * rowH);
+          doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
+          doc.line(rvx, iy + i * rowH + 0.8, pageW - margin - 2, iy + i * rowH + 0.8);
+        });
+        doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
+        return y + 38;
+      }
 
       // ===== HALAMAN 1: AKTIVITAS =====
-      let aktRows = '';
+      let y = margin;
+      y = drawHeader(doc, y);
+
+      // Section title
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
+      doc.text('AKTIVITAS HARIAN', margin, y + 5);
+      doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
+      doc.line(margin, y + 6, margin + contentW, y + 6);
+      doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
+      y += 8;
+
+      // Tabel aktivitas
+      const aktHead = [['No', 'Mulai', 'Selesai', 'Aktivitas', 'Keterangan']];
+      const aktBody = [];
       for (let i = 1; i <= rowCount; i++) {
         const akt = (data['aktivitas_'+i] || '').toUpperCase();
         const ket = (data['ket_'+i] || '').toUpperCase();
         const mulai = data['waktu_mulai_'+i] || '';
         const selesai = data['waktu_selesai_'+i] || '';
         if (!akt && !mulai) continue;
-        aktRows += `<tr><td>${i}</td><td>${mulai}</td><td>${selesai}</td><td style="color:#c0392b;font-weight:600;">${akt}</td><td class="left">${ket}</td></tr>`;
+        aktBody.push([i, mulai, selesai, akt, ket]);
       }
+      doc.autoTable({
+        head: aktHead, body: aktBody,
+        startY: y, margin: { left: margin, right: margin },
+        styles: { fontSize: 8, cellPadding: 2, halign: 'center' },
+        headStyles: { fillColor: [26, 107, 74], textColor: 255, fontStyle: 'bold' },
+        columnStyles: { 0: { cellWidth: 8 }, 1: { cellWidth: 16 }, 2: { cellWidth: 16 }, 3: { cellWidth: 45, textColor: [192, 57, 43], fontStyle: 'bold' }, 4: {} },
+        alternateRowStyles: { fillColor: [245, 252, 248] },
+      });
+      y = doc.lastAutoTable.finalY + 6;
+
+      // Catatan
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
+      doc.text('CATATAN', margin, y);
+      doc.setDrawColor(26, 107, 74); doc.line(margin, y + 1, margin + contentW, y + 1);
+      doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+      doc.setDrawColor(180, 180, 180); doc.rect(margin, y + 3, contentW, 12);
+      if (catatan) doc.text(catatan, margin + 2, y + 8, { maxWidth: contentW - 4 });
+      y += 18;
+
+      // Tanda tangan
+      const signW = 60;
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
+      doc.text('Diisi oleh : Driller / Assistant', margin, y);
+      doc.text('Disetujui oleh : Supervisor / Geost', margin + signW + 20, y);
+      doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+      doc.text(signDriller, margin + signW / 2, y + 5, { align: 'center' });
+      doc.text(signSupv, margin + signW + 20 + signW / 2, y + 5, { align: 'center' });
+      doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
+      doc.line(margin, y + 18, margin + signW, y + 18);
+      doc.line(margin + signW + 20, y + 18, margin + signW + 20 + signW, y + 18);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(80, 80, 80);
+      doc.text('Nama: ' + signDriller + '  No ID: ' + signDrillerID, margin, y + 21);
+      doc.text('Nama: ' + signSupv + '  No ID: ' + signSupvID, margin + signW + 20, y + 21);
 
       // ===== HALAMAN 2: CHECKLIST =====
+      doc.addPage();
+      y = margin;
+      y = drawHeader(doc, y);
+
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
+      doc.text('CHECKLIST PERALATAN', margin, y + 5);
+      doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
+      doc.line(margin, y + 6, margin + contentW, y + 6);
+      doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
+      y += 8;
+
       const alatList = getAlatList();
-      let chkRows = '';
+      const chkHead = [['No', 'Nama Alat', 'Jumlah', 'Baik', 'Rusak', 'Keterangan']];
+      const chkBody = [];
       for (let i = 1; i <= alatList.length; i++) {
-        const nama = (data['alat_nama_'+i] || alatList[i-1] || '').toUpperCase();
-        const qty  = data['alat_qty_'+i] || '';
-        const baik = data['alat_baik_'+i] || '';
-        const rusak= data['alat_rusak_'+i] || '';
-        const ket  = (data['alat_ket_'+i] || '').toUpperCase();
-        chkRows += `<tr><td>${i}</td><td class="left">${nama}</td><td>${qty}</td><td>${baik}</td><td>${rusak}</td><td class="left">${ket}</td></tr>`;
+        const nama  = (data['alat_nama_'+i] || alatList[i-1] || '').toUpperCase();
+        const qty   = data['alat_qty_'+i] || '';
+        const baik  = data['alat_baik_'+i] || '';
+        const rusak = data['alat_rusak_'+i] || '';
+        const ket   = (data['alat_ket_'+i] || '').toUpperCase();
+        chkBody.push([i, nama, qty, baik, rusak, ket]);
       }
+      doc.autoTable({
+        head: chkHead, body: chkBody,
+        startY: y, margin: { left: margin, right: margin },
+        styles: { fontSize: 7.5, cellPadding: 1.5 },
+        headStyles: { fillColor: [26, 107, 74], textColor: 255, fontStyle: 'bold', halign: 'center' },
+        columnStyles: {
+          0: { cellWidth: 8, halign: 'center' },
+          1: { cellWidth: 'auto', halign: 'left' },
+          2: { cellWidth: 16, halign: 'center' },
+          3: { cellWidth: 14, halign: 'center' },
+          4: { cellWidth: 14, halign: 'center' },
+          5: { cellWidth: 30, halign: 'left' }
+        },
+        alternateRowStyles: { fillColor: [245, 252, 248] },
+      });
 
-      const catatan = (data.catatan || '').toUpperCase();
-      const signDriller = (data.sign_driller_nama || '').toUpperCase();
-      const signDrillerID = (data.sign_driller_id || '').toUpperCase();
-      const signSupv = (data.sign_supv_nama || '').toUpperCase();
-      const signSupvID = (data.sign_supv_id || '').toUpperCase();
+      const finalY = doc.lastAutoTable.finalY + 4;
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(7); doc.setTextColor(120, 120, 120);
+      doc.text('* Pastikan semua item terisi sesuai dengan kondisi actual dan re check agar tidak terjadi kesalahan data.', margin, finalY);
 
-      const printArea = document.getElementById('print-area');
-      printArea.innerHTML = `
-        <!-- HALAMAN 1: AKTIVITAS -->
-        <div class="pdf-page">
-          ${headerHTML}
-          <div class="pdf-section-title">Aktivitas Harian</div>
-          <table class="pdf-table">
-            <thead><tr><th style="width:24px;">No</th><th style="width:44px;">Mulai</th><th style="width:44px;">Selesai</th><th style="width:130px;">Aktivitas</th><th>Keterangan</th></tr></thead>
-            <tbody>${aktRows || '<tr><td colspan="5" style="color:#999;">—</td></tr>'}</tbody>
-          </table>
-          <div class="pdf-section-title" style="margin-top:10px;">Catatan</div>
-          <div style="border:1px solid #ccc;border-radius:4px;padding:6px 8px;min-height:30px;font-size:9px;">${catatan}</div>
-          <div class="pdf-sign-grid" style="margin-top:10px;">
-            <div class="pdf-sign-box">
-              <div class="sign-title">Diisi oleh : Driller / Assistant</div>
-              <div class="pdf-sign-line"></div>
-              <div>Nama : ${signDriller}</div>
-              <div>No ID : ${signDrillerID}</div>
-            </div>
-            <div class="pdf-sign-box">
-              <div class="sign-title">Disetujui oleh : Supervisor / Geost</div>
-              <div class="pdf-sign-line"></div>
-              <div>Nama : ${signSupv}</div>
-              <div>No ID : ${signSupvID}</div>
-            </div>
-          </div>
-        </div>
-        <div class="pdf-page">
-          ${headerHTML}
-          <div class="pdf-section-title">Checklist Peralatan</div>
-          <table class="pdf-table">
-            <thead>
-              <tr>
-                <th style="width:24px;">No</th><th>Nama Alat</th>
-                <th style="width:44px;">Jumlah</th>
-                <th style="width:36px;">Baik</th>
-                <th style="width:36px;">Rusak</th>
-                <th style="width:100px;">Keterangan</th>
-              </tr>
-            </thead>
-            <tbody>${chkRows}</tbody>
-          </table>
-          <div class="pdf-note">* Pastikan semua item terisi sesuai dengan kondisi actual dan re check agar tidak terjadi kesalahan data.</div>
-        </div>
-      `;
-
-      window.print();
+      // Save
+      const filename = 'DailySheet_' + (hole || 'unknown') + '_' + tgl + '.pdf';
+      doc.save(filename);
+      showToast('✓ ' + filename + ' berhasil didownload!');
     }
+
 
     // ===== INIT =====
     updateMesinOptions();
