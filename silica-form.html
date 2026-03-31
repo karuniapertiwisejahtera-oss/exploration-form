@@ -166,7 +166,35 @@
 
       const HOLE_ID_KEYS = ['preparation', 'actual_run', 'core_loss', 'logging'];
 
-      if (HOLE_ID_KEYS.includes(key)) {
+      if (key === 'daily_sheet') {
+        // Daily Sheet: tampilkan Hole ID dan Nomor Mesin saja
+        records.forEach((rec, idx) => {
+          const ts    = new Date(rec.timestamp).toLocaleString('id-ID');
+          const hid   = (rec.hole_no || '—').toUpperCase();
+          const mesin = (rec.mesin   || '—').toUpperCase();
+          const tipe  = (rec.tipe    || '—').toUpperCase();
+          html += `<div class="dv-record">
+            <div class="dv-record-header">
+              <span>Record #${idx+1} — ${tipe}</span>
+              <span style="opacity:0.8;font-weight:400;">${ts}</span>
+            </div>
+            <div class="dv-record-body" style="padding:10px 12px;display:flex;gap:20px;">
+              <div class="dv-field">
+                <span class="dv-field-label">Hole ID</span>
+                <span class="dv-field-value" style="font-size:14px;font-weight:700;">${hid}</span>
+              </div>
+              <div class="dv-field">
+                <span class="dv-field-label">Mesin</span>
+                <span class="dv-field-value" style="font-size:14px;font-weight:700;color:#1a6b4a;">${mesin}</span>
+              </div>
+            </div>
+            <div class="dv-actions">
+              <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
+              <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
+            </div>
+          </div>`;
+        });
+      } else if (HOLE_ID_KEYS.includes(key)) {
         // Tampilkan hanya Hole ID
         records.forEach((rec, idx) => {
           const ts  = new Date(rec.timestamp).toLocaleString('id-ID');
