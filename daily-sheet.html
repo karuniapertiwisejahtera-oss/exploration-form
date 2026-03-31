@@ -284,7 +284,11 @@
       'Skop','Pacul','Kalkulator','Mistar','Spliter 1 Set','Ember Plastik',
       'Selang Air 10 M','Ayakan Kecil +0.3','Apar','Sendok Semen',
       'Timbangan Digital','Whiteboard','Shieve Shaker Besar','Shieve Shaker Kecil',
-      'Steker','Apron','','','','','','','','','','',''
+      'Steker','Apron','Lemari Palstik','Dispenser','Galon','','','','','','','',''
+    ];
+
+    const QTY_PREPARATION = [
+      300,16,3,3,3,'',1,1,2,1,1,1,1,60,1,1,1,1,1,1,1,1,1,3,1,1,2,'','','','','','','',''
     ];
 
     function getAlatList() {
@@ -309,7 +313,8 @@
     function initChecklist(mesin) {
       const tbody = document.getElementById('chk-body');
       tbody.innerHTML = '';
-      const qtys = MESIN_QTY[mesin] || [];
+      const tipe = document.getElementById('tipe-sel') ? document.getElementById('tipe-sel').value : 'Drilling';
+      const qtys = tipe === 'Preparation' ? QTY_PREPARATION : (MESIN_QTY[mesin] || []);
       getAlatList().forEach((nama, i) => {
         const no = i + 1;
         const qty = qtys[i] !== undefined ? qtys[i] : '';
