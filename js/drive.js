@@ -1,4 +1,4 @@
-﻿// ===== GOOGLE IDENTITY SERVICES (GIS) =====
+// ===== GOOGLE IDENTITY SERVICES (GIS) =====
 const CLIENT_ID = '654026557452-f20ngscfrgdsvmm42p3visqp0hagoim7.apps.googleusercontent.com';
 const API_KEY   = 'AIzaSyBm4tZzy1s7BQ3sXhl10-zWkJhl5TCHgrU';
 const SCOPES    = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets';
@@ -7,6 +7,7 @@ let _accessToken  = null;
 let _tokenClient  = null;
 let _tokenResolve = null;
 
+// Reset token (paksa minta token baru)
 function resetAccessToken() { _accessToken = null; }
 
 function _initTokenClient() {
@@ -39,8 +40,8 @@ function getAccessToken() {
     var interval = setInterval(function() {
       waited += 300;
       if (_tokenClient) {
-        clearInterval(interval);
         _tokenResolve = resolve;
+        _tokenClient.requestAccessToken({ prompt: '' });
         _tokenClient.requestAccessToken({ prompt: 'consent' });
       } else if (waited >= 6000) {
         clearInterval(interval);
