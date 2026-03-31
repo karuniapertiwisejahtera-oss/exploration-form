@@ -610,7 +610,15 @@
       // ===== HALAMAN 2: CHECKLIST =====
       doc.addPage();
       y = margin;
-      y = drawHeader(y);
+
+      // Header ringkas di halaman 2
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(26, 107, 74);
+      doc.text('DAILY SHEET CONTROL — ' + tipe, margin, y + 7);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(120, 120, 120);
+      doc.text('PT. KASMAR POLEANG RAYA  |  ' + tgl + '  |  HOLE ID: ' + hole + '  |  MESIN: ' + mesin, margin, y + 13);
+      doc.setTextColor(0, 0, 0);
+      y += 17;
+
       y = sectionTitle(doc, 'CHECKLIST PERALATAN', y);
 
       const alatList = getAlatList();
@@ -627,15 +635,15 @@
       doc.autoTable({
         head: chkHead, body: chkBody,
         startY: y, margin: { left: margin, right: margin },
-        styles: { fontSize: 8, cellPadding: 2, valign: 'middle' },
-        headStyles: { fillColor: [26, 107, 74], textColor: 255, fontStyle: 'bold', halign: 'center' },
+        styles: { fontSize: 7, cellPadding: 1.2, valign: 'middle' },
+        headStyles: { fillColor: [26, 107, 74], textColor: 255, fontStyle: 'bold', halign: 'center', fontSize: 7 },
         columnStyles: {
           0: { cellWidth: 10, halign: 'center' },
           1: { halign: 'left' },
-          2: { cellWidth: 18, halign: 'center' },
-          3: { cellWidth: 14, halign: 'center' },
-          4: { cellWidth: 14, halign: 'center' },
-          5: { cellWidth: 32, halign: 'left' }
+          2: { cellWidth: 16, halign: 'center' },
+          3: { cellWidth: 12, halign: 'center' },
+          4: { cellWidth: 12, halign: 'center' },
+          5: { cellWidth: 30, halign: 'left' }
         },
         alternateRowStyles: { fillColor: [245, 252, 248] },
         tableLineColor: [200, 200, 200], tableLineWidth: 0.2,
