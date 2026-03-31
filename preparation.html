@@ -57,7 +57,7 @@
     .prep-table td.gm06 { background: transparent; }
     .prep-table td.gp03 { background: transparent; }
     .prep-table td.gqaqc{ background: transparent; }
-    /* Garis tebal kiri sebagai pemisah antar grup — berlaku di header dan data */
+    /* Garis tebal kiri sebagai pemisah antar grup ΓÇö berlaku di header dan data */
     .prep-table th.g-start { border-left: 3px solid #888 !important; }
     .prep-table td.g-start { border-left: 3px solid #888 !important; }
     .prep-table th.g-start.g10,  .prep-table td.g-start.g10  { border-left-color: #29b6f6 !important; }
@@ -75,16 +75,16 @@
     .prep-table .cf1 { left: 0;     min-width: 52px; width: 52px; }
     .prep-table .cf2 { left: 53px;  min-width: 52px; width: 52px; }
     .prep-table .cf3 { left: 106px; min-width: 54px; width: 54px; }
-    .prep-table .cf4 { left: 161px; min-width: 60px; width: 60px; border-left: 2px solid #888 !important; }
-    .prep-table .cf5 { left: 222px; min-width: 60px; width: 60px; border-right: 2px solid #888 !important; }
+    .prep-table .cf4 { left: 161px; min-width: 80px; width: 80px; border-left: 2px solid #888 !important; }
+    .prep-table .cf5 { left: 222px; min-width: 80px; width: 80px; border-right: 2px solid #888 !important; }
 
     /* Kolom non-freeze */
-    .prep-table th.c-std  { min-width: 44px;  width: 44px; }
-    .prep-table th.c-wide { min-width: 88px;  width: 88px; } /* colspan=2: 44+44 */
-    .prep-table th.c-sid  { min-width: 80px;  width: 80px; }
+    .prep-table th.c-std  { min-width: 44px; width: 44px; }
+    .prep-table th.c-wide { min-width: 88px; width: 88px; } /* colspan=2: 44+44 */
+    .prep-table th.c-sid  { min-width: 80px; width: 80px; }
     .prep-table th.c-rem  { min-width: 140px; width: 140px; }
-    .prep-table th.c-cum  { min-width: 55px;  width: 55px; background: #fff3e0; }
-    .prep-table th.c-send { min-width: 55px;  width: 55px; background: #e8f5e9; }
+    .prep-table th.c-cum  { min-width: 55px; width: 55px; background: #fff3e0; }
+    .prep-table th.c-send { min-width: 55px; width: 55px; background: #e8f5e9; }
     /* Lebar data cell ikut header */
     .prep-table td { min-width: 44px; }
 
@@ -120,74 +120,38 @@
     /* Cell warning/error highlight */
     .prep-table td input.cell-warn  { background: #fff3e0 !important; outline: 2px solid #ff9800 !important; }
     .prep-table td input.cell-error { background: #ffebee !important; outline: 2px solid #e53935 !important; }
-    /* Tooltip comment pada cell bermasalah */
-    .prep-table td { position: relative; }
-    .prep-table td input.cell-warn::after,
-    .prep-table td input.cell-error::after { content: attr(data-msg); }
-    .cell-tooltip {
-      position: absolute; bottom: calc(100% + 4px); left: 0; z-index: 999;
-      background: #333; color: #fff; font-size: 10px; padding: 4px 8px;
-      border-radius: 6px; white-space: nowrap; pointer-events: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      display: none;
+    /* Popup tooltip cell bermasalah */
+    .cell-popup {
+      position: fixed; z-index: 9999;
+      padding: 7px 12px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      pointer-events: none; max-width: 240px;
+      line-height: 1.4; white-space: normal;
     }
-    .cell-tooltip::after {
-      content: ''; position: absolute; top: 100%; left: 10px;
-      border: 5px solid transparent; border-top-color: #333;
+    .cell-popup.warn  { background: #e65100; }
+    .cell-popup.error { background: #c62828; }
+
+    /* Baris yang tergabung ΓÇö hilangkan border bawah antar baris dalam grup */
+    .prep-table tr.row-merged td {
+      border-bottom: 1px dashed #ccc !important;
     }
-    .prep-table td:has(input.cell-warn) .cell-tooltip,
-    /* Baris terakhir dalam grup — tampilkan border bawah solid kembali */
+    /* Baris terakhir dalam grup ΓÇö border bawah solid tebal */
     .prep-table tr.row-merged-last td {
       border-bottom: 2px solid #888 !important;
     }
-    /* Pertegas border bawah kolom From_Cum & To_Cum di baris terakhir grup gabungan */
+    /* Kolom From_Cum & To_Cum: border bawah tebal hanya pada baris terakhir grup */
     .prep-table tr.row-merged-last td.td-cum {
-      border-bottom: 2px solid #e65100 !important;
-    }
-    /* Border bawah dashed pada td-cum di baris tengah grup tetap terlihat */
-    .prep-table tr.row-merged td.td-cum {
-      border-bottom: 1px dashed #e65100 !important;
-    }prep-table tr.row-merged-last td {
-      border-bottom: 2px solid #555 !important;
+      border-bottom: 2px solid #888 !important;
     }
 
     /* Tombol gabung */
     .btn-merge {
       background: #ff9800; color: white; border: none;
-      border-radius: 4px; padding: 6px 8px; font-size: 13px;
-      cursor: pointer; white-space: nowrap; min-width: 32px; min-height: 32px;
+      border-radius: 4px; padding: 2px 5px; font-size: 10px;
+      cursor: pointer; white-space: nowrap;
     }
     .btn-merge.active { background: #e65100; }
-
-    /* Mode gabung: baris lebih mudah di-tap */
-    body.merge-mode .prep-table tbody tr {
-      cursor: pointer;
-    }
-    body.merge-mode .prep-table tbody tr td {
-      padding-top: 8px !important;
-      padding-bottom: 8px !important;
-    }
-    body.merge-mode .prep-table tbody tr.row-selected-merge td {
-      background: #fff3e0 !important;
-      outline: 2px solid #ff9800;
-    }
-    body.merge-mode .prep-table tbody tr:not(.row-selected-merge):hover td {
-      background: #f5f5f5 !important;
-    }
-    /* Checkbox gabung */
-    .merge-check {
-      width: 20px; height: 20px; cursor: pointer;
-      accent-color: #ff9800;
-    };
-    }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; margin-bottom: 10px; }
-    .info-row { display: flex; align-items: center; gap: 4px; font-size: 14px; }
-    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 14px; }
-    .info-row input {
-      flex: 1; border: none; border-bottom: 1px solid #999; outline: none;
-      font-size: 14px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
-      text-transform: uppercase;
-    }btn-merge.active { background: #e65100; }
 
     /* Mode pilih baris */
     body.merge-mode .prep-table tbody tr { cursor: pointer; }
@@ -211,11 +175,11 @@
 
     /* Info grid */
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; margin-bottom: 10px; }
-    .info-row { display: flex; align-items: center; gap: 4px; font-size: 11px; }
-    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 10px; }
+    .info-row { display: flex; align-items: center; gap: 4px; font-size: 15px; }
+    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 15px; }
     .info-row input {
       flex: 1; border: none; border-bottom: 1px solid #999; outline: none;
-      font-size: 10px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
+      font-size: 15px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
       text-transform: uppercase;
     }
 
@@ -233,15 +197,28 @@
     #csv-input { display: none; }
     .btn-add-row {
       margin-top: 8px; width: 100%; background: #4db6ac; color: white;
-      border: none; padding: 9px; border-radius: 8px; font-size: 13px;
+      border: none; padding: 9px; border-radius: 8px; font-size: 10px;
       font-weight: 600; cursor: pointer;
     }
     .btn-add { background: #4db6ac; color: white; }
+  
+    /* ===== PRINT / PDF ===== */
+    @media print {
+      body * { visibility: hidden; }
+      .print-area, .print-area * { visibility: visible; }
+      .print-area { position: absolute; top: 0; left: 0; width: 100%; }
+      .prep-wrap { max-height: none !important; overflow: visible !important; }
+      .prep-table { font-size: 9px; }
+      .prep-table th, .prep-table td { padding: 2px 3px; }
+      .btn-merge, .btn-del-row { display: none !important; }
+      .prep-table th.col-freeze, .prep-table td.col-freeze { position: static !important; }
+      @page { size: landscape; margin: 8mm; }
+    }
   </style>
 </head>
 <body>
   <div class="page-header">
-    <button class="btn-back" onclick="goBack()">←</button>
+    <button class="btn-back" onclick="goBack()">ΓåÉ</button>
     <h1>Sample Preparation Form</h1>
   </div>
 
@@ -265,13 +242,13 @@
 
       <!-- Merge Banner -->
       <div class="merge-banner" id="merge-banner">
-        🔗 Mode Gabung aktif — ketuk baris yang ingin digabung
-        <button onclick="cancelMerge()">✕ Batal</button>
+        ≡ƒöù Mode Gabung aktif ΓÇö ketuk baris yang ingin digabung
+        <button onclick="cancelMerge()">Γ£ò Batal</button>
       </div>
 
       <!-- CSV Import -->
       <div class="csv-bar">
-        <label class="csv-btn" for="csv-input">📂 Import CSV</label>
+        <label class="csv-btn" for="csv-input">≡ƒôé Import CSV</label>
         <input type="file" id="csv-input" accept=".csv,.txt">
         <span id="csv-filename">Pilih file .csv dari HP</span>
       </div>
@@ -287,169 +264,142 @@
               <th class="col-freeze cf3" rowspan="3">Length(m)</th>
               <th class="col-freeze cf4" rowspan="3">Rec_Length</th>
               <th class="col-freeze cf5" rowspan="3">Grain</th>
-              <th class="c-std col-jenis" rowspan="3" style="min-width:55px;width:55px;">Jenis</th>
-              <th class="gm06 g-start" colspan="3">+0.3-0.6 mm</th>
-              <th class="gp03 g-start" colspan="3">-0.3 mm</th>
-              <th class="c-std" rowspan="3" style="min-width:38px;width:38px;">Gabung</th>
+              <th class="c-std" rowspan="3">Core Wt</th>
+              <th class="c-cum" rowspan="3">From Cum</th>
+              <th class="c-cum" rowspan="3">To Cum</th>
+              <th class="c-std" rowspan="3" style="min-width:52px; width:52px;">Gabung</th>
+              <th class="c-std" rowspan="3" style="min-width:28px;width:28px;"></th>
               <th class="c-std" rowspan="3">Samp No.</th>
+              <th class="c-std" rowspan="3" style="min-width: 44px; width: 44px;">Dry Wt</th>
               <th class="c-send" rowspan="3">Send Cum</th>
               <th class="c-sid" rowspan="3">Original Sample_ID</th>
               <th class="g10" colspan="3">+10 mm</th>
               <th class="g2 g-start" colspan="3">+2-10 mm</th>
               <th class="g06 g-start" colspan="3">+0.6-2 mm</th>
-              <th class="gm06 g-start" colspan="3">-0.6 mm</th>
-              <th class="gp03 g-start" colspan="3">+0.3 mm</th>
+              <th class="gm06 g-start" colspan="3">+0.3-0.6 mm</th>
+              <th class="gp03 g-start" colspan="3">-0.3 mm</th>
               <th class="gqaqc g-start" colspan="2">Sample QAQC</th>
-              <th class="c-std" rowspan="3" style="min-width:55px;width:55px;">Jenis</th>
+              <th class="c-std col-jenis" rowspan="3" style="min-width: 44px; width: 44px;">Jenis</th>
               <th class="c-rem" rowspan="3">Remarks</th>
             </tr>
             <!-- ROW 2: Wet (Kg) -->
             <tr>
               <th class="g10 c-wide" colspan="2">Wet (Kg)</th>
-              <th class="g10 c-sid"></th>
+              <th class="g10 c-sid" rowspan="2">Sample_ID</th>
               <th class="g2 g-start c-wide" colspan="2">Wet (Kg)</th>
-              <th class="g2 c-sid"></th>
+              <th class="g2 c-sid" rowspan="2">Sample_ID</th>
               <th class="g06 g-start c-wide" colspan="2">Wet (Kg)</th>
-              <th class="g06 c-sid"></th>
+              <th class="g06 c-sid" rowspan="2">Sample_ID</th>
               <th class="gm06 g-start c-wide" colspan="2">Wet (Kg)</th>
-              <th class="gm06 c-sid"></th>
+              <th class="gm06 c-sid" rowspan="2">Sample_ID</th>
               <th class="gp03 g-start c-wide" colspan="2">Wet (Kg)</th>
-              <th class="gp03 c-sid"></th>
-              <th class="gqaqc g-start c-sid"></th>
-    <button class="btn btn-add"    onclick="addRow()">+ Baris</button>
-    <button class="btn" style="background:#1a6b4a;color:white;" onclick="openWeightInput()">⚖ Input Weight</button>
-    <button class="btn" style="background:#e91e8c;color:white;" onclick="addQAQCRow('DS')">+ DS</button>
-    <button class="btn" style="background:#9c27b0;color:white;" onclick="addQAQCRow('BS')">+ BS</button>
-    <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
-    <button class="btn btn-clear"  onclick="clearData()">✕ Clear</button>
-    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
-              <th class="g10 c-sid">Sample_ID</th>
+              <th class="gp03 c-sid" rowspan="2">Sample_ID</th>
+              <th class="gqaqc g-start c-sid" rowspan="2">Sample_ID</th>
+              <th class="gqaqc c-std" rowspan="2">Wet(Kg)</th>
+            </tr>
+            <!-- ROW 3: Total | Rec | Sample_ID -->
+            <tr>
+              <th class="g10 c-std">Total</th>
+              <th class="g10 c-std">Rec</th>
+
               <th class="g2 g-start c-std">Total</th>
               <th class="g2 c-std">Rec</th>
-  <!-- MODAL INPUT WEIGHT -->
-  <div id="weight-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9998;overflow-y:auto;">
-    <div style="background:white;border-radius:16px;margin:20px auto;width:92%;max-width:420px;padding:16px;">
-    window.onerror = function(msg, src, line, col, err) {een;align-items:center;margin-bottom:12px;">
-        <span style="font-weight:700;font-size:15px;color:#1a2e22;">⚖ Input Weight</span>
-        <button onclick="closeWeightInput()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
+
+              <th class="g06 g-start c-std">Total</th>
+              <th class="g06 c-std">Rec</th>
+
+              <th class="gm06 g-start c-std">Total</th>
+              <th class="gm06 c-std">Rec</th>
+
+              <th class="gp03 g-start c-std">Total</th>
+              <th class="gp03 c-std">Rec</th>
+
+
+
+            </tr>
+          </thead>
+          <tbody id="prep-tbody"></tbody>
+        </table>
       </div>
-      <div id="weight-input-list" style="max-height:60vh;overflow-y:auto;"></div>
-      <button onclick="saveWeightInput()" style="margin-top:12px;width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Simpan</button>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn" style="background:#1a6b4a;color:white;" onclick="openWeightInput()">&#9878; Input Weight</button>
+    <button class="btn" style="background:#e91e8c;color:white;" onclick="addQAQCRow('DS')">+ DS</button>
+    <button class="btn" style="background:#9c27b0;color:white;" onclick="addQAQCRow('BS')">+ BS</button>
+    <button class="btn btn-save"   onclick="saveData()">≡ƒÆ╛ Save</button>
+    <button class="btn btn-clear"  onclick="clearData()">Γ£ò Clear</button>
+    <button class="btn btn-submit" onclick="submitData()">Γ£ô Submit</button>
+  </div>
+
+  <!-- Google API removed - offline mode -->
+
+  <script src="js/app.js"></script>
+  <script src="js/drive.js"></script>
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      alert('JS Error: ' + msg + '\nLine: ' + line + '\n' + (err ? err.stack : ''));
+      return false;
+    };
+  </script>
+  <script>
     let rowCount = 0;
     let mergeSourceRow = null; // nomor baris yang menekan tombol Gabung
 
     // ===== INPUT WEIGHT MODAL =====
-    const FRAC_DEFS = [
+    var FRAC_DEFS_W = [
       { label: '+10',      tot: 'a10_tot', sid: 'a10_sid' },
       { label: '+2',       tot: 'a2_tot',  sid: 'a2_sid'  },
       { label: '+0.6',     tot: 'a06_tot', sid: 'a06_sid' },
       { label: '+0.3-0.6', tot: 'm06_tot', sid: 'm06_sid' },
       { label: '-0.3',     tot: 'p03_tot', sid: 'p03_sid' },
     ];
-
     function openWeightInput() {
-      const list = document.getElementById('weight-input-list');
+      var list = document.getElementById('weight-input-list');
       list.innerHTML = '';
-      let hasItem = false;
-
-      // Baca urutan DOM
-      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
-      domRows.forEach(tr => {
-        const n = tr.dataset.row;
-        const sampNo = document.querySelector('[name="samp_no_' + n + '"]');
+      var hasItem = false;
+      var domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      domRows.forEach(function(tr) {
+        var n = tr.dataset.row;
+        var sampNo = document.querySelector('[name="samp_no_' + n + '"]');
         if (!sampNo || !sampNo.value.trim()) return;
-
-        FRAC_DEFS.forEach(frac => {
-          const sidEl = document.querySelector('[name="' + frac.sid + '_' + n + '"]');
-          const totEl = document.querySelector('[name="' + frac.tot + '_' + n + '"]');
+        FRAC_DEFS_W.forEach(function(frac) {
+          var sidEl = document.querySelector('[name="' + frac.sid + '_' + n + '"]');
+          var totEl = document.querySelector('[name="' + frac.tot + '_' + n + '"]');
           if (!sidEl || !sidEl.value.trim()) return;
-
           hasItem = true;
-          const sid = sidEl.value.trim().toUpperCase();
-          const cur = totEl ? totEl.value : '';
-
-          const row = document.createElement('div');
+          var sid = sidEl.value.trim().toUpperCase();
+          var cur = totEl ? totEl.value : '';
+          var row = document.createElement('div');
           row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0;';
-          row.innerHTML = `
-            <div style="flex:1;">
-              <div style="font-size:12px;font-weight:700;color:#1a2e22;">${sid}</div>
-              <div style="font-size:10px;color:#888;">${frac.label} — Baris ${sampNo.value}</div>
-            </div>
-            <input type="number" step="0.01" placeholder="Weight"
-              value="${cur}"
-              data-row="${n}" data-field="${frac.tot}"
-              style="width:100px;border:1.5px solid #ccc;border-radius:8px;padding:6px 8px;font-size:13px;text-align:center;">
-          `;
+          row.innerHTML = '<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#1a2e22;">' + sid + '</div><div style="font-size:11px;color:#888;">' + frac.label + ' &mdash; ' + sampNo.value + '</div></div><input type="number" step="0.01" placeholder="Weight" value="' + cur + '" data-row="' + n + '" data-field="' + frac.tot + '" style="width:100px;border:1.5px solid #ccc;border-radius:8px;padding:8px;font-size:14px;text-align:center;">';
           list.appendChild(row);
         });
       });
-
-      if (!hasItem) {
-        list.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">Belum ada Sample ID fraksi yang terisi.</p>';
-      }
-
+      if (!hasItem) list.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">Belum ada Sample ID fraksi yang terisi.</p>';
       document.getElementById('weight-modal-overlay').style.display = 'block';
-      // Focus input pertama
-      setTimeout(() => {
-        const first = list.querySelector('input[type=number]');
-        if (first) first.focus();
+      setTimeout(function() {
+        var inputs = Array.from(list.querySelectorAll('input[type=number]'));
+        inputs.forEach(function(inp, idx) {
+          inp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); if (idx + 1 < inputs.length) inputs[idx+1].focus(); else saveWeightInput(); }
+          });
+        });
+        if (inputs.length) inputs[0].focus();
       }, 100);
     }
-
-    function closeWeightInput() {
-      document.getElementById('weight-modal-overlay').style.display = 'none';
-    }
-
+    function closeWeightInput() { document.getElementById('weight-modal-overlay').style.display = 'none'; }
     function saveWeightInput() {
-      const inputs = document.querySelectorAll('#weight-input-list input[data-row]');
-      inputs.forEach(inp => {
-        const n     = inp.dataset.row;
-        const field = inp.dataset.field;
-        const el    = document.querySelector('[name="' + field + '_' + n + '"]');
-        if (el && inp.value !== '') {
-          el.value = inp.value;
-          calcRec(parseInt(n));
-          checkDryWtAlert(parseInt(n));
-        }
+      var inputs = document.querySelectorAll('#weight-input-list input[data-row]');
+      inputs.forEach(function(inp) {
+        if (inp.value === '') return;
+        var el = document.querySelector('[name="' + inp.dataset.field + '_' + inp.dataset.row + '"]');
+        if (el) { el.value = inp.value; calcRec(parseInt(inp.dataset.row)); checkDryWtAlert(parseInt(inp.dataset.row)); }
       });
       closeWeightInput();
-      showToast('✓ Weight berhasil disimpan!');
+      showToast('Weight berhasil disimpan!');
     }
-
-  <script src="js/app.js"></script>
-  <script src="js/drive.js"></script>c-std">Total</th>
-              <th class="g06 c-std">Rec</th>
-              <th class="g06 c-sid">Sample_ID</th>
-              <th class="gm06 g-start c-std">Total</th>
-              <th class="gm06 c-std">Rec</th>
-              <th class="gm06 c-sid">Sample_ID</th>
-              <th class="gp03 g-start c-std">Total</th>
-              <th class="gp03 c-std">Rec</th>
-              <th class="gp03 c-sid">Sample_ID</th>
-              <th class="gqaqc g-start c-sid">Sample_ID</th>
-              <th class="gqaqc c-std"></th>
-    <button class="btn btn-add"    onclick="addRow()">+ Baris</button>
-    <button class="btn" style="background:#e91e8c;color:white;" onclick="addQAQCRow('DS')">+ DS</button>
-    <button class="btn" style="background:#9c27b0;color:white;" onclick="addQAQCRow('BS')">+ BS</button>
-    <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
-    <button class="btn btn-clear"  onclick="clearData()">✕ Clear</button>
-    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="action-bar">
-    <button class="btn btn-add"    onclick="addRow()">+ Baris</button>
-    <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
-    <button class="btn btn-clear"  onclick="clearData()">✕ Clear</button>
-    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
-  </div>
-
-  <script src="js/app.js"></script>
-  <script src="js/drive.js"></script>
-  <script>
-    let rowCount = 0;
-    let mergeSourceRow = null; // nomor baris yang menekan tombol Gabungstyle="background:#ef5350;color:white;border:none;border-radius:3px;padding:1px 4px;font-size:10px;cursor:pointer;min-width:2
 
     // ===== TAMBAH BARIS =====
     function addRow(data) {
@@ -466,23 +416,21 @@
         return `<input type="number" id="${id}_${n}" name="${id}_${n}" value="${isNaN(clean) ? '' : clean}" step="0.01" class="auto">`;
       };
       const autoTxt = (id, val) =>
-      const num = (id, val) =>
-        `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01">`;
-      const numRO = (id, val) =>
-        `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01" readonly style="color:#888;background:#f5f5f5;">`;
-      const txt = (id, val) =>
-        `<input type="text" name="${id}_${n}" value="${val || ''}">`;Case();
+        `<input type="text" id="${id}_${n}" name="${id}_${n}" value="${val || ''}" class="auto" readonly>`;
+      // Grain size dropdown
+      const grainOpts = ['','GVL','CS','FS','CLY'];
+      const grainVal = (val) => (val || '').toString().trim().toUpperCase();
       const grainSel = (val) => `<select id="grain_${n}" name="grain_${n}" class="auto" style="color:#1a6b4a;font-weight:700;background:transparent;border:none;outline:none;width:100%;font-size:11px;text-align:center;">
         ${grainOpts.map(o => `<option value="${o}"${o===grainVal(val)?'selected':''}>${o}</option>`).join('')}
       </select>`;
-      const num = (id, val) =>
-        `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01">`;
       const num = (id, val) =>
         `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01">`;
       const numRO = (id, val) =>
         `<input type="number" name="${id}_${n}" value="${val != null ? val : ''}" step="0.01" readonly style="color:#888;background:#f5f5f5;">`;
       const txt = (id, val) =>
         `<input type="text" name="${id}_${n}" value="${val || ''}">`;
+
+      // Jenis dropdown
       const jenisOpts = ['','+0.3','DS','BS'];
       const jenisVal = (val) => (val || '').toString().trim().toUpperCase();
       const jenisSel = (val) => `<select name="jenis_${n}" style="background:transparent;border:none;outline:none;width:100%;font-size:11px;text-align:center;">
@@ -500,83 +448,32 @@
         <td>${num('core_wt', v.core_wt)}</td>
         <td class="td-cum"><input type="number" name="from_cum_${n}" id="from_cum_${n}" value="${v.from_cum != null ? v.from_cum : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td class="td-cum"><input type="number" name="to_cum_${n}"   id="to_cum_${n}"   value="${v.to_cum   != null ? v.to_cum   : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
-        <td><button class="btn-merge" onclick="startMerge(${n}, this)" title="Pilih baris untuk digabung">🔗</button></td>
+        <td style="text-align:center;"><button class="btn-merge" onclick="startMerge(${n}, this)" title="Pilih baris untuk digabung">≡ƒöù</button><input type="checkbox" class="merge-check" id="merge-check-${n}" style="display:none;margin-left:4px;" onchange="toggleMergeRow(${n}, this)"></td>
+        <td><button class="btn-del-row" onclick="deleteRow(${n})" title="Hapus baris" style="background:#ef5350;color:white;border:none;border-radius:4px;padding:3px 7px;font-size:12px;cursor:pointer;min-width:28px;">Γ£ò</button></td>
         <td>${txt('samp_no', v.samp_no)}</td>
+        <td>${num('dry_wt', v.dry_wt)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
         <td>${txt('sample_id', v.sample_id)}</td>
-        <td class="g10 g-start">${num('a10_tot', v.a10_tot)}</td>
-        <td class="g10">${numRO('a10_rec', v.a10_rec)}</td>
-        <td class="g10">${txt('a10_sid', v.a10_sid)}</td>
-        <td class="g2 g-start">${num('a2_tot',  v.a2_tot)}</td>
-        <td class="g2">${numRO('a2_rec',  v.a2_rec)}</td>
-        <td class="g2">${txt('a2_sid',  v.a2_sid)}</td>
-        <td class="g06 g-start">${num('a06_tot', v.a06_tot)}</td>
-        <td class="g06">${numRO('a06_rec', v.a06_rec)}</td>
-        <td class="g06">${txt('a06_sid', v.a06_sid)}</td>
-        <td class="gm06 g-start">${num('m06_tot', v.m06_tot)}</td>
-        <td class="frac-cell col-jenis">${jenisSel(v.jenis)}</td></td>
-        <td class="gm06">${txt('m06_sid', v.m06_sid)}</td>
-      attachRowListeners(n);
-      attachTotListeners(n);
-      updateTotalSample();
-    function updateTotalSample() {
-      document.getElementById('h-total-sample').value = rowCount;
-    }
-
-    // ===== TAMBAH BARIS QAQC (interval blank) =====
-    function addQAQCRow(jenis) {
-      // Hitung nomor QAQC berikutnya
-      let qNum = 0;
-      for (let i = 1; i <= rowCount; i++) {
-        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
-    function updateTotalSample() {
-      document.getElementById('h-total-sample').value = rowCount;
-    }
-
-    // ===== HAPUS BARIS =====
-    function deleteRow(rowNum) {
-      if (rowCount <= 1) { showToast('Minimal 1 baris harus ada', 'error'); return; }
-      const tr = document.getElementById('prep-row-' + rowNum);
-      if (!tr) return;
-      // Jika baris dalam grup gabung, lepas dulu
-      if (tr.dataset.mergeGroup) unmerge(tr.dataset.mergeGroup);
-      tr.remove();
-      recalcSamplingNo();
-      updateFracLock();
-      highlightDuplicates();
-      updateTotalSample();
-      showToast('Baris dihapus');
-    }     if (n > qNum) qNum = n;
-        }
-      }
-      qNum++;
-      addRow({ samp_no: 'Q' + qNum, jenis: jenis });
-      // Pastikan fraksi tidak terkunci (Samp_No sudah terisi)
-      qNum++;
-      addRow({ samp_no: 'Q' + qNum, jenis: jenis });
-      // Tandai baris sebagai QAQC
-      const qTr = document.getElementById('prep-row-' + rowCount);
-      if (qTr) qTr.classList.add('row-qaqc');n');
-    }   <td class="gqaqc">${num('qaqc_wt',  v.qaqc_wt)}</td>
-    function updateTotalSample() {
-      document.getElementById('h-total-sample').value = rowCount;
-    }
-
-    // Kunci/buka fraksi berdasarkan Samp_No — hanya baris dengan Samp_No terisi yang bisa diisi fraksi
-    function updateFracLock() {
-      for (let i = 1; i <= rowCount; i++) {
-        const tr = document.getElementById('prep-row-' + i);
-        if (!tr) continue;
-        const snEl = document.querySelector(`[name="samp_no_${i}"]`);
-        const hasSampNo = snEl && snEl.value.trim() !== '';
-        if (hasSampNo) tr.classList.remove('row-frac-locked');
-        else tr.classList.add('row-frac-locked');
-      }
-    }   } else {
-          tr.classList.remove('row-frac-locked');
-        }
-      }
-    } `;
+        <td class="g10 g-start frac-cell">${num('a10_tot', v.a10_tot)}</td>
+        <td class="g10 frac-cell">${numRO('a10_rec', v.a10_rec)}</td>
+        <td class="g10 frac-cell">${txt('a10_sid', v.a10_sid)}</td>
+        <td class="g2 g-start frac-cell">${num('a2_tot',  v.a2_tot)}</td>
+        <td class="g2 frac-cell">${numRO('a2_rec',  v.a2_rec)}</td>
+        <td class="g2 frac-cell">${txt('a2_sid',  v.a2_sid)}</td>
+        <td class="g06 g-start frac-cell">${num('a06_tot', v.a06_tot)}</td>
+        <td class="g06 frac-cell">${numRO('a06_rec', v.a06_rec)}</td>
+        <td class="g06 frac-cell">${txt('a06_sid', v.a06_sid)}</td>
+        <td class="gm06 g-start frac-cell">${num('m06_tot', v.m06_tot)}</td>
+        <td class="gm06 frac-cell">${numRO('m06_rec', v.m06_rec)}</td>
+        <td class="gm06 frac-cell">${txt('m06_sid', v.m06_sid)}</td>
+        <td class="gp03 g-start frac-cell">${num('p03_tot', v.p03_tot)}</td>
+        <td class="gp03 frac-cell">${numRO('p03_rec', v.p03_rec)}</td>
+        <td class="gp03 frac-cell">${txt('p03_sid', v.p03_sid)}</td>
+        <td class="gqaqc g-start frac-cell">${txt('qaqc_sid', v.qaqc_sid)}</td>
+        <td class="gqaqc frac-cell">${num('qaqc_wt',  v.qaqc_wt)}</td>
+        <td class="frac-cell col-jenis">${jenisSel(v.jenis)}</td>
+        <td class="frac-cell">${txt('remarks',  v.remarks)}</td>
+      `;
       tbody.appendChild(tr);
       attachRowListeners(n);
       attachTotListeners(n);
@@ -587,12 +484,140 @@
       document.getElementById('h-total-sample').value = rowCount;
     }
 
+    // ===== HAPUS BARIS =====
+    function deleteRow(rowNum) {
+      if (rowCount <= 1) { showToast('Minimal 1 baris harus ada', 'error'); return; }
+      const tr = document.getElementById('prep-row-' + rowNum);
+      if (!tr) return;
+      if (tr.dataset.mergeGroup) {
+        const mg = tr.dataset.mergeGroup;
+        // Lepas dari grup tanpa confirm
+        document.querySelectorAll('tr[data-merge-group="' + mg + '"]').forEach(function(r) {
+          r.classList.remove('row-merged', 'row-merged-last', 'row-merged-first');
+          delete r.dataset.mergeGroup;
+          const n = r.dataset.row;
+          const fcEl = document.getElementById('from_cum_' + n);
+          const tcEl = document.getElementById('to_cum_' + n);
+          if (fcEl) { fcEl.value = ''; fcEl.style.visibility = 'visible'; }
+          if (tcEl) { tcEl.value = ''; tcEl.style.visibility = 'visible'; }
+          const btnEl = r.querySelector('.btn-merge');
+          if (btnEl) { btnEl.textContent = '≡ƒöù'; btnEl.style.visibility = 'visible'; btnEl.onclick = function() { startMerge(parseInt(n), btnEl); }; }
+        });
+      }
+      tr.remove();
+      recalcSamplingNo();
+      updateFracLock();
+      highlightDuplicates();
+      updateTotalSample();
+      showToast('Baris dihapus');
+    }
+
+    // ===== TAMBAH BARIS QAQC (interval blank) =====
+    function addQAQCRow(jenis) {
+      // Hitung nomor Q berikutnya
+      let qNum = 0;
+      for (let i = 1; i <= rowCount; i++) {
+        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
+        if (snEl && /^Q\d+$/i.test(snEl.value.trim())) {
+          const n = parseInt(snEl.value.trim().slice(1));
+          if (n > qNum) qNum = n;
+        }
+      }
+      qNum++;
+
+      // Cari Sample_ID terakhir yang terisi untuk auto-fill Original Sample_ID (berdasarkan urutan DOM)
+      let lastSID = '';
+      const ALL_SID_FIELDS_Q = ['sample_id','qaqc_sid','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
+      Array.from(document.querySelectorAll('#prep-tbody tr[data-row]')).forEach(function(tr) {
+        const rn = tr.dataset.row;
+        ALL_SID_FIELDS_Q.forEach(function(f) {
+          const el = document.querySelector('[name="' + f + '_' + rn + '"]');
+          if (el && el.value.trim() && /^GS/i.test(el.value.trim())) lastSID = el.value.trim().toUpperCase();
+        });
+      });
+      // Hitung nomor berikutnya dari lastSID
+      let nextSID = '';
+      if (lastSID) {
+        const m = lastSID.match(/^([A-Z]+)(\d+)$/);
+        if (m) {
+          // Kumpulkan semua Sample ID yang sudah terpakai (semua field)
+          const used = new Set();
+          const ALL_SID_FIELDS = ['sample_id','qaqc_sid','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
+          Array.from(document.querySelectorAll('#prep-tbody tr[data-row]')).forEach(function(tr) {
+            const rn = tr.dataset.row;
+            ALL_SID_FIELDS.forEach(function(f) {
+              const el = document.querySelector('[name="' + f + '_' + rn + '"]');
+              if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
+            });
+          });
+          let next = parseInt(m[2]) + 1;
+          while (used.has(m[1] + String(next).padStart(m[2].length, '0'))) next++;
+          nextSID = m[1] + String(next).padStart(m[2].length, '0');
+        }
+      }
+
+      addRow({ samp_no: 'Q' + qNum, jenis: jenis, sample_id: nextSID });
+      const qTr = document.getElementById('prep-row-' + rowCount);
+      if (qTr) qTr.classList.add('row-qaqc');
+      // Sisipkan baris Q setelah baris terakhir yang punya Original Sample_ID (urutan DOM)
+      const tbody2 = document.getElementById('prep-tbody');
+      const allDomRows2 = Array.from(tbody2.querySelectorAll('tr[data-row]'));
+      let insertAfterTr = null;
+      allDomRows2.forEach(function(tr) {
+        const rn = tr.dataset.row;
+        const sidEl2 = document.querySelector('[name="sample_id_' + rn + '"]');
+        if (sidEl2 && sidEl2.value.trim() && tr !== qTr) insertAfterTr = tr;
+      });
+      if (insertAfterTr && qTr && insertAfterTr !== qTr) {
+        // insertAfter: sisipkan qTr setelah insertAfterTr
+        insertAfterTr.after(qTr);
+      }
+      // Auto-copy qaqc_sid ke sample_id saat diisi (jika sample_id belum terisi manual)
+      const newRow = rowCount;
+      const qaqcEl_q = document.querySelector('[name="qaqc_sid_' + newRow + '"]');
+      const sidEl_q  = document.querySelector('[name="sample_id_' + newRow + '"]');
+      if (qaqcEl_q && sidEl_q) {
+        const syncQAQC = function() {
+          if (sidEl_q.value === '' || sidEl_q.dataset.autoQ === 'true') {
+            sidEl_q.value = qaqcEl_q.value.toUpperCase();
+            sidEl_q.dataset.autoQ = 'true';
+          }
+        };
+        qaqcEl_q.addEventListener('input', syncQAQC);
+        qaqcEl_q.addEventListener('change', syncQAQC);
+      }
+      updateFracLock();
+      highlightDuplicates();
+      showToast('Baris QAQC ' + jenis + ' ditambahkan');
+    }
+
+    // Kunci hanya kolom Rec pada baris non-pertama dalam grup gabung
+    function updateFracLock() {
+      for (let i = 1; i <= rowCount; i++) {
+        const tr = document.getElementById('prep-row-' + i);
+        if (!tr) continue;
+        // Hanya kunci input Rec (readonly) ΓÇö Total tetap bisa diisi manual
+        const recFields = ['a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'];
+        const recEls = recFields.map(f => document.querySelector('[name="' + f + '_' + i + '"]')).filter(Boolean);
+        // Kunci jika baris ada dalam grup gabung DAN from_cum tersembunyi (bukan baris pertama)
+        const fcEl = document.getElementById('from_cum_' + i);
+        const inMerge = tr.dataset.mergeGroup && fcEl && fcEl.style.visibility === 'hidden';
+        if (inMerge) {
+          tr.classList.add('row-frac-locked');
+          recEls.forEach(el => { el.disabled = true; });
+        } else {
+          tr.classList.remove('row-frac-locked');
+          recEls.forEach(el => { el.disabled = false; });
+        }
+      }
+    }
+
     // ===== AUTO-FILL: Sampling No & Sample_ID berantai =====
 
     // Hitung ulang Sampling No untuk semua baris (S1, S2... hanya jika from_cum tidak kosong)
     // Jika semua grain_size dalam grup = CLY, samp_no dikosongkan
     function recalcSamplingNo() {
-      // Bangun map: mergeGroup → array rowNums
+      // Bangun map: mergeGroup ΓåÆ array rowNums
       const groupRows = {};
       for (let i = 1; i <= rowCount; i++) {
         const tr = document.getElementById('prep-row-' + i);
@@ -617,14 +642,13 @@
         const fcEl = document.getElementById('from_cum_' + i);
         const snEl = document.querySelector(`[name="samp_no_${i}"]`);
         if (!snEl) continue;
-        const hasCum = fcEl && fcEl.closest('td').style.visibility !== 'hidden' && fcEl.value !== '';
+        const hasCum = fcEl && fcEl.style.visibility !== 'hidden' && fcEl.value !== '';
         if (!hasCum) continue;
-        }
-      }
-      updateFracLock();
-    }
 
-    // Urutan kolom Sample_ID dalam satu baris
+        const tr = document.getElementById('prep-row-' + i);
+        const mg = tr ? (tr.dataset.mergeGroup || ('_single_' + i)) : ('_single_' + i);
+
+        if (isCLYGroup[mg]) {
           // Grup CLY: kosongkan samp_no
           snEl.value = '';
           snEl.dataset.auto = 'true';
@@ -641,7 +665,7 @@
     // Urutan kolom Sample_ID dalam satu baris
     const SID_ORDER = ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
 
-    // Mapping sid → tot
+    // Mapping sid ΓåÆ tot
     const SID_TO_TOT = {
       'a10_sid': 'a10_tot',
       'a2_sid':  'a2_tot',
@@ -659,26 +683,25 @@
       const base = triggerEl.value.trim();
       if (!base) return;
       const match = base.match(/^(.*?)(\d+)$/);
-    // Auto-fill Sample_ID setelah kolom trigger diisi — update semua fraksi setelahnya
-    function autoFillSampleIDs(rowNum, triggerField) {
-      const triggerIdx = SID_ORDER.indexOf(triggerField);
-      if (triggerIdx < 0) return;
-      const triggerEl = document.querySelector(`[name="${triggerField}_${rowNum}"]`);
-      if (!triggerEl) return;
-      const base = triggerEl.value.trim();
-      if (!base) return;
-      const match = base.match(/^(.*?)(\d+)$/);
       if (!match) return;
       const prefix = match[1], numPart = match[2];
       const numVal = parseInt(numPart), padLen = numPart.length;
       SID_ORDER.slice(triggerIdx + 1).forEach((name, idx) => {
         const el = document.querySelector(`[name="${name}_${rowNum}"]`);
         if (!el) return;
-        // Update semua fraksi setelahnya (auto maupun manual)
         el.value = prefix + String(numVal + idx + 1).padStart(padLen, '0');
         el.dataset.auto = 'true';
       });
       highlightDuplicates();
+    }
+
+    function clearAutoAfter(rowNum, triggerField) {
+      const triggerIdx = SID_ORDER.indexOf(triggerField);
+      if (triggerIdx < 0) return;
+      SID_ORDER.slice(triggerIdx + 1).forEach(name => {
+        const el = document.querySelector(`[name="${name}_${rowNum}"]`);
+        if (el && el.dataset.auto === 'true') { el.value = ''; el.dataset.auto = 'false'; }
+      });
     }
 
     // ===== HIGHLIGHT DUPLIKAT SAMPLE_ID =====
@@ -695,34 +718,39 @@
           if (!seen[val]) seen[val] = [];
           seen[val].push(el);
         });
-    // ===== AUTO-FILL QAQC SAMPLE_ID =====
-    // Saat Sample_ID utama diisi (misal GS003015), QAQC diisi dengan nomor berikutnya
-    // yang belum dipakai di seluruh form
-    function autoFillQAQC(rowNum) {
-      const sidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
-      if (!sidEl || !sidEl.value.trim()) return;
-      const qaqcEl = document.querySelector(`[name="qaqc_sid_${rowNum}"]`);
-      if (!qaqcEl || qaqcEl.value.trim()) return; // sudah terisi, jangan timpa
+      }
+      // Reset semua dulu
+      document.querySelectorAll('#prep-table input.dup').forEach(el => el.classList.remove('dup'));
+      // Tandai yang duplikat
+      Object.values(seen).forEach(els => {
+        if (els.length > 1) els.forEach(el => el.classList.add('dup'));
+      });
+    }
 
+    // ===== AUTO-FILL QAQC SAMPLE_ID =====
+    // Hanya aktif jika Jenis = DS atau BS
+    function autoFillQAQC(rowNum) {
+      const jenisEl = document.querySelector('[name="jenis_' + rowNum + '"]');
+      const jenis = jenisEl ? jenisEl.value.trim().toUpperCase() : '';
+      if (jenis !== 'DS' && jenis !== 'BS') return;
+      const sidEl = document.querySelector('[name="sample_id_' + rowNum + '"]');
+      if (!sidEl || !sidEl.value.trim()) return;
+      const qaqcEl = document.querySelector('[name="qaqc_sid_' + rowNum + '"]');
+      if (!qaqcEl || qaqcEl.value.trim()) return;
       const base = sidEl.value.trim().toUpperCase();
       const match = base.match(/^([A-Z]+)(\d+)$/);
       if (!match) return;
-      const prefix = match[1];
-      const startNum = parseInt(match[2]);
-
-      // Kumpulkan semua Sample_ID dan QAQC yang sudah terpakai
+      const prefix = match[1], padLen = match[2].length;
       const used = new Set();
       for (let i = 1; i <= rowCount; i++) {
-        ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'].forEach(f => {
-          const el = document.querySelector(`[name="${f}_${i}"]`);
+        ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'].forEach(function(f) {
+          const el = document.querySelector('[name="' + f + '_' + i + '"]');
           if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
         });
       }
-
-      // Cari nomor berikutnya yang belum dipakai
-      let next = startNum + 1;
-      while (used.has(prefix + String(next).padStart(match[2].length, '0'))) next++;
-      qaqcEl.value = prefix + String(next).padStart(match[2].length, '0');
+      let next = parseInt(match[2]) + 1;
+      while (used.has(prefix + String(next).padStart(padLen, '0'))) next++;
+      qaqcEl.value = prefix + String(next).padStart(padLen, '0');
       qaqcEl.dataset.auto = 'true';
       highlightDuplicates();
     }
@@ -735,35 +763,23 @@
       const snEl = document.querySelector(`[name="samp_no_${n}"]`);
       if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
 
-      // Auto-fill QAQC Sample_ID saat Sample_ID utama diisi
-      const sidEl = document.querySelector(`[name="sample_id_${n}"]`);
-      if (sidEl) {
-        sidEl.addEventListener('change', () => {
-          autoFillQAQC(n);
-          highlightDuplicates();
-        });
-      }
-    }
-
-    function attachRowListeners(n) {
-      const fcEl = document.getElementById('from_cum_' + n);
-      if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
-      const grainEl = document.querySelector(`[name="grain_${n}"]`);
-      if (grainEl) grainEl.addEventListener('change', recalcSamplingNo);
-      const snEl = document.querySelector(`[name="samp_no_${n}"]`);
-      if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
+      // Auto-fill QAQC saat Jenis berubah ke DS/BS atau Sample_ID diisi
+      const jenisEl_r = document.querySelector('[name="jenis_' + n + '"]');
+      if (jenisEl_r) jenisEl_r.addEventListener('change', function() { autoFillQAQC(n); });
+      const sidEl_r = document.querySelector('[name="sample_id_' + n + '"]');
+      if (sidEl_r) sidEl_r.addEventListener('change', function() { autoFillQAQC(n); highlightDuplicates(); });
       SID_ORDER.forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (!el) return;
 
         // Auto-fill Sample_ID berikutnya
         el.addEventListener('input', () => {
-        // Auto-fill Sample_ID berikutnya saat input
-        el.addEventListener('input', () => {
           el.dataset.auto = 'false';
           if (el.value.trim()) autoFillSampleIDs(n, field);
           highlightDuplicates();
-        });Barcode scan → isi kolom Total sebarisnya
+        });
+
+        // Barcode scan ΓåÆ isi kolom Total sebarisnya
         // Barcode scanner biasanya kirim karakter cepat lalu Enter/Tab
         el.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === 'Tab') {
@@ -808,35 +824,41 @@
     // ===== KALKULASI REC =====
     function calcRec(rowNum) {
       const get = (name) => {
+        const el = document.querySelector(`[name="${name}_${rowNum}"]`);
+        return el ? (parseFloat(el.value) || 0) : 0;
+      };
+      const set = (name, val) => {
+        const el = document.querySelector(`[name="${name}_${rowNum}"]`);
+        if (el) {
+          el.value = val !== '' ? val : '';
+          el.dataset.autoRec = val !== '' ? 'true' : 'false';
+        }
+      };
+
       const t10  = get('a10_tot');
       const t2   = get('a2_tot');
       const t06  = get('a06_tot');
       const tm06 = get('m06_tot');  // +0.3-0.6 mm
       const sum3 = t10 + t2 + t06 + tm06;
 
-      if (sum3 === 0) return; // belum ada data
+      if (sum3 === 0) {
+        // Kosongkan semua Rec jika semua Total kosong
+        ['a10_rec','a2_rec','a06_rec','m06_rec'].forEach(function(f) {
+          const el = document.querySelector('[name="' + f + '_' + rowNum + '"]');
+          if (el) { el.value = ''; el.dataset.autoRec = 'false'; }
+        });
+        return;
+      }
 
-      // Jika sum < 500 → ×250, selain itu → ×500
-      const mult = sum3 < 500 ? 250 : 500;
+      // Jika sum < 500 ΓåÆ ├ù250, selain itu ΓåÆ ├ù500
+      const mult = sum3 >= 1000 ? 1000 : (sum3 >= 500 ? 500 : 250);
 
-      // Hitung Rec untuk semua fraksi kecuali -0.3 mm
+      // Hitung Rec untuk +10, +2-10, +0.6-2, +0.3-0.6 (bukan -0.3)
       const tots = {
         a10_rec:  t10,
         a2_rec:   t2,
         a06_rec:  t06,
         m06_rec:  tm06,
-        p03_rec:  get('p03_tot')
-      }; (sum3 === 0) return; // belum ada data
-
-      // Jika sum < 500 → ×250, selain itu → ×500
-      const mult = sum3 < 500 ? 250 : 500;
-
-      // Hitung Rec untuk fraksi +10, +2-10, +0.6-2, +0.3 saja (bukan -0.6)
-      const tots = {
-        a10_rec: t10,
-        a2_rec:  t2,
-        a06_rec: t06,
-        p03_rec: get('p03_tot')
       };
 
       Object.entries(tots).forEach(([recField, totVal]) => {
@@ -846,19 +868,140 @@
     }
 
     // Pasang listener pada kolom Total untuk trigger kalkulasi Rec
+    // ===== CEK SELISIH CORE WT vs DRY WT =====
+    // Popup singleton
+    let _cellPopup = null;
+    function _getPopup() {
+      if (!_cellPopup) {
+        _cellPopup = document.createElement('div');
+        _cellPopup.className = 'cell-popup';
+        _cellPopup.style.display = 'none';
+        document.body.appendChild(_cellPopup);
+      }
+      return _cellPopup;
+    }
+    function _showPopup(el, msg, cls) {
+      const popup = _getPopup();
+      popup.textContent = msg;
+      popup.className = 'cell-popup ' + (cls === 'cell-error' ? 'error' : 'warn');
+      const rect = el.getBoundingClientRect();
+      popup.style.display = 'block';
+      popup.style.left = rect.left + 'px';
+      popup.style.top  = (rect.top - popup.offsetHeight - 8) + 'px';
+    }
+    function _hidePopup() {
+      const popup = _getPopup();
+      popup.style.display = 'none';
+    }
+
+    function setCellTooltip(el, msg, cls) {
+      if (!el) return;
+      el.classList.add(cls || 'cell-warn');
+      el.dataset.cellMsg = msg;
+      el.dataset.cellCls = cls || 'cell-warn';
+      // Pasang listener popup jika belum
+      if (!el._popupBound) {
+        el.addEventListener('mouseenter', function() { _showPopup(el, el.dataset.cellMsg, el.dataset.cellCls); });
+        el.addEventListener('focus',      function() { _showPopup(el, el.dataset.cellMsg, el.dataset.cellCls); });
+        el.addEventListener('mouseleave', _hidePopup);
+        el.addEventListener('blur',       _hidePopup);
+        el._popupBound = true;
+      }
+    }
+    function clearCellTooltip(el) {
+      if (!el) return;
+      delete el.dataset.cellMsg;
+      delete el.dataset.cellCls;
+    }
+
+    function checkDryWtAlert(rowNum) {
+      const tr = document.getElementById('prep-row-' + rowNum);
+      if (!tr) return;
+      const mg = tr.dataset.mergeGroup || ('_single_' + rowNum);
+      const groupRows = [];
+      for (let i = 1; i <= rowCount; i++) {
+        const t = document.getElementById('prep-row-' + i);
+        if (t && (t.dataset.mergeGroup || ('_single_' + i)) === mg) groupRows.push(i);
+      }
+      let totalCoreWt = 0, totalDryWt = 0, totalWet = 0;
+      const FRAC_TOTS = ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'];
+      groupRows.forEach(function(i) {
+        const cEl = document.querySelector('[name="core_wt_' + i + '"]');
+        const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+        if (cEl && cEl.value) totalCoreWt += parseFloat(cEl.value) || 0;
+        if (dEl && dEl.value) totalDryWt  += parseFloat(dEl.value) || 0;
+        FRAC_TOTS.forEach(function(f) {
+          const fEl = document.querySelector('[name="' + f + '_' + i + '"]');
+          if (fEl && fEl.value) totalWet += parseFloat(fEl.value) || 0;
+        });
+      });
+      // Reset semua cell warning dan tooltip di grup
+      groupRows.forEach(function(i) {
+        const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+        const cEl = document.querySelector('[name="core_wt_' + i + '"]');
+        [dEl, cEl].forEach(function(el) { if (el) { el.classList.remove('cell-warn','cell-error'); el.title = ''; clearCellTooltip(el); } });
+        FRAC_TOTS.forEach(function(f) {
+          const fEl = document.querySelector('[name="' + f + '_' + i + '"]');
+          if (fEl) { fEl.classList.remove('cell-warn','cell-error'); fEl.title = ''; clearCellTooltip(fEl); }
+        });
+      });
+      // Cek 1: selisih Core Wt vs Dry Wt >20%
+      if (totalCoreWt > 0 && totalDryWt > 0) {
+        const pct = Math.abs(totalCoreWt - totalDryWt) / totalCoreWt * 100;
+        if (pct > 20) {
+          groupRows.forEach(function(i) {
+            const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+            const cEl = document.querySelector('[name="core_wt_' + i + '"]');
+            if (dEl) setCellTooltip(dEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
+            if (cEl) setCellTooltip(cEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
+          });
+          showToast('ΓÜá∩╕Å Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
+        }
+      }
+      // Cek 2: Wet Total > Dry Wt
+      if (totalDryWt > 0 && totalWet > totalDryWt) {
+        groupRows.forEach(function(i) {
+          FRAC_TOTS.forEach(function(f) {
+            const fEl = document.querySelector('[name="' + f + '_' + i + '"]');
+            if (fEl && fEl.value) setCellTooltip(fEl, 'Wet Total > Dry Wt', 'cell-error');
+          });
+          const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+            if (dEl) setCellTooltip(dEl, 'Wet Total > Dry Wt', 'cell-error');
+        });
+        showToast('ΓÜá∩╕Å Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
+      }
+      // Cek 3: Selisih Wet Total vs Dry Wt > 500
+      if (totalDryWt > 0 && totalWet > 0 && Math.abs(totalWet - totalDryWt) > 500) {
+        groupRows.forEach(function(i) {
+          const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
+            if (dEl) setCellTooltip(dEl, 'Selisih Wet Total & Dry Wt > 500', 'cell-warn');
+        });
+        showToast('ΓÜá∩╕Å Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
+      }
+    }
+
     function attachTotListeners(n) {
       ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (!el) return;
         el.addEventListener('change', () => calcRec(n));
-        el.addEventListener('input',  () => {
-          if (el.dataset.autoRec === 'true') el.dataset.autoRec = 'false';
-        });
+        el.addEventListener('input',  () => { calcRec(n); });
       });
-      // Rec fields: jika diedit manual → hapus flag autoRec
+      // Rec fields: jika diedit manual ΓåÆ hapus flag autoRec
       ['a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'].forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (el) el.addEventListener('input', () => { el.dataset.autoRec = 'false'; });
+      });
+      // Listener dry_wt dan core_wt untuk cek selisih >20%
+      ['dry_wt','core_wt'].forEach(function(field) {
+        const el = document.querySelector('[name="' + field + '_' + n + '"]');
+        if (el) el.addEventListener('input', function() { checkDryWtAlert(n); });
+        if (el) el.addEventListener('change', function() { checkDryWtAlert(n); });
+      });
+      // Listener fraksi Total untuk cek Wet Total vs Dry Wt
+      ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(function(field) {
+        const el2 = document.querySelector('[name="' + field + '_' + n + '"]');
+        if (el2) el2.addEventListener('change', function() { checkDryWtAlert(n); });
       });
     }
 
@@ -943,6 +1086,19 @@
     // selectedRows = set nomor baris yang dipilih untuk digabung dengan mergeSourceRow
     let selectedRows = new Set();
 
+    function toggleMergeRow(rowNum, cb) {
+      const tr = document.getElementById('prep-row-' + rowNum);
+      if (!tr) return;
+      if (cb.checked) {
+        selectedRows.add(rowNum);
+        tr.classList.add('row-selected-merge');
+      } else {
+        if (rowNum === mergeSourceRow) { cb.checked = true; return; }
+        selectedRows.delete(rowNum);
+        tr.classList.remove('row-selected-merge');
+      }
+    }
+
     function startMerge(rowNum, btn) {
       // Jika sudah ada mode merge aktif, batalkan dulu
       if (mergeSourceRow !== null) cancelMerge();
@@ -951,6 +1107,13 @@
       selectedRows = new Set([rowNum]); // sumber otomatis terpilih
 
       document.body.classList.add('merge-mode');
+      // Tampilkan checkbox di semua baris
+      document.querySelectorAll('.merge-check').forEach(function(cb) {
+        cb.style.display = 'inline-block'; cb.checked = false;
+      });
+      // Centang checkbox baris sumber
+      const srcCb = document.getElementById('merge-check-' + rowNum);
+      if (srcCb) srcCb.checked = true;
       document.getElementById('merge-banner').classList.add('show');
       btn.classList.add('active');
 
@@ -966,7 +1129,7 @@
       // Abaikan klik pada tombol gabung itu sendiri
       if (e.target.classList.contains('btn-merge')) return;
       // Abaikan klik pada input
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.tagName === 'INPUT') return; // checkbox ditangani toggleMergeRow
 
       const tr = e.target.closest('tr');
       if (!tr || !tr.dataset.row) return;
@@ -977,14 +1140,20 @@
         if (n === mergeSourceRow) return;
         selectedRows.delete(n);
         tr.classList.remove('row-selected-merge');
+        const cb1 = document.getElementById('merge-check-' + n); if (cb1) cb1.checked = false;
       } else {
         selectedRows.add(n);
+        const cb2 = document.getElementById('merge-check-' + n); if (cb2) cb2.checked = true;
         tr.classList.add('row-selected-merge');
       }
     }
 
     function cancelMerge() {
       document.body.classList.remove('merge-mode');
+      // Sembunyikan semua checkbox
+      document.querySelectorAll('.merge-check').forEach(function(cb) {
+        cb.style.display = 'none'; cb.checked = false;
+      });
       document.getElementById('merge-banner').classList.remove('show');
       document.getElementById('prep-tbody').removeEventListener('click', onRowClick);
 
@@ -1025,21 +1194,24 @@
       sortedRows.forEach((n, idx) => {
         const tr = document.getElementById('prep-row-' + n);
         if (!tr) return;
-      cancelMerge();
-      recalcSamplingNo();
-      highlightDuplicates();
-      updateFracLock();
-      const msg = sortedRows.length === 1
-        // Pindah ke baris berikutnya, kolom sama — tidak tambah baris otomatis
-        if (rowIdx + 1 < totalRows) {
-          focusCell(rowIdx + 1, colIdx);
-        } if (fcEl) { fcEl.value = fromCum; fcEl.closest('td').style.visibility = 'visible'; }
-          if (tcEl) { tcEl.value = toCum;   tcEl.closest('td').style.visibility = 'visible'; }
-          if (btnEl) { btnEl.textContent = '🔓'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.classList.remove('active'); }
+        tr.classList.add('row-merged');
+        tr.classList.remove('row-merged-last', 'row-merged-first');
+        if (idx === 0) tr.classList.add('row-merged-first');
+        tr.dataset.mergeGroup = groupId;
+
+        const fcEl = document.getElementById('from_cum_' + n);
+        const tcEl = document.getElementById('to_cum_' + n);
+        const btnEl = tr.querySelector('.btn-merge');
+
+        if (idx === 0) {
+          // Baris pertama: tampilkan From_Cum & To_Cum, tombol jadi unlock
+          if (fcEl) { fcEl.value = fromCum; fcEl.style.visibility = 'visible'; }
+          if (tcEl) { tcEl.value = toCum;   tcEl.style.visibility = 'visible'; }
+          if (btnEl) { btnEl.textContent = '≡ƒöô'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.classList.remove('active'); }
         } else {
           // Baris lain: sembunyikan From_Cum & To_Cum
-          if (fcEl) { fcEl.value = fromCum; fcEl.closest('td').style.visibility = 'hidden'; }
-          if (tcEl) { tcEl.value = toCum;   tcEl.closest('td').style.visibility = 'hidden'; }
+          if (fcEl) { fcEl.value = fromCum; fcEl.style.visibility = 'hidden'; }
+          if (tcEl) { tcEl.value = toCum;   tcEl.style.visibility = 'hidden'; }
           if (btnEl) { btnEl.style.visibility = 'hidden'; }
         }
       });
@@ -1051,30 +1223,31 @@
       cancelMerge();
       recalcSamplingNo();
       highlightDuplicates();
-      const msg = sortedRows.length === 1
-        ? `✓ From_Cum & To_Cum diisi: ${fromCum} – ${toCum} m`
-        : `✓ ${sortedRows.length} baris digabung: ${fromCum} – ${toCum} m`;
-      showToast(msg);
-      showToast('Gabungan dilepas');
-      recalcSamplingNo();
-      highlightDuplicates();
+          restoreQAQCClass();
       updateFracLock();
+      const msg = sortedRows.length === 1
+        ? `Γ£ô From_Cum & To_Cum diisi: ${fromCum} ΓÇô ${toCum} m`
+        : `Γ£ô ${sortedRows.length} baris digabung: ${fromCum} ΓÇô ${toCum} m`;
+      showToast(msg);
+    }
+
+    // ===== UNMERGE =====
     function unmerge(groupId) {
       if (!confirm('Lepas gabungan baris ini?')) return;
       document.querySelectorAll(`tr[data-merge-group="${groupId}"]`).forEach(tr => {
-        tr.classList.remove('row-merged', 'row-merged-last');
+        tr.classList.remove('row-merged', 'row-merged-last', 'row-merged-first');
         delete tr.dataset.mergeGroup;
         const n = tr.dataset.row;
         const fcEl = document.getElementById('from_cum_' + n);
         const tcEl = document.getElementById('to_cum_' + n);
-        if (fcEl) { fcEl.value = ''; fcEl.closest('td').style.visibility = 'visible'; }
-        if (tcEl) { tcEl.value = ''; tcEl.closest('td').style.visibility = 'visible'; }
+        if (fcEl) { fcEl.value = ''; fcEl.style.visibility = 'visible'; }
+        if (tcEl) { tcEl.value = ''; tcEl.style.visibility = 'visible'; }
         // Hapus Samp_No yang terisi otomatis
         const snEl = document.querySelector(`[name="samp_no_${n}"]`);
         if (snEl && snEl.dataset.auto === 'true') { snEl.value = ''; }
         const btnEl = tr.querySelector('.btn-merge');
         if (btnEl) {
-          btnEl.textContent = '🔗';
+          btnEl.textContent = '≡ƒöù';
           btnEl.title = 'Pilih baris untuk digabung';
           btnEl.style.visibility = 'visible';
           const rowNum = parseInt(n);
@@ -1085,13 +1258,14 @@
       showToast('Gabungan dilepas');
       recalcSamplingNo();
       highlightDuplicates();
+          restoreQAQCClass();
     }
 
     // Tombol Terapkan di banner
     document.addEventListener('DOMContentLoaded', () => {
       const banner = document.getElementById('merge-banner');
       const applyBtn = document.createElement('button');
-      applyBtn.textContent = '✓ Terapkan';
+      applyBtn.textContent = 'Γ£ô Terapkan';
       applyBtn.style.cssText = 'background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;';
       applyBtn.onclick = applyMerge;
       banner.insertBefore(applyBtn, banner.querySelector('button'));
@@ -1186,16 +1360,13 @@
               if (iTo >= 0 && lastCols[iTo]) {
                 var tdEl = document.getElementById('h-depth');
                 if (tdEl && !tdEl.value) tdEl.value = lastCols[iTo].replace(/,/g,'.');
-            // Reset input agar bisa import file yang sama lagi
-            input.value = '';
-            recalcSamplingNo();
-            updateFracLock();
-            showToast('✓ ' + imported + ' baris diimport dari CSV');
-          } catch(err) {
-            console.error('[importCSV] parse error:', err);
-            showToast('Error parsing CSV: ' + err.message, 'error');
-            alert('Debug error: ' + err.message + '\n' + err.stack);
-          }   if (!cols[iFrom] && !cols[iTo]) return;
+              }
+            }
+
+            var imported = 0;
+            dataRows.forEach(function(line) {
+              var cols = line.split(sep).map(function(c){ return c.trim().replace(/^"|"$/g,'').replace(/,/g,'.'); });
+              if (!cols[iFrom] && !cols[iTo]) return;
               var fv = parseFloat(cols[iFrom]) || 0;
               var tv = parseFloat(cols[iTo])   || 0;
               addRow({
@@ -1210,7 +1381,7 @@
 
             // Reset input agar bisa import file yang sama lagi
             input.value = '';
-            showToast('✓ ' + imported + ' baris diimport dari CSV');
+            showToast('Γ£ô ' + imported + ' baris diimport dari CSV');
             highlightDuplicates();
           } catch(err) {
             console.error('[importCSV] parse error:', err);
@@ -1231,14 +1402,25 @@
         const el = document.querySelector('[name="' + k + '"]');
         if (el) data[k] = el.value;
       });
-      data.row_count = rowCount;
-      // Simpan merge group per baris
-      for (let i = 1; i <= rowCount; i++) {
-        const tr = document.getElementById('prep-row-' + i);
-        if (tr && tr.dataset.mergeGroup) data['merge_group_' + i] = tr.dataset.mergeGroup;
-      }
-      document.querySelectorAll('#prep-table input, #prep-table select').forEach(el => {
-        if (el.name) data[el.name] = el.value;
+
+      // Simpan berdasarkan urutan DOM agar baris Q tetap pada posisi yang benar
+      const FIELDS = [
+        'from','to','len','rec','grain','core_wt','from_cum','to_cum',
+        'samp_no','send_cum','sample_id','dry_wt',
+        'a10_tot','a10_rec','a10_sid','a2_tot','a2_rec','a2_sid',
+        'a06_tot','a06_rec','a06_sid','m06_tot','m06_rec','m06_sid',
+        'p03_tot','p03_rec','p03_sid','qaqc_sid','qaqc_wt','jenis','remarks'
+      ];
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      data.row_count = domRows.length;
+      domRows.forEach((tr, idx) => {
+        const pos = idx + 1;
+        const origN = tr.dataset.row;
+        if (tr.dataset.mergeGroup) data['merge_group_' + pos] = tr.dataset.mergeGroup;
+        FIELDS.forEach(field => {
+          const el = document.querySelector('[name="' + field + '_' + origN + '"]');
+          data[field + '_' + pos] = el ? el.value : '';
+        });
       });
       if (window._editRecordId) {
         DB.delete('preparation', window._editRecordId);
@@ -1297,19 +1479,21 @@
       return rows.join('\r\n');
     }
 
-    // ===== GENERATE EXPORT CSV (format lab — vertikal per fraksi) =====
+    // ===== GENERATE EXPORT CSV (format lab ΓÇö vertikal per fraksi) =====
     function generateExportCSV() {
       const holeId   = (document.getElementById('h-holeid').value   || '').toUpperCase();
       const deposit  = (document.getElementById('h-deposit').value  || '').toUpperCase();
 
+      // Baca urutan baris dari DOM (bukan dari rowCount) agar urutan setelah insertBefore terjaga
       const groups = {};
-      for (let i = 1; i <= rowCount; i++) {
-        const tr = document.getElementById('prep-row-' + i);
-        if (!tr) continue;
+      const groupOrder = [];
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      domRows.forEach(tr => {
+        const i = parseInt(tr.dataset.row);
         const mg = tr.dataset.mergeGroup || ('_single_' + i);
-        if (!groups[mg]) groups[mg] = [];
+        if (!groups[mg]) { groups[mg] = []; groupOrder.push(mg); }
         groups[mg].push(i);
-      }
+      });
 
       const get = (id, n) => {
         const el = document.querySelector(`[name="${id}_${n}"]`);
@@ -1333,20 +1517,26 @@
         { label: '+10',  tot: 'a10_tot', rec: 'a10_rec', sid: 'a10_sid' },
         { label: '+2',   tot: 'a2_tot',  rec: 'a2_rec',  sid: 'a2_sid'  },
         { label: '+0.6', tot: 'a06_tot', rec: 'a06_rec', sid: 'a06_sid' },
-        { label: '-0.6', tot: 'm06_tot', rec: 'm06_rec', sid: 'm06_sid' },
-        { label: '+0.3', tot: 'p03_tot', rec: 'p03_rec', sid: 'p03_sid' },
+        { label: '+0.3', tot: 'm06_tot', rec: 'm06_rec', sid: 'm06_sid' },
+        { label: '-0.3', tot: 'p03_tot', rec: 'p03_rec', sid: 'p03_sid' },
       ];
 
       const q = v => `"${String(v == null ? '' : v).replace(/"/g,'""')}"`;
 
       let intervalCounter = 0;
       let rowCounter = 0; // No. berurut per baris fraksi
-      Object.entries(groups).forEach(([mg, rowNums]) => {
-        rowNums.sort((a,b) => a-b);
+      groupOrder.forEach(mg => {
+        const rowNums = groups[mg];
+        // rowNums sudah dalam urutan DOM; sort hanya untuk sub-baris dalam grup gabung
         const firstRow = rowNums[0];
 
         const fcEl = document.getElementById('from_cum_' + firstRow);
-        if (!fcEl || fcEl.value === '') return;
+        const sampNo = get('samp_no', firstRow);
+        const isQRow = /^Q\d+$/i.test(sampNo);
+        const allCLY = rowNums.every(n => get('grain', n).toUpperCase() === 'CLY');
+        const hasFrac = rowNums.some(n => FRACTIONS.some(f => get(f.tot, n) !== ''));
+        // Skip jika: bukan Q-row, bukan CLY, tidak ada fraksi, dan from_cum kosong
+        if (!isQRow && !allCLY && !hasFrac && (!fcEl || fcEl.value === '')) return;
         intervalCounter++;
 
         // Recovery_Sampling = average Rec_Length dari semua baris dalam grup
@@ -1355,99 +1545,129 @@
           const rv = getF('rec', n);
           if (rv > 0) { recSum += rv; recCount++; }
         });
-        const recAvg = recCount > 0 ? parseFloat((recSum / recCount).toFixed(4)) : '';
+        const recAvg = recCount > 0 ? (recSum / recCount).toFixed(2) : '';
 
         // Core_Weight = Core_Wt baris pertama (bukan sum)
-        const coreWt = get('core_wt', firstRow) || '';
-
+        // Core_Weight = jumlah Core_Wt semua baris dalam grup
+        let coreWtSum = 0; rowNums.forEach(n => { const v = parseFloat(get('core_wt', n)); if (v > 0) coreWtSum += v; }); const coreWt = coreWtSum > 0 ? parseFloat((coreWtSum / 1000).toFixed(6)) : '';
         // Sampling_Insitu_Weight = Core_Weight / Recovery_Sampling
         const insitu = (coreWt && recAvg && recAvg > 0)
           ? parseFloat((coreWt / recAvg).toFixed(4)) : '';
 
-        const depthFrom  = get('from_cum', firstRow);
-        const depthTo    = get('to_cum',   firstRow);
+        const depthFrom  = get('from_cum', firstRow) !== '' ? parseFloat(get('from_cum', firstRow)).toFixed(2) : '';
+        const depthTo    = get('to_cum',   firstRow) !== '' ? parseFloat(get('to_cum',   firstRow)).toFixed(2) : '';
         const sampleId   = get('sample_id', firstRow);   // kolom Sample_ID (setelah Send_Cum)
         const sidToLab   = sampleId ? 'GS' + sampleId.slice(2) : '';  // Sample_id_to_Lab
         const remarks    = get('remarks', firstRow);
-        const sidToLab   = sampleId;  // Sample_id_to_Lab = langsung dari kolom Sample_ID
-        const remarks    = get('remarks', firstRow);
         const qaqcSid    = get('qaqc_sid', firstRow);
-        const qaqcSidLab = qaqcSid;  // langsung dari kolom QAQC Sample_ID
+        const qaqcSidLab = qaqcSid ? 'GS' + qaqcSid.slice(2) : '';
         const remarkUpper = remarks.trim().toUpperCase();
         const jenisUpper  = get('jenis', firstRow).trim().toUpperCase();
+
+        // ID = Hole_ID + No. (dihitung per baris di dalam loop fraksi)
         // Sheet_No = 4 karakter awal Hole_ID
         const sheetNoAuto = holeId.slice(0, 4);
 
         // DS/BS: kosongkan Depth_From s/d Berat_Kering, Sample_id_to_Lab = QAQC
         const isQAQCInterval = jenisUpper === 'DS' || jenisUpper === 'BS';
 
-        // Baris vertikal per fraksi — skip jika Total kosong
-        let firstFrac = true;
-        FRACTIONS.forEach((frac) => {
-          const totVal = get(frac.tot, firstRow);
-          if (!totVal) return; // skip fraksi kosong
-          rowCounter++;
-          const noPad = String(rowCounter);
-          const idCol = holeId ? holeId + noPad : noPad;
-          const sidVal = get(frac.sid, firstRow);
-
-          // Kolom tetap per baris
-          const fixedAll = [
-            rowCounter, idCol, deposit, sheetNoAuto, holeId,
-            isQAQCInterval ? '' : depthFrom,
-            isQAQCInterval ? '' : depthTo,
-            isQAQCInterval ? '' : recAvg,
-            isQAQCInterval ? '' : coreWt,
-            isQAQCInterval ? '' : insitu
-          ];
-
-          // Sample_id_to_Lab:
-          // - DS/BS interval: semua baris pakai QAQC Sample_ID
-          // - baris pertama interval normal: pakai sampleId utama
-          // - fraksi +0.3: jika remarks = '+0.3' pakai QAQC, selain itu pakai sid +0.3
-          // - baris lain: kosong
-          let sidToLabRow = '';
-          if (isQAQCInterval) {
-            sidToLabRow = qaqcSidLab; // semua baris DS/BS pakai QAQC
-          } else if (firstFrac) {
-            sidToLabRow = sidToLab;
-          } else if (frac.label === '+0.3') {
-            const p03Jenis = jenisUpper === '+0.3';
-            sidToLabRow = p03Jenis ? qaqcSidLab : (sidVal ? 'GS' + sidVal.slice(2) : '');
-          }
-            sidToLabRow = p03Jenis ? qaqcSidLab : (sidVal ? sidVal : '');
-          // DS/BS: kosongkan Washing_weight dan Berat_Kering juga
-          const totNum = parseFloat(totVal) || 0;
-          const washVal = isQAQCInterval ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
-
-          const row = [
-            ...fixedAll.map(v => q(v)),
-            q(frac.label), q(sidVal), q(washVal),
-            q(''), q(sidToLabRow), q(''),
-            q(''), q(''), firstFrac ? q(remarks) : q(''), q('')
-          ];
-          rows.push(row.join(','));
-          firstFrac = false;
+        // Iterasi setiap sub-baris dalam grup
+        let firstSubRow = true;
+        let clyWritten = false;
+        // Hitung totalWet dan dryWt grup untuk Dev_Sieve dan H2O
+        let grpTotalWet = 0;
+        rowNums.forEach(function(n) {
+          ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(function(f) {
+            const v = parseFloat(get(f, n)) || 0; grpTotalWet += v;
+          });
         });
+        const grpDryWt = parseFloat(get('dry_wt', firstRow)) || 0;
+        const grpDryWtKg = grpDryWt > 0 ? parseFloat((grpDryWt / 1000).toFixed(6)) : '';
+        const grpDevSieve = (grpTotalWet > 0 && grpDryWt > 0) ? parseFloat(((grpTotalWet - grpDryWt) / 1000).toFixed(6)) : '';
+        const grpH2O = (coreWt && grpDryWt > 0) ? parseFloat(((parseFloat(coreWt)*1000 - grpDryWt) / (parseFloat(coreWt)*1000) * 100).toFixed(4)) : '';
+        // Ore = kode grain size dominan berdasarkan total Rec_Length
+        const GRAIN_MAP = { 'GVL': 'CMR', 'CS': 'CS', 'FS': 'FS', 'CLY': 'CLY' };
+        const grainTotals = {};
+        rowNums.forEach(function(n) {
+          const g = get('grain', n).toUpperCase();
+          const r = parseFloat(get('len', n)) || 0;
+          if (g) grainTotals[g] = (grainTotals[g] || 0) + r;
+        });
+        let dominantGrain = '', maxRec = 0;
+        Object.keys(grainTotals).forEach(function(g) {
+          if (grainTotals[g] > maxRec) { maxRec = grainTotals[g]; dominantGrain = g; }
+        });
+        const grpOre = GRAIN_MAP[dominantGrain] || dominantGrain;
+        rowNums.forEach(subRow => {
+          const subSampleId  = get('sample_id', subRow);
+          const subSidToLab  = subSampleId;
+          const subRemarks   = get('remarks', subRow);
+          const subJenis     = get('jenis', subRow).trim().toUpperCase();
+          const subIsQAQC    = subJenis === 'DS' || subJenis === 'BS';
+          const subQaqcSid   = get('qaqc_sid', subRow);
+          const subQaqcLab   = subQaqcSid;
+          const subAllCLY    = get('grain', subRow).toUpperCase() === 'CLY';
+          const subIsQRow    = /^Q\d+$/i.test(get('samp_no', subRow));
+          // Skip sub-baris yang tidak punya fraksi, bukan CLY, dan bukan Q-row
+          const subHasFrac = FRACTIONS.some(f => get(f.tot, subRow) !== '');
+          if (!subHasFrac && !subAllCLY && !subIsQRow) return;
 
-        // Baris QAQC jika ada — tanpa label Fraksi, kosong Depth s/d Berat_Kering
-        if (qaqcSid) {
-          rowCounter++;
-          const qaqcNoPad = String(rowCounter);
-          const qaqcIdCol = holeId ? holeId + qaqcNoPad : qaqcNoPad;
-          const qaqcWt = get('qaqc_wt', firstRow);
-          const qaqcFixed = [
-            rowCounter, qaqcIdCol, deposit, sheetNoAuto, holeId,
-            '', '', '', '', ''  // Depth s/d Insitu kosong
-          ];
-          const row = [
-            ...qaqcFixed.map(v => q(v)),
-            q(''), q(''), q(qaqcWt),
-            q(''), q(qaqcSidLab), q(''),
-            q(''), q(''), q(''), q('')
-          ];
-          rows.push(row.join(','));
-        }
+          // Fraksi yang ada Total-nya untuk sub-baris ini
+          let firstFrac = true;
+          FRACTIONS.forEach((frac) => {
+            const totVal = get(frac.tot, subRow);
+            if (!totVal) return; // skip fraksi kosong
+            rowCounter++;
+            const idCol = holeId ? holeId + rowCounter : String(rowCounter);
+            const sidVal = get(frac.sid, subRow);
+            const isFirstRecord = firstFrac && firstSubRow;
+            const fixedAll = [
+              rowCounter, idCol, deposit, sheetNoAuto, holeId,
+              subIsQAQC ? '' : depthFrom,
+              subIsQAQC ? '' : depthTo,
+              (subIsQAQC || !isFirstRecord) ? '' : recAvg,
+              (subIsQAQC || !isFirstRecord) ? '' : coreWt,
+              (subIsQAQC || !isFirstRecord) ? '' : insitu
+            ];
+            let sidToLabRow = '';
+            if (subIsQAQC) {
+              sidToLabRow = subQaqcLab;
+            } else if (firstFrac) {
+              sidToLabRow = subSidToLab;
+            }
+            const totNum = parseFloat(totVal) || 0;
+            const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
+            const dryWtVal = isFirstRecord ? grpDryWtKg : '';
+            const row = [
+              ...fixedAll.map(v => q(v)),
+              q(frac.label), q(sidVal), q(washVal),
+              q(dryWtVal), q(sidToLabRow), q(''),
+              isFirstRecord ? q(grpDevSieve) : q(''), isFirstRecord ? q(grpH2O) : q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), isFirstRecord ? q(grpOre) : q('')
+            ];
+            rows.push(row.join(','));
+            firstFrac = false;
+          });
+
+          // CLY atau Q-row tanpa fraksi: tulis 1 baris blank
+          if (firstFrac && ((subAllCLY && !clyWritten) || subIsQRow)) {
+            rowCounter++;
+            const idCol2 = holeId ? holeId + rowCounter : String(rowCounter);
+            const row = [
+              q(rowCounter), q(idCol2), q(deposit), q(sheetNoAuto), q(holeId),
+              subIsQRow ? q('') : q(depthFrom),
+              subIsQRow ? q('') : q(depthTo),
+              subIsQRow ? q('') : q(recAvg),
+              subIsQRow ? q('') : q(coreWt),
+              subIsQRow ? q('') : q(insitu),
+              q(''), q(''), q(''),
+              q(''), subIsQRow ? q(subSampleId) : q(''), q(''),
+              q(''), q(''), firstSubRow ? q(subRemarks) : q(''), q('')
+            ];
+            rows.push(row.join(','));
+            if (subAllCLY) clyWritten = true;
+          }
+          firstSubRow = false;
+        });
       });
 
       return rows.join('\r\n');
@@ -1472,75 +1692,99 @@
       return [...dupes];
     }
 
-    // ===== GAS WEB APP URL =====
-    // Ganti dengan URL dari Deploy Google Apps Script Anda
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
+    // ===== DOWNLOAD CSV HELPER =====
+    function downloadCSV(fileName, csv) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = fileName; a.click();
+      URL.revokeObjectURL(url);
+    }
 
-    async function submitData() {
+    function submitData() {
       const dupes = checkDuplicateSampleIDs();
       if (dupes.length > 0) {
         const list = dupes.join(', ');
-        if (!confirm(`⚠️ Sample_ID duplikat ditemukan:\n${list}\n\nLanjutkan submit?`)) return;
+        if (!confirm('ΓÜá∩╕Å Sample_ID duplikat ditemukan:\n' + list + '\n\nLanjutkan submit?')) return;
       }
-      if (!confirm('Submit? Data akan diupload sebagai CSV ke Google Drive.')) return;
-      saveData();
-
-        if (!confirm(`⚠️ Sample_ID duplikat ditemukan:\n${list}\n\nLanjutkan submit?`)) return;
-      if (!csv || csv.split('\r\n').length < 2) { showToast('Tidak ada data untuk disubmit', 'error'); return; }
-
-      const holeId   = (document.getElementById('h-holeid').value || 'unknown').toUpperCase();
-      const safeName = holeId.replace(/\s+/g, '_');
-      const fileName = 'Prep_' + safeName + '.csv';
-
-      if (!GAS_URL || GAS_URL.includes('PASTE_YOUR')) {
-        showToast('GAS_URL belum diisi di kode!', 'error'); return;
-      }
-
-      showToast('Mengupload CSV...');
-      try {
-        const res = await fetch(GAS_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ fileName, csvData: csv })
-        });
-      });
-      updateFracLock();
-    }
-
-    // ===== LOAD MODE EDIT / CONTINUE =====
-        showToast('Error: ' + err.message, 'error');
-      }
-    }
-
-    // ===== EXPORT LAB CSV =====
-    async function exportData() {
-      if (!confirm('Export data ke format Lab CSV dan upload ke Google Drive?')) return;
-      const holeId = document.getElementById('h-holeid').value || 'unknown';
-      const filename = `Export_${holeId.replace(/\s+/g,'_')}.csv`;
-      const FOLDER = '17gfoPQ7OQNcpZHpmHjdl-MP4FkvbRATQ';
-      const csv = generateExportCSV();
-      // Download lokal juga
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-    // ===== RESTORE QAQC CLASS =====
-    function restoreQAQCClass() {
+      // Cek selisih Core Wt vs Dry Wt untuk semua grup
+      const dryWtWarnings = [];
+      const checkedGroups = new Set();
       for (let i = 1; i <= rowCount; i++) {
-        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
-        if (snEl && /^Q\d+$/i.test(snEl.value.trim())) {
-          const tr = document.getElementById('prep-row-' + i);
-          if (tr) tr.classList.add('row-qaqc');
+        const tr = document.getElementById('prep-row-' + i);
+        if (!tr) continue;
+        const mg = tr.dataset.mergeGroup || ('_single_' + i);
+        if (checkedGroups.has(mg)) continue;
+        checkedGroups.add(mg);
+        let totalCoreWt = 0, totalDryWt = 0;
+        for (let j = 1; j <= rowCount; j++) {
+          const t = document.getElementById('prep-row-' + j);
+          if (!t || (t.dataset.mergeGroup || ('_single_' + j)) !== mg) continue;
+          const cEl = document.querySelector('[name="core_wt_' + j + '"]');
+          const dEl = document.querySelector('[name="dry_wt_' + j + '"]');
+          if (cEl && cEl.value) totalCoreWt += parseFloat(cEl.value) || 0;
+          if (dEl && dEl.value) totalDryWt  += parseFloat(dEl.value) || 0;
+        }
+        if (totalCoreWt > 0 && totalDryWt > 0) {
+          const pct = Math.abs(totalCoreWt - totalDryWt) / totalCoreWt * 100;
+          if (pct > 20) dryWtWarnings.push('Grup ' + mg + ': ' + pct.toFixed(1) + '%');
         }
       }
-    }
+      if (dryWtWarnings.length > 0) {
+        if (!confirm('ΓÜá∩╕Å Selisih Core Wt & Dry Wt >20% pada:\n' + dryWtWarnings.join('\n') + '\n\nLanjutkan submit?')) return;
+      }
+      saveData();
 
-    // ===== LOAD MODE EDIT / CONTINUE =====
-        const rc = parseInt(rec.row_count) || 0;
-        if (rc === 0) { addRow(); return; }
-        for (let i = 1; i <= rc; i++) {erhasil diupload!');
-      else showToast('✓ Export didownload (upload gagal)');
+      const csv = generateExportCSV();
+      if (!csv || csv.split('\r\n').length < 2) { showToast('Tidak ada data untuk disubmit', 'error'); return; }
+
+      const holeId = (document.getElementById('h-holeid').value || 'unknown').toUpperCase();
+      const fileName = 'Prep_' + holeId.replace(/\s+/g, '_') + '.xls';
+
+      // Parse CSV ke array of arrays
+      const rows = csv.split('\r\n').map(line => {
+        const result = []; let cur = '', inQ = false;
+        for (let i = 0; i < line.length; i++) {
+          const c = line[i];
+          if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+          else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+          else cur += c;
+        }
+        result.push(cur); return result;
+      });
+
+      // Kolom Fraksi = index 10 (0-based)
+      const FRAKSI_COL = 10;
+      // Kolom yang perlu format 2 desimal: Depth_From(5), Depth_To(6), Recovery_sampling(7)
+      const TWO_DEC_COLS = new Set([5, 6, 7]);
+
+      // Build XLS HTML
+      let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
+      html += '<head><meta charset="UTF-8"><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Sheet1</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body><table>';
+      rows.forEach((row, ri) => {
+        html += '<tr>';
+        row.forEach((cell, ci) => {
+          if (ri === 0) {
+            html += '<th>' + cell + '</th>';
+          } else if (TWO_DEC_COLS.has(ci)) {
+            html += '<td style="mso-number-format:"0.00">' + cell + '</td>';
+          } else if (ci === FRAKSI_COL) {
+            html += '<td style="mso-number-format:\\@">' + cell + '</td>';
+          } else {
+            html += '<td>' + cell + '</td>';
+          }
+        });
+        html += '</tr>';
+      });
+      html += '</table></body></html>';
+
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = fileName; a.click();
+      URL.revokeObjectURL(url);
+      showToast('Γ£ô ' + fileName + ' didownload! Menyiapkan PDF...');
+      setTimeout(function() { window.print(); }, 800);
     }
 
     // ===== RESTORE MERGE VISIBILITY SETELAH LOAD =====
@@ -1562,19 +1806,31 @@
           const btnEl = tr ? tr.querySelector('.btn-merge') : null;
           // Pastikan class row-merged ada
           if (tr) tr.classList.add('row-merged');
-          // Tandai baris terakhir grup
+          // Tandai baris pertama dan terakhir grup
           if (n === lastRow && tr) tr.classList.add('row-merged-last');
+          if (idx === 0 && tr) tr.classList.add('row-merged-first');
           if (idx === 0) {
-            if (fcEl) fcEl.closest('td').style.visibility = 'visible';
-            if (tcEl) tcEl.closest('td').style.visibility = 'visible';
-            if (btnEl) { btnEl.textContent = '🔓'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.style.visibility = 'visible'; }
+            if (fcEl) fcEl.style.visibility = 'visible';
+            if (tcEl) tcEl.style.visibility = 'visible';
+            if (btnEl) { btnEl.textContent = '≡ƒöô'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.style.visibility = 'visible'; }
           } else {
-            if (fcEl) fcEl.closest('td').style.visibility = 'hidden';
-            if (tcEl) tcEl.closest('td').style.visibility = 'hidden';
+            if (fcEl) fcEl.style.visibility = 'hidden';
+            if (tcEl) tcEl.style.visibility = 'hidden';
             if (btnEl) btnEl.style.visibility = 'hidden';
           }
         });
       });
+    }
+      updateFracLock();
+
+    function restoreQAQCClass() {
+      for (let i = 1; i <= rowCount; i++) {
+        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
+        if (snEl && /^Q\d+$/i.test(snEl.value.trim())) {
+          const tr = document.getElementById('prep-row-' + i);
+          if (tr) tr.classList.add('row-qaqc');
+        }
+      }
     }
 
     // ===== LOAD MODE EDIT / CONTINUE =====
@@ -1590,23 +1846,22 @@
             to:          rec['to_'+i],
             length:      rec['len_'+i],
             recovery:    rec['rec_'+i],
-          restoreMergeVisibility();
-          recalcSamplingNo();
-          highlightDuplicates();
-          restoreQAQCClass();
-        }
-      } else if (mode === 'continue') {+i],
+            grain_size:  rec['grain_'+i],
+            core_wt:     rec['core_wt_'+i],
+            from_cum:    rec['from_cum_'+i],
+            to_cum:      rec['to_cum_'+i],
+            samp_no:     rec['samp_no_'+i],
             send_cum:    rec['send_cum_'+i],
             sample_id:   rec['sample_id_'+i],
+            dry_wt:      rec['dry_wt_'+i],
             a10_tot:     rec['a10_tot_'+i],
             a10_rec:     rec['a10_rec_'+i],
             a10_sid:     rec['a10_sid_'+i],
             a2_tot:      rec['a2_tot_'+i],
-          restoreRows(last);
-          restoreMergeVisibility();
-          recalcSamplingNo();
-          highlightDuplicates();
-          restoreQAQCClass();6_rec_'+i],
+            a2_rec:      rec['a2_rec_'+i],
+            a2_sid:      rec['a2_sid_'+i],
+            a06_tot:     rec['a06_tot_'+i],
+            a06_rec:     rec['a06_rec_'+i],
             a06_sid:     rec['a06_sid_'+i],
             m06_tot:     rec['m06_tot_'+i],
             m06_rec:     rec['m06_rec_'+i],
@@ -1636,6 +1891,8 @@
           restoreMergeVisibility();
           recalcSamplingNo();
           highlightDuplicates();
+          restoreQAQCClass();
+          updateFracLock();
         }
       } else if (mode === 'continue') {
         const saved = DB.getAll('preparation');
@@ -1646,14 +1903,29 @@
             if (el && last[k] !== undefined) el.value = last[k];
           });
           restoreRows(last);
+          window._editRecordId = last.id; // update record yang sama saat Save
           restoreMergeVisibility();
           recalcSamplingNo();
           highlightDuplicates();
+          restoreQAQCClass();
+          updateFracLock();
         }
       } else { addRow(); }
       sessionStorage.removeItem('form_mode');
       sessionStorage.removeItem('edit_record_id');
     });
   </script>
+
+  <!-- MODAL INPUT WEIGHT -->
+  <div id="weight-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9998;overflow-y:auto;padding:20px;">
+    <div style="background:white;border-radius:16px;margin:0 auto;width:100%;max-width:420px;padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-weight:700;font-size:15px;color:#1a2e22;">&#9878; Input Weight</span>
+        <button onclick="closeWeightInput()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">&#10005;</button>
+      </div>
+      <div id="weight-input-list" style="max-height:60vh;overflow-y:auto;"></div>
+      <button onclick="saveWeightInput()" style="margin-top:12px;width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">&#10003; Simpan</button>
+    </div>
+  </div>
 </body>
 </html>
