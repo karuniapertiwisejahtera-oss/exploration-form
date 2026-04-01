@@ -372,7 +372,7 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${no}</td>
-          <td class="nama-alat"><input type="text" name="alat_nama_${no}" value="${nama}"></td>
+          <td class="nama-alat"><span style="font-size:11px;">${nama}</span><input type="hidden" name="alat_nama_${no}" value="${nama}"></td>
           <td><input type="number" name="alat_qty_${no}" value="${qty}" min="0"></td>
           <td><input type="number" name="alat_baik_${no}" min="0" style="width:40px;border:none;outline:none;font-size:11px;text-align:center;background:transparent;"></td>
           <td><input type="number" name="alat_rusak_${no}" min="0" style="width:40px;border:none;outline:none;font-size:11px;text-align:center;background:transparent;"></td>
