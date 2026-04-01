@@ -162,14 +162,60 @@ window.addEventListener('offline', updateOnlineStatus);
 
 // ===== TAB BAR (Sheet Navigator) =====
 const FORM_TABS = [
-  { label: 'Actual Run',   url: 'actual-run.html'  },
-  { label: 'Preparation',  url: 'preparation.html' },
-  { label: 'Daily Sheet',  url: 'daily-sheet.html' },
-  { label: 'Core Loss',    url: 'core-loss.html'   },
-  { label: 'Logging',      url: 'logging.html'     },
-  { label: 'Inspection',   url: 'inspection.html'  },
-  { label: 'P5M',          url: 'p5m.html'         },
+  { label: 'Actual Run',   url: 'actual-run.html',  key: 'actual_run'  },
+  { label: 'Preparation',  url: 'preparation.html', key: 'preparation' },
+  { label: 'Daily Sheet',  url: 'daily-sheet.html', key: 'daily_sheet' },
+  { label: 'Core Loss',    url: 'core-loss.html',   key: 'core_loss'   },
+  { label: 'Logging',      url: 'logging.html',     key: 'logging'     },
+  { label: 'Inspection',   url: 'inspection.html',  key: 'inspection'  },
+  { label: 'P5M',          url: 'p5m.html',         key: 'p5m'         },
 ];
+
+// Popup NEW / CONTINUE
+function showTabPopup(tab) {
+  // Hapus popup lama jika ada
+  const old = document.getElementById('tab-popup');
+  if (old) old.remove();
+
+  const hasSaved = DB.getAll(tab.key).length > 0;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'tab-popup';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:white;border-radius:14px;padding:20px;width:88%;max-width:320px;';
+  box.innerHTML = `
+    <div style="font-weight:700;font-size:15px;color:#1a6b4a;margin-bottom:6px;">${tab.label}</div>
+    <div style="font-size:13px;color:#555;margin-bottom:16px;">Pilih mode pengisian:</div>
+    <button id="tab-new-btn" style="width:100%;padding:12px;margin-bottom:8px;background:#1a6b4a;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+      ➕ NEW — Data Baru
+    </button>
+    ${hasSaved ? `<button id="tab-cont-btn" style="width:100%;padding:12px;margin-bottom:8px;background:#2e9e6e;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+      ▶ CONTINUE — Lanjutkan Data Terakhir
+    </button>` : ''}
+    <button id="tab-cancel-btn" style="width:100%;padding:10px;background:#f5f5f5;color:#666;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;">
+      Batal
+    </button>
+  `;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  box.querySelector('#tab-new-btn').addEventListener('click', () => {
+    overlay.remove();
+    sessionStorage.setItem('form_mode', 'new');
+    window.location.href = tab.url;
+  });
+  if (hasSaved) {
+    box.querySelector('#tab-cont-btn').addEventListener('click', () => {
+      overlay.remove();
+      sessionStorage.setItem('form_mode', 'continue');
+      window.location.href = tab.url;
+    });
+  }
+  box.querySelector('#tab-cancel-btn').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+}
 
 function initTabBar() {
   const cur = window.location.pathname.split('/').pop();
@@ -185,7 +231,6 @@ function initTabBar() {
     'scrollbar-width:none', 'height:32px', 'align-items:stretch'
   ].join(';');
 
-  // Hide scrollbar
   const style = document.createElement('style');
   style.textContent = '#tab-bar::-webkit-scrollbar{display:none} .page-header{margin-top:32px}';
   document.head.appendChild(style);
@@ -205,7 +250,12 @@ function initTabBar() {
     ].join(';');
 
     if (!isActive) {
-      btn.addEventListener('click', () => { window.location.href = tab.url; });
+      btn.addEventListener('click', () => {
+        // Peringatan save sebelum pindah
+        const confirmed = confirm('⚠ Pastikan data sudah di-Save sebelum berpindah form.\n\nLanjutkan ke ' + tab.label + '?');
+        if (!confirmed) return;
+        showTabPopup(tab);
+      });
       btn.addEventListener('mouseover', () => { btn.style.background = '#243d2e'; btn.style.color = '#fff'; });
       btn.addEventListener('mouseout',  () => { btn.style.background = 'transparent'; btn.style.color = '#a8d5b5'; });
     }
