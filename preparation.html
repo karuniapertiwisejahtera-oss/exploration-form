@@ -1877,17 +1877,17 @@
 
       // Kolom tetap (rowspan 3)
       const fixedCols = [
-        { lbl: 'From',        w: 10 },
-        { lbl: 'To',          w: 10 },
-        { lbl: 'Len',         w: 9  },
-        { lbl: 'Rec',         w: 9  },
-        { lbl: 'Grain',       w: 10 },
-        { lbl: 'Core Wt',     w: 12 },
-        { lbl: 'From Cum',    w: 13 },
-        { lbl: 'To Cum',      w: 13 },
-        { lbl: 'Samp No',     w: 13 },
-        { lbl: 'Dry Wt',      w: 12 },
-        { lbl: 'Sample ID',   w: 22 },
+        { lbl: 'From',        w: 9  },
+        { lbl: 'To',          w: 9  },
+        { lbl: 'Len',         w: 8  },
+        { lbl: 'Rec',         w: 8  },
+        { lbl: 'Grain',       w: 9  },
+        { lbl: 'Core Wt',     w: 11 },
+        { lbl: 'From Cum',    w: 11 },
+        { lbl: 'To Cum',      w: 11 },
+        { lbl: 'Samp No',     w: 11 },
+        { lbl: 'Dry Wt',      w: 11 },
+        { lbl: 'Sample ID',   w: 20 },
       ];
       // Grup fraksi: [label, color, subCols]
       const fracGroups = [
@@ -1897,8 +1897,8 @@
         { lbl: '+0.3-0.6 mm', color: Cm06, sub: ['Tot','Rec','Sample ID'] },
         { lbl: '-0.3 mm',     color: Cp03, sub: ['Tot','Rec','Sample ID'] },
       ];
-      const subW = 10; // lebar tiap sub-kolom
-      const remW = 18; // Remarks
+      const subW = 8; // lebar tiap sub-kolom
+      const remW = 16; // Remarks
 
       // Gambar header row 1
       let x = margin;
