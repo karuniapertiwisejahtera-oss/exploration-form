@@ -1804,6 +1804,15 @@
       const dateStart= document.getElementById('h-date-start').value  || '—';
       const dateEnd  = document.getElementById('h-date-finish').value || '—';
 
+      // Hitung total sample dari kolom Sample ID
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      let totalSample = 0;
+      domRows.forEach(tr => {
+        const n = tr.dataset.row;
+        const el = document.querySelector('[name="samp_no_'+n+'"]');
+        if (el && el.value.trim() && /^S\d+$/i.test(el.value.trim())) totalSample++;
+      });
+
       let y = margin;
 
       // ---- JUDUL ----
@@ -1814,80 +1823,206 @@
       doc.setTextColor(0, 0, 0);
       y += 17;
 
-      // ---- INFO BOX: 2 kolom seimbang ----
-      // Kiri: Hole ID, Sheet, Deposit, Total Depth | Kanan: Sampler, Date Start, Date Finish
+      // ---- INFO: tanpa box, dengan garis bawah per field ----
       const leftInfo  = [['HOLE ID', holeId], ['SHEET/GRID NO', sheet], ['DEPOSIT', deposit], ['TOTAL DEPTH', depth + ' m']];
-      const rightInfo = [['SAMPLER', sampler], ['DATE START', dateStart], ['DATE FINISH', dateEnd]];
-      const maxRows = Math.max(leftInfo.length, rightInfo.length);
-      const rH = 5; const infoH = maxRows * rH + 6;
+      const rightInfo = [['SAMPLER', sampler], ['DATE START', dateStart], ['DATE FINISH', dateEnd], ['TOTAL SAMPLE', String(totalSample)]];
+      const rH = 5.5;
+      const infoH = Math.max(leftInfo.length, rightInfo.length) * rH + 2;
 
-      doc.setFillColor(240, 249, 244);
-      doc.rect(margin, y, contentW, infoH, 'F');
-      doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
-      doc.rect(margin, y, contentW, infoH);
-      doc.setDrawColor(0, 0, 0);
+      const col1 = margin, col2 = margin + 32;
+      const col3 = pageW / 2 + 2, col4 = pageW / 2 + 34;
+      const iy = y + 4;
 
-      const col1 = margin + 4, col2 = margin + 36;
-      const col3 = pageW / 2 + 4, col4 = pageW / 2 + 36;
-      const iy = y + 4.5;
+      // Garis pembatas tengah vertikal
+      doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.4);
+      doc.line(pageW / 2, y, pageW / 2, y + infoH);
 
       leftInfo.forEach(([lbl, val], i) => {
         doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 107, 74);
         doc.text(lbl, col1, iy + i * rH);
         doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
         doc.text(val, col2, iy + i * rH);
-        doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
-        doc.line(col2, iy + i * rH + 0.8, pageW / 2 - 4, iy + i * rH + 0.8);
+        doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
+        doc.line(col2, iy + i * rH + 1, pageW / 2 - 4, iy + i * rH + 1);
       });
       rightInfo.forEach(([lbl, val], i) => {
         doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 107, 74);
         doc.text(lbl, col3, iy + i * rH);
         doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
         doc.text(val, col4, iy + i * rH);
-        doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
-        doc.line(col4, iy + i * rH + 0.8, pageW - margin - 2, iy + i * rH + 0.8);
+        doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
+        doc.line(col4, iy + i * rH + 1, pageW - margin, iy + i * rH + 1);
       });
+
+      // Garis bawah info section
+      doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
+      doc.line(margin, y + infoH, margin + contentW, y + infoH);
       doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
       y += infoH + 4;
 
-      // ---- SECTION TITLE ----
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
-      doc.text('DATA SAMPEL', margin, y);
-      doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
-      doc.line(margin, y + 1.5, margin + contentW, y + 1.5);
-      doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
-      y += 5;
+      // ---- HEADER TABEL MULTI-LEVEL (seperti di form) ----
+      // Warna grup sesuai form
+      const C10   = [179, 229, 252]; // +10 mm - biru muda
+      const C2    = [200, 230, 201]; // +2-10 mm - hijau muda
+      const C06   = [255, 249, 196]; // +0.6-2 mm - kuning muda
+      const Cm06  = [255, 224, 178]; // +0.3-0.6 mm - oranye muda
+      const Cp03  = [243, 229, 245]; // -0.3 mm - ungu muda
+      const CHDR  = [26, 107, 74];   // header utama - hijau tua
+      const WHITE = [255, 255, 255];
 
-      // ---- TABEL DATA ----
-      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
-      const head = [['From','To','Len','Rec','Grain','Core Wt','From\nCum','To\nCum','Samp\nNo','Dry\nWt','Sample ID','+10\nTot','+10\nRec','+2\nTot','+2\nRec','+0.6\nTot','+0.6\nRec','+0.3-0.6\nTot','+0.3-0.6\nRec','-0.3\nTot','-0.3\nRec','Remarks']];
-      const body = [];
-      domRows.forEach(tr => {
-        const n = tr.dataset.row;
-        const g = (name) => { const el = document.querySelector('[name="'+name+'_'+n+'"]'); return el ? (el.value || '').toUpperCase() : ''; };
-        body.push([
-          g('from'), g('to'), g('len'), g('rec'), g('grain'), g('core_wt'),
-          g('from_cum'), g('to_cum'), g('samp_no'), g('dry_wt'), g('sample_id'),
-          g('a10_tot'), g('a10_rec'), g('a2_tot'), g('a2_rec'),
-          g('a06_tot'), g('a06_rec'), g('m06_tot'), g('m06_rec'),
-          g('p03_tot'), g('p03_rec'), g('remarks')
-        ]);
+      // Definisi kolom: [label, width, color, colspan, rowspan]
+      // Row 1: kolom tetap + grup fraksi
+      const hdrH1 = 5, hdrH2 = 4, hdrH3 = 4;
+      const totalHdrH = hdrH1 + hdrH2 + hdrH3;
+
+      // Kolom tetap (rowspan 3)
+      const fixedCols = [
+        { lbl: 'From',        w: 10 },
+        { lbl: 'To',          w: 10 },
+        { lbl: 'Len',         w: 9  },
+        { lbl: 'Rec',         w: 9  },
+        { lbl: 'Grain',       w: 10 },
+        { lbl: 'Core Wt',     w: 12 },
+        { lbl: 'From Cum',    w: 13 },
+        { lbl: 'To Cum',      w: 13 },
+        { lbl: 'Samp No',     w: 13 },
+        { lbl: 'Dry Wt',      w: 12 },
+        { lbl: 'Sample ID',   w: 22 },
+      ];
+      // Grup fraksi: [label, color, subCols]
+      const fracGroups = [
+        { lbl: '+10 mm',      color: C10,  sub: ['Tot','Rec','Sample ID'] },
+        { lbl: '+2-10 mm',    color: C2,   sub: ['Tot','Rec','Sample ID'] },
+        { lbl: '+0.6-2 mm',   color: C06,  sub: ['Tot','Rec','Sample ID'] },
+        { lbl: '+0.3-0.6 mm', color: Cm06, sub: ['Tot','Rec','Sample ID'] },
+        { lbl: '-0.3 mm',     color: Cp03, sub: ['Tot','Rec','Sample ID'] },
+      ];
+      const subW = 10; // lebar tiap sub-kolom
+      const remW = 18; // Remarks
+
+      // Gambar header row 1
+      let x = margin;
+      // Kolom tetap - background hijau tua
+      fixedCols.forEach(col => {
+        doc.setFillColor(...CHDR);
+        doc.rect(x, y, col.w, totalHdrH, 'F');
+        doc.setDrawColor(255,255,255); doc.setLineWidth(0.2);
+        doc.rect(x, y, col.w, totalHdrH);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5); doc.setTextColor(...WHITE);
+        // Wrap text
+        const lines = doc.splitTextToSize(col.lbl, col.w - 1);
+        const textY = y + totalHdrH / 2 - (lines.length - 1) * 2.5 + 2;
+        lines.forEach((ln, li) => doc.text(ln, x + col.w / 2, textY + li * 3, { align: 'center' }));
+        x += col.w;
       });
 
-      doc.autoTable({
-        head: head, body: body,
-        startY: y, margin: { left: margin, right: margin },
-        styles: { fontSize: 6, cellPadding: 1.2, halign: 'center', valign: 'middle' },
-        headStyles: { fillColor: [26, 107, 74], textColor: 255, fontStyle: 'bold', fontSize: 6.5 },
-        alternateRowStyles: { fillColor: [245, 252, 248] },
-        tableLineColor: [200, 200, 200], tableLineWidth: 0.2,
-        columnStyles: { 10: { halign: 'left' }, 21: { halign: 'left', cellWidth: 18 } }
+      // Grup fraksi - row 1 (label grup)
+      fracGroups.forEach(grp => {
+        const grpW = grp.sub.length * subW;
+        doc.setFillColor(...grp.color);
+        doc.rect(x, y, grpW, hdrH1, 'F');
+        doc.setDrawColor(200,200,200); doc.setLineWidth(0.2);
+        doc.rect(x, y, grpW, hdrH1);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5);
+        // Warna teks sesuai grup
+        const txtColor = grp.color === C10 ? [1,87,155] : grp.color === C2 ? [27,94,32] : grp.color === C06 ? [245,127,23] : grp.color === Cm06 ? [191,54,12] : [106,27,154];
+        doc.setTextColor(...txtColor);
+        doc.text(grp.lbl, x + grpW / 2, y + hdrH1 / 2 + 1.5, { align: 'center' });
+        x += grpW;
+      });
+
+      // Remarks
+      doc.setFillColor(...CHDR);
+      doc.rect(x, y, remW, totalHdrH, 'F');
+      doc.setDrawColor(255,255,255); doc.setLineWidth(0.2);
+      doc.rect(x, y, remW, totalHdrH);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5); doc.setTextColor(...WHITE);
+      doc.text('Remarks', x + remW / 2, y + totalHdrH / 2 + 2, { align: 'center' });
+
+      // Row 2+3: sub-kolom fraksi (Wet Kg + Sample ID)
+      x = margin + fixedCols.reduce((s, c) => s + c.w, 0);
+      fracGroups.forEach(grp => {
+        // Row 2: "Wet (Kg)" span 2
+        const wetW = subW * 2;
+        doc.setFillColor(...grp.color);
+        doc.rect(x, y + hdrH1, wetW, hdrH2, 'F');
+        doc.setDrawColor(200,200,200); doc.setLineWidth(0.2);
+        doc.rect(x, y + hdrH1, wetW, hdrH2);
+        const txtColor2 = grp.color === C10 ? [1,87,155] : grp.color === C2 ? [27,94,32] : grp.color === C06 ? [245,127,23] : grp.color === Cm06 ? [191,54,12] : [106,27,154];
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5); doc.setTextColor(...txtColor2);
+        doc.text('Wet (Kg)', x + wetW / 2, y + hdrH1 + hdrH2 / 2 + 1.5, { align: 'center' });
+
+        // Sample ID span row 2+3
+        doc.setFillColor(...grp.color);
+        doc.rect(x + wetW, y + hdrH1, subW, hdrH2 + hdrH3, 'F');
+        doc.rect(x + wetW, y + hdrH1, subW, hdrH2 + hdrH3);
+        doc.text('Sample ID', x + wetW + subW / 2, y + hdrH1 + (hdrH2 + hdrH3) / 2 + 1.5, { align: 'center' });
+
+        // Row 3: Total | Rec
+        doc.setFillColor(Math.max(0, grp.color[0]-30), Math.max(0, grp.color[1]-30), Math.max(0, grp.color[2]-30));
+        doc.rect(x, y + hdrH1 + hdrH2, subW, hdrH3, 'F');
+        doc.rect(x, y + hdrH1 + hdrH2, subW, hdrH3);
+        doc.text('Total', x + subW / 2, y + hdrH1 + hdrH2 + hdrH3 / 2 + 1.5, { align: 'center' });
+
+        doc.setFillColor(Math.max(0, grp.color[0]-30), Math.max(0, grp.color[1]-30), Math.max(0, grp.color[2]-30));
+        doc.rect(x + subW, y + hdrH1 + hdrH2, subW, hdrH3, 'F');
+        doc.rect(x + subW, y + hdrH1 + hdrH2, subW, hdrH3);
+        doc.text('Rec', x + subW + subW / 2, y + hdrH1 + hdrH2 + hdrH3 / 2 + 1.5, { align: 'center' });
+
+        x += grp.sub.length * subW;
+      });
+
+      doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
+      y += totalHdrH;
+
+      // ---- DATA ROWS ----
+      const rowH = 5;
+      domRows.forEach((tr, ri) => {
+        const n = tr.dataset.row;
+        const g = (name) => { const el = document.querySelector('[name="'+name+'_'+n+'"]'); return el ? (el.value || '') : ''; };
+        const vals = [
+          g('from'), g('to'), g('len'), g('rec'), g('grain'), g('core_wt'),
+          g('from_cum'), g('to_cum'), g('samp_no'), g('dry_wt'), g('sample_id'),
+          g('a10_tot'), g('a10_rec'), g('a10_sid'),
+          g('a2_tot'),  g('a2_rec'),  g('a2_sid'),
+          g('a06_tot'), g('a06_rec'), g('a06_sid'),
+          g('m06_tot'), g('m06_rec'), g('m06_sid'),
+          g('p03_tot'), g('p03_rec'), g('p03_sid'),
+          g('remarks')
+        ];
+
+        // Cek apakah perlu halaman baru
+        if (y + rowH > doc.internal.pageSize.getHeight() - margin) {
+          doc.addPage();
+          y = margin;
+        }
+
+        // Background alternating
+        if (ri % 2 === 1) {
+          doc.setFillColor(245, 252, 248);
+          const totalW = fixedCols.reduce((s,c)=>s+c.w,0) + fracGroups.length*3*subW + remW;
+          doc.rect(margin, y, totalW, rowH, 'F');
+        }
+
+        // Tulis nilai
+        let xv = margin;
+        const colWidths = [...fixedCols.map(c=>c.w), ...fracGroups.flatMap(()=>[subW,subW,subW]), remW];
+        vals.forEach((val, ci) => {
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(0,0,0);
+          doc.setDrawColor(200,200,200); doc.setLineWidth(0.15);
+          doc.rect(xv, y, colWidths[ci], rowH);
+          const txt = val.toString().toUpperCase();
+          doc.text(txt, xv + colWidths[ci] / 2, y + rowH / 2 + 1.5, { align: 'center', maxWidth: colWidths[ci] - 1 });
+          xv += colWidths[ci];
+        });
+        y += rowH;
       });
 
       const filename = 'Prep_' + holeId.replace(/\s+/g,'_') + '.pdf';
       doc.save(filename);
       showToast('✓ ' + filename + ' berhasil didownload!');
     }
+
 
     // ===== RESTORE MERGE VISIBILITY SETELAH LOAD =====
     function restoreMergeVisibility() {
