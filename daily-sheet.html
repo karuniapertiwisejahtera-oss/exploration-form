@@ -431,6 +431,8 @@
       const data = getFormData('daily-sheet-form');
       data.row_count = rowCount;
       data.crew_count = crewCount;
+      // Hapus alat_nama dari data tersimpan - selalu ambil dari array terbaru
+      Object.keys(data).forEach(k => { if (k.startsWith('alat_nama_')) delete data[k]; });
       if (window._editRecordId) {
         DB.delete('daily_sheet', window._editRecordId);
         window._editRecordId = null;
@@ -456,6 +458,8 @@
       const data = getFormData('daily-sheet-form');
       data.row_count = rowCount;
       data.crew_count = crewCount;
+      // Hapus alat_nama dari data - selalu ambil dari array terbaru
+      Object.keys(data).forEach(k => { if (k.startsWith('alat_nama_')) delete data[k]; });
       if (window._editRecordId) {
         DB.delete('daily_sheet', window._editRecordId);
         window._editRecordId = null;
