@@ -172,7 +172,6 @@ const FORM_TABS = [
 ];
 
 function initTabBar() {
-  // Hanya tampil di halaman form (bukan index/login/silica)
   const cur = window.location.pathname.split('/').pop();
   const isForm = FORM_TABS.some(t => t.url === cur);
   if (!isForm) return;
@@ -180,24 +179,29 @@ function initTabBar() {
   const bar = document.createElement('div');
   bar.id = 'tab-bar';
   bar.style.cssText = [
-    'position:fixed', 'bottom:52px', 'left:0', 'right:0', 'z-index:900',
+    'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:1000',
     'display:flex', 'overflow-x:auto', 'background:#1a2e22',
-    'border-top:2px solid #2e9e6e', '-webkit-overflow-scrolling:touch',
-    'scrollbar-width:none'
+    'border-bottom:2px solid #2e9e6e', '-webkit-overflow-scrolling:touch',
+    'scrollbar-width:none', 'height:32px', 'align-items:stretch'
   ].join(';');
 
+  // Hide scrollbar
+  const style = document.createElement('style');
+  style.textContent = '#tab-bar::-webkit-scrollbar{display:none} .page-header{margin-top:32px}';
+  document.head.appendChild(style);
+
   FORM_TABS.forEach(tab => {
-    const btn = document.createElement('button');
     const isActive = tab.url === cur;
+    const btn = document.createElement('button');
     btn.textContent = tab.label;
     btn.style.cssText = [
-      'flex-shrink:0', 'padding:6px 14px', 'border:none', 'cursor:pointer',
+      'flex-shrink:0', 'padding:0 14px', 'border:none', 'cursor:pointer',
       'font-size:11px', 'font-weight:' + (isActive ? '700' : '500'),
       'white-space:nowrap', 'border-right:1px solid #2e4a38',
       'background:' + (isActive ? '#2e9e6e' : 'transparent'),
       'color:' + (isActive ? '#fff' : '#a8d5b5'),
-      'border-top:' + (isActive ? '2px solid #7fffd4' : '2px solid transparent'),
-      'transition:background 0.15s'
+      'border-bottom:' + (isActive ? '2px solid #7fffd4' : '2px solid transparent'),
+      'transition:background 0.15s', 'height:100%'
     ].join(';');
 
     if (!isActive) {
@@ -208,15 +212,8 @@ function initTabBar() {
     bar.appendChild(btn);
   });
 
-  // Scroll tab aktif ke tengah
   document.addEventListener('DOMContentLoaded', () => {
-    document.body.appendChild(bar);
-    // Adjust action-bar margin
-    const actionBar = document.querySelector('.action-bar');
-    if (actionBar) actionBar.style.bottom = '0';
-    bar.style.bottom = (actionBar ? actionBar.offsetHeight : 52) + 'px';
-
-    // Scroll active tab into view
+    document.body.insertBefore(bar, document.body.firstChild);
     const activeBtn = bar.querySelector('[style*="2e9e6e"]');
     if (activeBtn) activeBtn.scrollIntoView({ inline: 'center', block: 'nearest' });
   });
