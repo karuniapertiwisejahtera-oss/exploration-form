@@ -379,6 +379,48 @@
           list.appendChild(row);
         });
       });
+      // ===== DETEKSI DUPLIKAT SAMPLE ID DALAM INTERVAL YANG SAMA =====
+      var dupWarning = document.getElementById('weight-dup-warning');
+      if (!dupWarning) {
+        dupWarning = document.createElement('div');
+        dupWarning.id = 'weight-dup-warning';
+        dupWarning.style.cssText = 'margin-bottom:10px;padding:8px 12px;background:#fff3e0;border:1.5px solid #ff9800;border-radius:8px;font-size:11px;color:#e65100;display:none;';
+        list.parentNode.insertBefore(dupWarning, list);
+      }
+
+      // Kumpulkan semua SID per baris (interval)
+      var dupMessages = [];
+      var domRows2 = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      domRows2.forEach(function(tr) {
+        var n = tr.dataset.row;
+        var sampNo = document.querySelector('[name="samp_no_' + n + '"]');
+        if (!sampNo || !sampNo.value.trim()) return;
+        var sids = [];
+        var ALL_FRAC = ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
+        ALL_FRAC.forEach(function(f) {
+          var el = document.querySelector('[name="' + f + '_' + n + '"]');
+          if (el && el.value.trim()) sids.push({ sid: el.value.trim().toUpperCase(), frac: f });
+        });
+        // Cek duplikat dalam interval ini
+        var seen = {};
+        sids.forEach(function(item) {
+          if (!seen[item.sid]) seen[item.sid] = [];
+          seen[item.sid].push(item.frac);
+        });
+        Object.keys(seen).forEach(function(sid) {
+          if (seen[sid].length > 1) {
+            dupMessages.push('⚠ ' + sampNo.value + ': <b>' + sid + '</b> muncul di ' + seen[sid].join(', '));
+          }
+        });
+      });
+
+      if (dupMessages.length > 0) {
+        dupWarning.innerHTML = '<b>⚠ Sample ID Double dalam Interval:</b><br>' + dupMessages.join('<br>');
+        dupWarning.style.display = 'block';
+      } else {
+        dupWarning.style.display = 'none';
+      }
+
       if (!hasItem) list.innerHTML = '<p style="color:#999;text-align:center;padding:20px;">Belum ada Sample ID fraksi yang terisi.</p>';
       document.getElementById('weight-modal-overlay').style.display = 'block';
       setTimeout(function() {
