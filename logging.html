@@ -6,21 +6,69 @@
   <title>Logging Form</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .log-section {
-      background: #fff; border: 1.5px solid #e0e0e0;
-      border-radius: 10px; padding: 12px; margin-bottom: 10px;
+    /* Header info style seperti form lain */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin-bottom: 10px; }
+    .info-row { display: flex; align-items: center; gap: 4px; font-size: 13px; }
+    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; color: #1a6b4a; min-width: 90px; font-size: 12px; }
+    .info-row input, .info-row select {
+      flex: 1; border: none; border-bottom: 1.5px solid #a8d5b5; outline: none;
+      font-size: 13px; padding: 3px 4px; background: transparent; min-width: 0;
+      text-transform: uppercase;
     }
-    .log-section-title {
-      font-size: 11px; font-weight: 700; color: #1a6b4a;
-      text-transform: uppercase; letter-spacing: 0.5px;
-      border-bottom: 1.5px solid #a8d5b5; padding-bottom: 4px; margin-bottom: 8px;
+    .info-row input:focus, .info-row select:focus { border-bottom-color: #1a6b4a; }
+
+    /* Entry counter bar */
+    .entry-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1a6b4a; color: white; padding: 6px 12px;
+      border-radius: 8px; margin-bottom: 10px; font-size: 12px; font-weight: 700;
     }
-    .log-entry { background: #f8fffe; border: 1.5px solid #c8e6c9; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
-    .log-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .log-entry-num { font-size: 12px; font-weight: 700; color: #1a6b4a; }
-    .btn-del-entry { background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer; }
-    .calc-btn { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1a6b4a; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: 600; }
-    .hole-id-locked { background: #f5f5f5; color: #888; font-style: italic; }
+    .entry-bar span { opacity: 0.85; font-weight: 400; font-size: 11px; }
+
+    /* Field groups */
+    .field-group { margin-bottom: 6px; }
+    .field-group label {
+      display: block; font-size: 10px; font-weight: 700; color: #1a6b4a;
+      text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 2px;
+    }
+    .field-group input, .field-group select, .field-group textarea {
+      width: 100%; border: none; border-bottom: 1.5px solid #ccc; outline: none;
+      font-size: 13px; padding: 5px 4px; background: transparent;
+      text-transform: uppercase; box-sizing: border-box;
+    }
+    .field-group select { cursor: pointer; }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus {
+      border-bottom-color: #1a6b4a; background: #f0f9f4; border-radius: 4px 4px 0 0;
+    }
+    .field-group textarea { resize: vertical; min-height: 60px; }
+    .field-group input[readonly] { color: #888; background: #f5f5f5; font-style: italic; }
+
+    /* Section divider */
+    .section-divider {
+      font-size: 10px; font-weight: 700; color: #1a6b4a; text-transform: uppercase;
+      letter-spacing: 0.5px; border-bottom: 1.5px solid #a8d5b5;
+      padding-bottom: 3px; margin: 10px 0 6px 0;
+    }
+
+    /* From-To row */
+    .from-to-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* Calc button */
+    .calc-inline { display: flex; gap: 6px; align-items: flex-end; }
+    .calc-inline input { flex: 1; }
+    .btn-calc { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1a6b4a; border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+
+    /* Nav buttons */
+    .nav-bar {
+      display: flex; gap: 8px; padding: 10px 12px;
+      background: white; border-top: 1px solid #e0e0e0;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    }
+    .btn-save-entry { flex: 1; background: #1a6b4a; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-next-entry { flex: 1; background: #2e9e6e; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-prev-entry { flex: 0 0 44px; background: #e8f5e9; color: #1a6b4a; border: 1.5px solid #a8d5b5; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+
+    body { padding-bottom: 70px; }
   </style>
 </head>
 <body>
@@ -30,69 +78,40 @@
   </div>
 
   <div class="form-container">
-    <form id="logging-form">
 
-      <!-- BOREHOLE INFORMATION -->
-      <div class="form-section">
-        <div class="form-section-title">Borehole Information</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Hole ID *</label>
-            <input type="text" name="hole_id" id="hole-id-input" placeholder="Hole ID" oninput="syncHoleId()">
-          </div>
-          <div class="form-group">
-            <label>Date Start *</label>
-            <input type="date" name="date_start">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Logger *</label>
-            <input type="text" name="logger" placeholder="Nama Logger">
-          </div>
-          <div class="form-group">
-            <label>Compartemen *</label>
-            <input type="text" name="compartemen" placeholder="Compartemen">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Easting</label>
-            <input type="number" name="easting" placeholder="0.000" step="0.001">
-          </div>
-          <div class="form-group">
-            <label>Northing</label>
-            <input type="number" name="northing" placeholder="0.000" step="0.001">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Elevation</label>
-            <input type="number" name="elevation" placeholder="0" step="0.01">
-          </div>
-          <div class="form-group">
-            <label>Drilling *</label>
-            <select name="drilling">
-              <option value="">Pilih drilling...</option>
-              <option>KPR-01</option>
-              <option>KPR-02</option>
-              <option>KPR-03</option>
-              <option>KPR-04</option>
-            </select>
-          </div>
+    <!-- BOREHOLE INFORMATION -->
+    <div class="form-section" id="borehole-section">
+      <div class="form-section-title">Borehole Information</div>
+      <div class="info-grid">
+        <div class="info-row"><label>Hole ID *</label><input type="text" name="hole_id" id="hole-id-input" placeholder="Hole ID" oninput="syncHoleId()"></div>
+        <div class="info-row"><label>Date Start *</label><input type="date" name="date_start"></div>
+        <div class="info-row"><label>Logger *</label><input type="text" name="logger" placeholder="Nama Logger"></div>
+        <div class="info-row"><label>Compartemen</label><input type="text" name="compartemen" placeholder="Compartemen"></div>
+        <div class="info-row"><label>Easting</label><input type="number" name="easting" placeholder="0.000" step="0.001"></div>
+        <div class="info-row"><label>Northing</label><input type="number" name="northing" placeholder="0.000" step="0.001"></div>
+        <div class="info-row"><label>Elevation</label><input type="number" name="elevation" placeholder="0" step="0.01"></div>
+        <div class="info-row">
+          <label>Drilling *</label>
+          <select name="drilling">
+            <option value="">Pilih...</option>
+            <option>KPR-01</option><option>KPR-02</option>
+            <option>KPR-03</option><option>KPR-04</option>
+          </select>
         </div>
       </div>
+    </div>
 
-      <!-- LOG ENTRIES -->
-      <div class="form-section">
-        <div class="form-section-title">Data Log Interval</div>
-        <div id="log-entries"></div>
-        <button type="button" onclick="addLogEntry()" style="width:100%;background:#1a6b4a;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;">
-          + Tambah Interval
-        </button>
-      </div>
+    <!-- ENTRY COUNTER -->
+    <div class="entry-bar">
+      <div>ENTRY: <strong id="cur-entry">1</strong> / <strong id="tot-entry">1</strong></div>
+      <span id="entry-range">— m</span>
+    </div>
 
-    </form>
+    <!-- CURRENT ENTRY FORM -->
+    <div id="entry-form">
+      <!-- Diisi oleh JS -->
+    </div>
+
   </div>
 
   <!-- Calculator Modal -->
@@ -100,222 +119,235 @@
     <div style="background:white;border-radius:14px;padding:20px;width:88%;max-width:340px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <span style="font-weight:700;font-size:14px;color:#1a6b4a;">Calculator Core Recovery</span>
-        <button onclick="closeCalc()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">×</button>
+        <button onclick="closeCalc()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#999;">×</button>
       </div>
-      <div class="form-group"><label>Panjang Core (m)</label><input type="number" id="calc-core" step="0.01" placeholder="0.00" oninput="calcRecovery()"></div>
-      <div class="form-group"><label>Interval (m)</label><input type="number" id="calc-interval" step="0.01" placeholder="0.00" oninput="calcRecovery()"></div>
-      <div class="form-group"><label>Hasil (%)</label><input type="number" id="calc-result" readonly style="background:#f5f5f5;font-weight:700;color:#1a6b4a;"></div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button onclick="closeCalc()" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;background:#f5f5f5;cursor:pointer;">Cancel</button>
-        <button onclick="applyCalc()" style="flex:1;padding:10px;border:none;border-radius:8px;background:#1a6b4a;color:white;font-weight:700;cursor:pointer;">Apply</button>
+      <div class="field-group"><label>Panjang Core (m)</label><input type="number" id="calc-core" step="0.01" placeholder="0.00" oninput="calcRecovery()"></div>
+      <div class="field-group"><label>Interval (m)</label><input type="number" id="calc-interval" step="0.01" placeholder="0.00" oninput="calcRecovery()"></div>
+      <div class="field-group"><label>Hasil (%)</label><input type="number" id="calc-result" readonly style="background:#f5f5f5;font-weight:700;color:#1a6b4a;"></div>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button onclick="closeCalc()" style="flex:1;padding:11px;border:1px solid #ccc;border-radius:8px;background:#f5f5f5;cursor:pointer;font-size:13px;">Cancel</button>
+        <button onclick="applyCalc()" style="flex:1;padding:11px;border:none;border-radius:8px;background:#1a6b4a;color:white;font-weight:700;cursor:pointer;font-size:13px;">Apply</button>
       </div>
     </div>
   </div>
 
-  <div class="action-bar">
-    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
-    <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
-    <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
+  <!-- Nav Bar -->
+  <div class="nav-bar">
+    <button class="btn-prev-entry" onclick="prevEntry()" title="Interval sebelumnya">‹</button>
+    <button class="btn-save-entry" onclick="saveEntry()">💾 Save</button>
+    <button class="btn-next-entry" onclick="nextEntry()">Next ›</button>
   </div>
 
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
   <script>
-    let entryCount = 0;
-    let calcTargetEntry = null;
+    // ===== DROPDOWN OPTIONS =====
+    const ROCK_CODE  = ['CMR','BRC','SS','CLS','SLT'];
+    const GRAIN_SIZE = ['GVL','CS','FS','CLY'];
+    const SORTASI    = ['PS','MS','WS'];
+    const ROUNDNESS  = ['WRD','RD','SRD','SAG','AG'];
+    const COLOUR     = ['TRP','WHT','BRN','RED','YLW','BLU','GRY','GRN','BLK','PUR'];
+    const STRUCTURE  = ['BDD','GBD','LMN','IGM','LCS','IMB','CRB','MSV'];
+    const FRAGMENT   = ['CMR','BRC','SS','QRT','CLS','SLT','LMS','SCH','SHL'];
+    const MATRIX     = ['CMR','BRC','SS','QRT','CLS','SLT','LMS','SCH','SHL'];
+    const CEMENT     = ['SLC','CBT','IO'];
+    const FABRIC     = ['OPN','CLS'];
+    const COMPACTION = ['HRD','SFT','FRB','SGY'];
+    const MINERAL    = ['QRT','ILM','MGT','HMT','PRT','ZRC','TRM','OLV','PY','GRT','APT','EPD','ZST','KYN','ADS','SLM','HBL','MSK','BTT','PL','CAL','CLY','OR','DLM','GTH','RTL','ANS','QZ','MNG'];
+    const DEPOSITE   = ['BLOCK 1','BLOCK 2','BLOCK 3'];
 
-    // Dropdown options
-    const ROCK_CODE   = ['CMR','BRC','SS','CLS','SLT'];
-    const GRAIN_SIZE  = ['GVL','CS','FS','CLY'];
-    const SORTASI     = ['PS','MS','WS'];
-    const ROUNDNESS   = ['WRD','RD','SRD','SAG','AG'];
-    const COLOUR      = ['TRP','WHT','BRN','RED','YLW','BLU','GRY','GRN','BLK','PUR'];
-    const STRUCTURE   = ['BDD','GBD','LMN','IGM','LCS','IMB','CRB','MSV'];
-    const FRAGMENT    = ['CMR','BRC','SS','QRT','CLS','SLT','LMS','SCH','SHL'];
-    const MATRIX      = ['CMR','BRC','SS','QRT','CLS','SLT','LMS','SCH','SHL'];
-    const CEMENT      = ['SLC','CBT','IO'];
-    const FABRIC      = ['OPN','CLS'];
-    const COMPACTION  = ['HRD','SFT','FRB','SGY'];
-    const MINERAL     = ['QRT','ILM','MGT','HMT','PRT','ZRC','TRM','OLV','PY','GRT','APT','EPD','ZST','KYN','ADS','SLM','HBL','MSK','BTT','PL','CAL','CLY','OR','DLM','GTH','RTL','ANS','QZ','MNG'];
-    const DEPOSITE    = ['BLOCK 1','BLOCK 2','BLOCK 3'];
-
-    function sel(name, opts, n) {
-      return `<select name="${name}_${n}" style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:8px;font-size:13px;background:white;">
+    function mkSel(name, opts) {
+      return `<select name="${name}" style="width:100%;border:none;border-bottom:1.5px solid #ccc;outline:none;font-size:13px;padding:5px 4px;background:transparent;text-transform:uppercase;box-sizing:border-box;">
         <option value="">add items...</option>
         ${opts.map(o=>`<option>${o}</option>`).join('')}
       </select>`;
     }
 
+    // ===== STATE =====
+    let entries = [{}]; // array of entry data objects
+    let curIdx  = 0;    // current entry index (0-based)
+
     function syncHoleId() {
-      const val = document.getElementById('hole-id-input').value;
+      const val = document.getElementById('hole-id-input').value.toUpperCase();
       document.querySelectorAll('.hole-id-display').forEach(el => el.value = val);
     }
 
-    function addLogEntry() {
-      entryCount++;
-      const n = entryCount;
-      const holeId = document.getElementById('hole-id-input')?.value || '';
-      const container = document.getElementById('log-entries');
-      const div = document.createElement('div');
-      div.className = 'log-entry';
-      div.id = `entry-${n}`;
-      div.innerHTML = `
-        <div class="log-entry-header">
-          <span class="log-entry-num">Interval #${n}</span>
-          <button type="button" class="btn-del-entry" onclick="removeEntry(${n})">🗑 Hapus</button>
-        </div>
+    // ===== RENDER ENTRY FORM =====
+    function renderEntry(idx) {
+      const d = entries[idx] || {};
+      const holeId = document.getElementById('hole-id-input')?.value.toUpperCase() || '';
+      const n = idx; // use index as field suffix
 
+      document.getElementById('cur-entry').textContent = idx + 1;
+      document.getElementById('tot-entry').textContent = entries.length;
+      const from = d.from || ''; const to = d.to || '';
+      document.getElementById('entry-range').textContent = (from || '—') + ' — ' + (to || '—') + ' m';
+
+      const v = (f) => d[f] !== undefined ? d[f] : '';
+      const selV = (name, opts, val) => `<select name="${name}" style="width:100%;border:none;border-bottom:1.5px solid #ccc;outline:none;font-size:13px;padding:5px 4px;background:transparent;text-transform:uppercase;box-sizing:border-box;">
+        <option value="">add items...</option>
+        ${opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}
+      </select>`;
+
+      document.getElementById('entry-form').innerHTML = `
         <!-- HOLE ID -->
-        <div class="log-section">
-          <div class="log-section-title">Hole ID</div>
-          <div class="form-group">
-            <label>HOLE ID 🔒 (Tidak dapat diubah)</label>
-            <input type="text" name="log_${n}_hole_id" class="hole-id-display hole-id-locked" value="${holeId}" readonly>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>FROM</label>
-              <input type="number" name="log_${n}_from" placeholder="0.00" step="0.01">
-            </div>
-            <div class="form-group">
-              <label>TO</label>
-              <input type="number" name="log_${n}_to" placeholder="0.00" step="0.01">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>CORE RECOVERY <button type="button" class="calc-btn" onclick="openCalc(${n})">⚙ Hitung</button></label>
-            <input type="number" name="log_${n}_recovery" id="recovery_${n}" placeholder="0.00" step="0.01">
+        <div class="field-group">
+          <label>HOLE ID 🔒</label>
+          <input type="text" name="e_hole_id" class="hole-id-display" value="${holeId}" readonly>
+        </div>
+
+        <div class="section-divider">Interval</div>
+        <div class="from-to-row">
+          <div class="field-group"><label>FROM (m)</label><input type="number" name="e_from" value="${v('from')}" placeholder="0.00" step="0.01" oninput="updateRange()"></div>
+          <div class="field-group"><label>TO (m)</label><input type="number" name="e_to" value="${v('to')}" placeholder="0.00" step="0.01" oninput="updateRange()"></div>
+        </div>
+        <div class="field-group">
+          <label>CORE RECOVERY (%)</label>
+          <div class="calc-inline">
+            <input type="number" name="e_recovery" id="recovery-input" value="${v('recovery')}" placeholder="0.00" step="0.01">
+            <button type="button" class="btn-calc" onclick="openCalc()">⚙ Hitung</button>
           </div>
         </div>
 
-        <!-- ROCK & GRAIN -->
-        <div class="log-section">
-          <div class="log-section-title">Rock & Grain</div>
-          <div class="form-row">
-            <div class="form-group"><label>ROCK CODE</label>${sel('log_'+n+'_rock_code', ROCK_CODE, n)}</div>
-            <div class="form-group"><label>GRAIN SIZE</label>${sel('log_'+n+'_grain_size', GRAIN_SIZE, n)}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>% MATERIAL >1 CM</label><input type="number" name="log_${n}_material_pct" placeholder="0" min="0" max="100"></div>
-            <div class="form-group"><label>SORTASI</label>${sel('log_'+n+'_sortasi', SORTASI, n)}</div>
-          </div>
-        </div>
+        <div class="section-divider">Rock & Grain</div>
+        <div class="field-group"><label>ROCK CODE</label>${selV('e_rock_code', ROCK_CODE, v('rock_code'))}</div>
+        <div class="field-group"><label>GRAIN SIZE</label>${selV('e_grain_size', GRAIN_SIZE, v('grain_size'))}</div>
+        <div class="field-group"><label>% MATERIAL &gt;1 CM</label><input type="number" name="e_material_pct" value="${v('material_pct')}" placeholder="0" min="0" max="100"></div>
+        <div class="field-group"><label>SORTASI</label>${selV('e_sortasi', SORTASI, v('sortasi'))}</div>
 
-        <!-- ROUNDNESS & STRUCTURE -->
-        <div class="log-section">
-          <div class="log-section-title">Roundness & Structure</div>
-          <div class="form-row">
-            <div class="form-group"><label>ROUNDNESS</label>${sel('log_'+n+'_roundness', ROUNDNESS, n)}</div>
-            <div class="form-group"><label>COLOUR</label>${sel('log_'+n+'_colour', COLOUR, n)}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>STRUCTURE</label>${sel('log_'+n+'_structure', STRUCTURE, n)}</div>
-            <div class="form-group"><label>FRAGMENT</label>${sel('log_'+n+'_fragment', FRAGMENT, n)}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>MATRIX</label>${sel('log_'+n+'_matrix', MATRIX, n)}</div>
-            <div class="form-group"><label>CEMENT</label>${sel('log_'+n+'_cement', CEMENT, n)}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>FABRIC</label>${sel('log_'+n+'_fabric', FABRIC, n)}</div>
-            <div class="form-group"><label>COMPACTION</label>${sel('log_'+n+'_compaction', COMPACTION, n)}</div>
-          </div>
-        </div>
+        <div class="section-divider">Roundness & Structure</div>
+        <div class="field-group"><label>ROUNDNESS</label>${selV('e_roundness', ROUNDNESS, v('roundness'))}</div>
+        <div class="field-group"><label>COLOUR</label>${selV('e_colour', COLOUR, v('colour'))}</div>
+        <div class="field-group"><label>STRUCTURE</label>${selV('e_structure', STRUCTURE, v('structure'))}</div>
+        <div class="field-group"><label>FRAGMENT</label>${selV('e_fragment', FRAGMENT, v('fragment'))}</div>
+        <div class="field-group"><label>MATRIX</label>${selV('e_matrix', MATRIX, v('matrix'))}</div>
+        <div class="field-group"><label>CEMENT</label>${selV('e_cement', CEMENT, v('cement'))}</div>
+        <div class="field-group"><label>FABRIC</label>${selV('e_fabric', FABRIC, v('fabric'))}</div>
+        <div class="field-group"><label>COMPACTION</label>${selV('e_compaction', COMPACTION, v('compaction'))}</div>
 
-        <!-- MINERAL -->
-        <div class="log-section">
-          <div class="log-section-title">Mineral</div>
-          <div class="form-group"><label>MINERAL PRIMER</label>${sel('log_'+n+'_min1', MINERAL, n)}</div>
-          <div class="form-group"><label>MINERAL SEKUNDER</label>${sel('log_'+n+'_min2', MINERAL, n)}</div>
-          <div class="form-group"><label>MINERAL TERSIER</label>${sel('log_'+n+'_min3', MINERAL, n)}</div>
-          <div class="form-group"><label>DEPOSITE</label>${sel('log_'+n+'_deposite', DEPOSITE, n)}</div>
-          <div class="form-group"><label>COMMENT</label><textarea name="log_${n}_comment" placeholder="Keterangan tambahan..." rows="2" style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:8px;font-size:13px;resize:vertical;"></textarea></div>
-        </div>
+        <div class="section-divider">Mineral</div>
+        <div class="field-group"><label>MINERAL PRIMER</label>${selV('e_min1', MINERAL, v('min1'))}</div>
+        <div class="field-group"><label>MINERAL SEKUNDER</label>${selV('e_min2', MINERAL, v('min2'))}</div>
+        <div class="field-group"><label>MINERAL TERSIER</label>${selV('e_min3', MINERAL, v('min3'))}</div>
+        <div class="field-group"><label>DEPOSITE</label>${selV('e_deposite', DEPOSITE, v('deposite'))}</div>
+
+        <div class="section-divider">Additional</div>
+        <div class="field-group"><label>COMMENT</label><textarea name="e_comment" placeholder="Keterangan tambahan...">${v('comment')}</textarea></div>
       `;
-      container.appendChild(div);
     }
 
-    function removeEntry(n) {
-      const el = document.getElementById(`entry-${n}`);
-      if (el) el.remove();
+    function updateRange() {
+      const from = document.querySelector('[name="e_from"]')?.value || '—';
+      const to   = document.querySelector('[name="e_to"]')?.value   || '—';
+      document.getElementById('entry-range').textContent = from + ' — ' + to + ' m';
+    }
+
+    // ===== READ CURRENT ENTRY FROM DOM =====
+    function readCurrentEntry() {
+      const fields = ['hole_id','from','to','recovery','rock_code','grain_size','material_pct','sortasi',
+        'roundness','colour','structure','fragment','matrix','cement','fabric','compaction',
+        'min1','min2','min3','deposite','comment'];
+      const d = {};
+      fields.forEach(f => {
+        const el = document.querySelector(`[name="e_${f}"]`);
+        if (el) d[f] = el.value;
+      });
+      return d;
+    }
+
+    // ===== NAVIGATION =====
+    function saveEntry() {
+      entries[curIdx] = readCurrentEntry();
+      // Simpan ke DB
+      const header = {};
+      document.querySelectorAll('#borehole-section input, #borehole-section select').forEach(el => {
+        if (el.name) header[el.name] = el.value;
+      });
+      header.entries = JSON.stringify(entries);
+      header.entry_count = entries.length;
+      DB.save('logging', header);
+      showToast('✓ Interval ' + (curIdx+1) + ' tersimpan');
+    }
+
+    function nextEntry() {
+      entries[curIdx] = readCurrentEntry();
+      // Auto-fill From dari To sebelumnya
+      const prevTo = entries[curIdx].to || '';
+      curIdx++;
+      if (curIdx >= entries.length) {
+        entries.push({ from: prevTo });
+      }
+      renderEntry(curIdx);
+      window.scrollTo(0, 0);
+    }
+
+    function prevEntry() {
+      if (curIdx <= 0) return;
+      entries[curIdx] = readCurrentEntry();
+      curIdx--;
+      renderEntry(curIdx);
+      window.scrollTo(0, 0);
     }
 
     // ===== CALCULATOR =====
-    function openCalc(n) {
-      calcTargetEntry = n;
+    function openCalc() {
       document.getElementById('calc-core').value = '';
       document.getElementById('calc-interval').value = '';
       document.getElementById('calc-result').value = '';
+      // Pre-fill interval dari From-To
+      const from = parseFloat(document.querySelector('[name="e_from"]')?.value) || 0;
+      const to   = parseFloat(document.querySelector('[name="e_to"]')?.value)   || 0;
+      if (to > from) document.getElementById('calc-interval').value = (to - from).toFixed(2);
       document.getElementById('calc-modal').style.display = 'flex';
     }
     function closeCalc() { document.getElementById('calc-modal').style.display = 'none'; }
     function calcRecovery() {
       const core = parseFloat(document.getElementById('calc-core').value) || 0;
       const intv = parseFloat(document.getElementById('calc-interval').value) || 0;
-      document.getElementById('calc-result').value = intv > 0 ? ((core / intv * 100).toFixed(2)) : '';
+      document.getElementById('calc-result').value = intv > 0 ? (core / intv * 100).toFixed(2) : '';
     }
     function applyCalc() {
       const result = document.getElementById('calc-result').value;
-      if (calcTargetEntry && result) {
-        const el = document.getElementById(`recovery_${calcTargetEntry}`);
-        if (el) el.value = result;
-      }
+      const el = document.getElementById('recovery-input');
+      if (el && result) el.value = result;
       closeCalc();
     }
 
-    // ===== SAVE =====
-    function saveData() {
-      const data = getFormData('logging-form');
-      data.entry_count = entryCount;
-      DB.save('logging', data);
-      showToast('Data Logging tersimpan!');
-    }
-
-    // ===== CLEAR =====
-    function clearData() {
-      clearForm('logging-form');
-      document.getElementById('log-entries').innerHTML = '';
-      entryCount = 0;
-      addLogEntry(); addLogEntry();
-      showToast('Form dikosongkan');
-    }
-
-    // ===== SUBMIT =====
+    // ===== SUBMIT (XLS) =====
     function submitData() {
-      saveData();
-      const data = getFormData('logging-form');
-      const hid  = (data.hole_id || 'unknown').replace(/\s+/g,'_');
-      const tgl  = data.date_start || new Date().toISOString().slice(0,10);
+      entries[curIdx] = readCurrentEntry();
+      const header = {};
+      document.querySelectorAll('#borehole-section input, #borehole-section select').forEach(el => {
+        if (el.name) header[el.name] = el.value;
+      });
+      DB.save('logging', { ...header, entries: JSON.stringify(entries), entry_count: entries.length });
+
+      const hid = (header.hole_id || 'unknown').replace(/\s+/g,'_');
+      const tgl = header.date_start || new Date().toISOString().slice(0,10);
       const filename = `Logging_${hid}_${tgl}.xls`;
 
-      const headers = ['No','Hole ID','From','To','Recovery','Rock Code','Grain Size','% Mat >1cm','Sortasi','Roundness','Colour','Structure','Fragment','Matrix','Cement','Fabric','Compaction','Min Primer','Min Sekunder','Min Tersier','Deposite','Comment'];
-      let rows = '<tr>' + headers.map(h=>`<th>${h}</th>`).join('') + '</tr>';
-      for (let i = 1; i <= entryCount; i++) {
-        const g = f => (data[`log_${i}_${f}`] || '').toUpperCase();
-        rows += `<tr>
-          <td>${i}</td><td>${g('hole_id')}</td><td>${g('from')}</td><td>${g('to')}</td><td>${g('recovery')}</td>
-          <td>${g('rock_code')}</td><td>${g('grain_size')}</td><td>${g('material_pct')}</td><td>${g('sortasi')}</td>
-          <td>${g('roundness')}</td><td>${g('colour')}</td><td>${g('structure')}</td><td>${g('fragment')}</td>
-          <td>${g('matrix')}</td><td>${g('cement')}</td><td>${g('fabric')}</td><td>${g('compaction')}</td>
-          <td>${g('min1')}</td><td>${g('min2')}</td><td>${g('min3')}</td><td>${g('deposite')}</td><td>${g('comment')}</td>
-        </tr>`;
-      }
+      const cols = ['No','Hole ID','From','To','Recovery','Rock Code','Grain Size','% Mat >1cm','Sortasi','Roundness','Colour','Structure','Fragment','Matrix','Cement','Fabric','Compaction','Min Primer','Min Sekunder','Min Tersier','Deposite','Comment'];
+      let rows = '<tr>' + cols.map(h=>`<th>${h}</th>`).join('') + '</tr>';
+      entries.forEach((e, i) => {
+        const U = s => (s||'').toUpperCase();
+        rows += `<tr><td>${i+1}</td><td>${U(e.hole_id)}</td><td>${e.from||''}</td><td>${e.to||''}</td><td>${e.recovery||''}</td>
+          <td>${U(e.rock_code)}</td><td>${U(e.grain_size)}</td><td>${e.material_pct||''}</td><td>${U(e.sortasi)}</td>
+          <td>${U(e.roundness)}</td><td>${U(e.colour)}</td><td>${U(e.structure)}</td><td>${U(e.fragment)}</td>
+          <td>${U(e.matrix)}</td><td>${U(e.cement)}</td><td>${U(e.fabric)}</td><td>${U(e.compaction)}</td>
+          <td>${U(e.min1)}</td><td>${U(e.min2)}</td><td>${U(e.min3)}</td><td>${U(e.deposite)}</td><td>${U(e.comment)}</td></tr>`;
+      });
 
-      const info = `<tr><td colspan="22"><b>Hole ID:</b> ${data.hole_id||''} | <b>Date Start:</b> ${data.date_start||''} | <b>Logger:</b> ${data.logger||''} | <b>Compartemen:</b> ${data.compartemen||''} | <b>Drilling:</b> ${data.drilling||''}</td></tr>
-        <tr><td colspan="22"><b>Easting:</b> ${data.easting||''} | <b>Northing:</b> ${data.northing||''} | <b>Elevation:</b> ${data.elevation||''}</td></tr>
-        <tr><td colspan="22"></td></tr>`;
-
+      const info = `<tr><td colspan="22"><b>Hole ID:</b> ${header.hole_id||''} | <b>Date:</b> ${header.date_start||''} | <b>Logger:</b> ${header.logger||''} | <b>Drilling:</b> ${header.drilling||''}</td></tr><tr><td colspan="22"></td></tr>`;
       const html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>${info}${rows}</table></body></html>`;
       const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
       URL.revokeObjectURL(url);
       showToast('✓ ' + filename + ' berhasil didownload!');
     }
 
-    // Default 2 interval
-    addLogEntry(); addLogEntry();
+    // ===== INIT =====
+    renderEntry(0);
   </script>
 </body>
 </html>
