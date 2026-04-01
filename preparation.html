@@ -1814,17 +1814,24 @@
       doc.setTextColor(0, 0, 0);
       y += 17;
 
-      // ---- INFO BOX ----
-      const infoH = 18;
+      // ---- INFO BOX: 2 kolom seimbang ----
+      // Kiri: Hole ID, Sheet, Deposit, Total Depth | Kanan: Sampler, Date Start, Date Finish
+      const leftInfo  = [['HOLE ID', holeId], ['SHEET/GRID NO', sheet], ['DEPOSIT', deposit], ['TOTAL DEPTH', depth + ' m']];
+      const rightInfo = [['SAMPLER', sampler], ['DATE START', dateStart], ['DATE FINISH', dateEnd]];
+      const maxRows = Math.max(leftInfo.length, rightInfo.length);
+      const rH = 5; const infoH = maxRows * rH + 6;
+
       doc.setFillColor(240, 249, 244);
       doc.rect(margin, y, contentW, infoH, 'F');
       doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
       doc.rect(margin, y, contentW, infoH);
       doc.setDrawColor(0, 0, 0);
 
-      const col1 = margin + 4, col2 = margin + 40, col3 = pageW / 2 + 4, col4 = pageW / 2 + 44;
-      const iy = y + 4.5, rH = 4.5;
-      [['HOLE ID', holeId], ['SHEET/GRID NO', sheet], ['DEPOSIT', deposit], ['TOTAL DEPTH', depth + ' m']].forEach(([lbl, val], i) => {
+      const col1 = margin + 4, col2 = margin + 36;
+      const col3 = pageW / 2 + 4, col4 = pageW / 2 + 36;
+      const iy = y + 4.5;
+
+      leftInfo.forEach(([lbl, val], i) => {
         doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 107, 74);
         doc.text(lbl, col1, iy + i * rH);
         doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
@@ -1832,7 +1839,7 @@
         doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
         doc.line(col2, iy + i * rH + 0.8, pageW / 2 - 4, iy + i * rH + 0.8);
       });
-      [['SAMPLER', sampler], ['DATE START', dateStart], ['DATE FINISH', dateEnd]].forEach(([lbl, val], i) => {
+      rightInfo.forEach(([lbl, val], i) => {
         doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 107, 74);
         doc.text(lbl, col3, iy + i * rH);
         doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
@@ -1853,7 +1860,7 @@
 
       // ---- TABEL DATA ----
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
-      const head = [['From','To','Len','Rec','Grain','Core Wt','From Cum','To Cum','Samp No','Dry Wt','Sample ID','+10 Tot','+10 Rec','+2 Tot','+2 Rec','+0.6 Tot','+0.6 Rec','+0.3-0.6 Tot','+0.3-0.6 Rec','-0.3 Tot','-0.3 Rec','Remarks']];
+      const head = [['From','To','Len','Rec','Grain','Core Wt','From\nCum','To\nCum','Samp\nNo','Dry\nWt','Sample ID','+10\nTot','+10\nRec','+2\nTot','+2\nRec','+0.6\nTot','+0.6\nRec','+0.3-0.6\nTot','+0.3-0.6\nRec','-0.3\nTot','-0.3\nRec','Remarks']];
       const body = [];
       domRows.forEach(tr => {
         const n = tr.dataset.row;
