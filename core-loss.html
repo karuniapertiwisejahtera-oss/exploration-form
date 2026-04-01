@@ -5,6 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Core Loss Form</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .core-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .core-cell {
+      border: 1.5px solid #b0bec5;
+      border-radius: 8px;
+      padding: 6px 4px 4px;
+      background: #fff;
+      text-align: center;
+    }
+    .cell-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1a2e22;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    /* Sub-angka kecil */
+    .sub-nums {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px;
+    }
+    .sub-num {
+      width: 18px;
+      height: 18px;
+      font-size: 8px;
+      font-weight: 600;
+      border: 1px solid #90a4ae;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: #f5f5f5;
+      color: #546e7a;
+      user-select: none;
+      transition: background 0.1s;
+    }
+    .sub-num.selected {
+      background: #1a6b4a;
+      color: white;
+      border-color: #1a6b4a;
+    }
+    .sub-num:active { opacity: 0.7; }
+    /* Input tersembunyi */
+    .core-cell input[type=hidden] { display: none; }
+  </style>
 </head>
 <body>
   <div class="page-header">
@@ -100,16 +152,59 @@
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
   <script>
+    // Sub-angka yang tersedia per meter (sesuai gambar)
+    function getSubNums(meter) {
+      // Baris angka kecil: 10 20 30 40 50 60 70 80 90 100
+      // Tapi tiap meter punya variasi — dari gambar terlihat angka berbeda
+      // Gunakan set standar: 10,20,30,40,50,60,70,80,90,100
+      return [10,20,30,40,50,60,70,80,90,100];
+    }
+
     function buildGrid(containerId, start, end) {
       const grid = document.getElementById(containerId);
       for (let i = start; i <= end; i++) {
         const cell = document.createElement('div');
         cell.className = 'core-cell';
+        const subNums = getSubNums(i);
+        const subHtml = subNums.map(n =>
+          `<div class="sub-num" data-meter="${i}" data-val="${n}" onclick="toggleSub(this)">${n}</div>`
+        ).join('');
         cell.innerHTML = `
           <div class="cell-num">${i}</div>
-          <input type="number" name="core_${i}" placeholder="-" step="0.01">
+          <div class="sub-nums">${subHtml}</div>
+          <input type="hidden" name="core_${i}" value="">
         `;
         grid.appendChild(cell);
+      }
+    }
+
+    function toggleSub(el) {
+      const meter = el.dataset.meter;
+      const val   = parseInt(el.dataset.val);
+      const isSelected = el.classList.contains('selected');
+
+      // Deselect semua sub-num dalam meter ini
+      document.querySelectorAll(`.sub-num[data-meter="${meter}"]`).forEach(s => s.classList.remove('selected'));
+
+      if (!isSelected) {
+        // Pilih yang diklik
+        el.classList.add('selected');
+        document.querySelector(`[name="core_${meter}"]`).value = val;
+      } else {
+        // Deselect → kosongkan
+        document.querySelector(`[name="core_${meter}"]`).value = '';
+      }
+    }
+
+    // Restore selected state dari data tersimpan
+    function restoreGrid(data) {
+      for (let i = 1; i <= 80; i++) {
+        const val = data[`core_${i}`];
+        if (!val) continue;
+        const btn = document.querySelector(`.sub-num[data-meter="${i}"][data-val="${val}"]`);
+        if (btn) btn.classList.add('selected');
+        const inp = document.querySelector(`[name="core_${i}"]`);
+        if (inp) inp.value = val;
       }
     }
 
@@ -125,6 +220,7 @@
     async function clearData() {
       if (confirm('Yakin ingin mengosongkan form?')) {
         clearForm('core-loss-form');
+        document.querySelectorAll('.sub-num.selected').forEach(el => el.classList.remove('selected'));
         showToast('Form dikosongkan');
       }
     }
