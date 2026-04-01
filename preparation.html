@@ -845,7 +845,7 @@
 
       if (sum3 === 0) {
         // Kosongkan semua Rec jika semua Total kosong
-        ['a10_rec','a2_rec','a06_rec','m06_rec'].forEach(function(f) {
+        ['a10_rec','a2_rec','a06_rec'].forEach(function(f) {
           const el = document.querySelector('[name="' + f + '_' + rowNum + '"]');
           if (el) { el.value = ''; el.dataset.autoRec = 'false'; }
         });
@@ -855,12 +855,11 @@
       // Jika sum < 500 ΓåÆ ├ù250, selain itu ΓåÆ ├ù500
       const mult = sum3 >= 1000 ? 1000 : (sum3 >= 500 ? 500 : 250);
 
-      // Hitung Rec untuk +10, +2-10, +0.6-2, +0.3-0.6 (bukan -0.3)
+      // Hitung Rec untuk +10, +2-10, +0.6-2 saja (bukan +0.3-0.6 dan -0.3)
       const tots = {
         a10_rec:  t10,
         a2_rec:   t2,
         a06_rec:  t06,
-        m06_rec:  tm06,
       };
 
       Object.entries(tots).forEach(([recField, totVal]) => {
