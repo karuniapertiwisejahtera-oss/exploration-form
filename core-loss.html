@@ -35,7 +35,7 @@
     .sub-num {
       width: 18px;
       height: 18px;
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 600;
       border: 1px solid #90a4ae;
       border-radius: 3px;
@@ -47,13 +47,46 @@
       color: #546e7a;
       user-select: none;
       transition: background 0.1s;
+      position: relative;
+      overflow: hidden;
     }
-    .sub-num.selected {
+    .sub-num.full {
       background: #1a6b4a;
       color: white;
       border-color: #1a6b4a;
     }
-    .sub-num:active { opacity: 0.7; }
+    /* Arsiran parsial: gradient dari bawah */
+    .sub-num .fill-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: #1a6b4a;
+      transition: height 0.15s;
+      z-index: 0;
+    }
+    .sub-num span { position: relative; z-index: 1; }
+    .sub-num.full .fill-bar { height: 100%; }
+    /* Input popup */
+    .sub-input-popup {
+      position: absolute; z-index: 999;
+      background: white; border: 1.5px solid #1a6b4a;
+      border-radius: 8px; padding: 8px 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column; gap: 6px;
+      min-width: 120px;
+    }
+    .sub-input-popup label { font-size: 10px; font-weight: 700; color: #1a6b4a; }
+    .sub-input-popup input {
+      border: 1.5px solid #a8d5b5; border-radius: 6px;
+      padding: 5px 8px; font-size: 14px; text-align: center;
+      width: 100%; box-sizing: border-box; outline: none;
+    }
+    .sub-input-popup .pop-btns { display: flex; gap: 4px; }
+    .sub-input-popup .pop-btns button {
+      flex: 1; padding: 5px; border: none; border-radius: 6px;
+      font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .pop-ok  { background: #1a6b4a; color: white; }
+    .pop-clr { background: #ffebee; color: #c62828; }
     /* Input tersembunyi */
     .core-cell input[type=hidden] { display: none; }
   </style>
@@ -154,9 +187,6 @@
   <script>
     // Sub-angka yang tersedia per meter (sesuai gambar)
     function getSubNums(meter) {
-      // Baris angka kecil: 10 20 30 40 50 60 70 80 90 100
-      // Tapi tiap meter punya variasi — dari gambar terlihat angka berbeda
-      // Gunakan set standar: 10,20,30,40,50,60,70,80,90,100
       return [10,20,30,40,50,60,70,80,90,100];
     }
 
@@ -167,7 +197,10 @@
         cell.className = 'core-cell';
         const subNums = getSubNums(i);
         const subHtml = subNums.map(n =>
-          `<div class="sub-num" data-meter="${i}" data-val="${n}" onclick="toggleSub(this)">${n}</div>`
+          `<div class="sub-num" data-meter="${i}" data-max="${n}" onclick="openSubInput(event,this)">
+            <div class="fill-bar" style="height:0%"></div>
+            <span>${n}</span>
+          </div>`
         ).join('');
         cell.innerHTML = `
           <div class="cell-num">${i}</div>
@@ -178,31 +211,112 @@
       }
     }
 
-    function toggleSub(el) {
+    let _activePopup = null;
+
+    function openSubInput(e, el) {
+      e.stopPropagation();
+      // Tutup popup lama
+      if (_activePopup) { _activePopup.remove(); _activePopup = null; }
+
       const meter = el.dataset.meter;
-      const val   = parseInt(el.dataset.val);
-      const isSelected = el.classList.contains('selected');
+      const max   = parseInt(el.dataset.max); // nilai max kotak ini (10,20,...,100)
+      const curVal = parseFloat(el.dataset.cur || 0);
 
-      // Deselect semua sub-num dalam meter ini
-      document.querySelectorAll(`.sub-num[data-meter="${meter}"]`).forEach(s => s.classList.remove('selected'));
+      const popup = document.createElement('div');
+      popup.className = 'sub-input-popup';
+      popup.innerHTML = `
+        <label>Kotak ${max-9}–${max} cm (0–10):</label>
+        <input type="number" id="pop-inp" min="0" max="10" step="0.5" value="${curVal > 0 ? curVal : ''}" placeholder="0–10">
+        <div class="pop-btns">
+          <button class="pop-clr" onclick="clearSub('${meter}','${max}')">✕ Hapus</button>
+          <button class="pop-ok"  onclick="applySub('${meter}','${max}')">✓ OK</button>
+        </div>
+      `;
 
-      if (!isSelected) {
-        // Pilih yang diklik
-        el.classList.add('selected');
-        document.querySelector(`[name="core_${meter}"]`).value = val;
-      } else {
-        // Deselect → kosongkan
-        document.querySelector(`[name="core_${meter}"]`).value = '';
+      // Posisi popup di dekat kotak
+      const rect = el.getBoundingClientRect();
+      popup.style.position = 'fixed';
+      popup.style.top  = (rect.bottom + 4) + 'px';
+      popup.style.left = Math.min(rect.left, window.innerWidth - 140) + 'px';
+      document.body.appendChild(popup);
+      _activePopup = popup;
+
+      const inp = document.getElementById('pop-inp');
+      inp.focus(); inp.select();
+      inp.addEventListener('keydown', function(ev) {
+        if (ev.key === 'Enter') applySub(meter, max);
+        if (ev.key === 'Escape') { popup.remove(); _activePopup = null; }
+      });
+
+      // Tutup saat klik di luar
+      setTimeout(() => {
+        document.addEventListener('click', function closeP(ev) {
+          if (!popup.contains(ev.target)) {
+            popup.remove(); _activePopup = null;
+            document.removeEventListener('click', closeP);
+          }
+        });
+      }, 10);
+    }
+
+    function applySub(meter, max) {
+      const inp = document.getElementById('pop-inp');
+      let val = parseFloat(inp.value);
+      if (isNaN(val) || val < 0) val = 0;
+      if (val > 10) val = 10;
+
+      const el = document.querySelector(`.sub-num[data-meter="${meter}"][data-max="${max}"]`);
+      if (el) {
+        el.dataset.cur = val;
+        const pct = (val / 10) * 100;
+        el.querySelector('.fill-bar').style.height = pct + '%';
+        el.classList.toggle('full', val >= 10);
+        // Warna teks: putih jika terisi >50%, gelap jika <50%
+        el.querySelector('span').style.color = pct > 50 ? 'white' : '#546e7a';
       }
+
+      // Update nilai total meter = sum semua sub-num
+      updateMeterTotal(meter);
+      if (_activePopup) { _activePopup.remove(); _activePopup = null; }
+    }
+
+    function clearSub(meter, max) {
+      const el = document.querySelector(`.sub-num[data-meter="${meter}"][data-max="${max}"]`);
+      if (el) {
+        el.dataset.cur = 0;
+        el.querySelector('.fill-bar').style.height = '0%';
+        el.classList.remove('full');
+        el.querySelector('span').style.color = '#546e7a';
+      }
+      updateMeterTotal(meter);
+      if (_activePopup) { _activePopup.remove(); _activePopup = null; }
+    }
+
+    function updateMeterTotal(meter) {
+      let total = 0;
+      document.querySelectorAll(`.sub-num[data-meter="${meter}"]`).forEach(el => {
+        total += parseFloat(el.dataset.cur || 0);
+      });
+      const inp = document.querySelector(`[name="core_${meter}"]`);
+      if (inp) inp.value = total > 0 ? total.toFixed(1) : '';
     }
 
     // Restore selected state dari data tersimpan
     function restoreGrid(data) {
       for (let i = 1; i <= 80; i++) {
-        const val = data[`core_${i}`];
+        const val = parseFloat(data[`core_${i}`]);
         if (!val) continue;
-        const btn = document.querySelector(`.sub-num[data-meter="${i}"][data-val="${val}"]`);
-        if (btn) btn.classList.add('selected');
+        // Distribusikan nilai ke kotak-kotak (dari kiri ke kanan, tiap kotak max 10)
+        let remaining = val;
+        document.querySelectorAll(`.sub-num[data-meter="${i}"]`).forEach(el => {
+          if (remaining <= 0) return;
+          const fill = Math.min(remaining, 10);
+          el.dataset.cur = fill;
+          el.querySelector('.fill-bar').style.height = (fill / 10 * 100) + '%';
+          el.classList.toggle('full', fill >= 10);
+          el.querySelector('span').style.color = fill > 5 ? 'white' : '#546e7a';
+          remaining -= fill;
+        });
         const inp = document.querySelector(`[name="core_${i}"]`);
         if (inp) inp.value = val;
       }
@@ -220,7 +334,12 @@
     async function clearData() {
       if (confirm('Yakin ingin mengosongkan form?')) {
         clearForm('core-loss-form');
-        document.querySelectorAll('.sub-num.selected').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.sub-num').forEach(el => {
+          el.dataset.cur = 0;
+          el.querySelector('.fill-bar').style.height = '0%';
+          el.classList.remove('full');
+          el.querySelector('span').style.color = '#546e7a';
+        });
         showToast('Form dikosongkan');
       }
     }
