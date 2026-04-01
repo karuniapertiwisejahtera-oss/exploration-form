@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <!-- v107 -->
+    <!-- v108 -->
   <title>Actual Run Form</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
@@ -43,7 +43,6 @@
     .run-table col.c-ttd     { width: 15%; }
 
     .run-table td input {
-      text-transform: uppercase;
       width: 100%;
       border: none;
       outline: none;
@@ -72,13 +71,8 @@
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2px 8px;
+      gap: 5px 8px;
       margin-bottom: 10px;
-      background: linear-gradient(135deg, #f0f9f4, #e8f5ee);
-      border: 1.5px solid #a8d5b5;
-      border-radius: 8px;
-      padding: 8px 10px;
-      box-shadow: 0 1px 4px rgba(26,107,74,0.08);
     }
 
     .info-row {
@@ -86,43 +80,30 @@
       align-items: center;
       gap: 3px;
       min-width: 0;
-      padding: 3px 6px;
-      border-radius: 4px;
-      transition: background 0.15s;
     }
-    .info-row:hover { background: #f0f7f4; }
 
     .info-row label {
       font-weight: 700;
       white-space: nowrap;
-      font-size: 12px;
+      font-size: 9.5px;
       flex-shrink: 0;
-      color: #1a6b4a;
     }
 
     .info-row input {
       flex: 1;
       border: none;
-      border-bottom: 2px solid #a8d5b5;
+      border-bottom: 1px solid #999;
       outline: none;
-      font-size: 12px;
-      padding: 2px 4px;
+      font-size: 9.5px;
+      padding: 2px 2px;
       background: transparent;
       min-width: 0;
-      text-transform: uppercase;
-      color: #1a2e22;
-      font-weight: 600;
       width: 0;
-    }
-    .info-row input:focus {
-      border-bottom-color: #1a6b4a;
-      background: #f0f7f4;
-      border-radius: 3px 3px 0 0;
     }
 
     /* date input lebih compact */
     .info-row input[type="date"] {
-      font-size: 11px;
+      font-size: 8.5px;
       padding: 1px 2px;
     }
 
@@ -131,37 +112,26 @@
       justify-content: flex-end;
       align-items: center;
       gap: 6px;
-      font-size: 10px;
-      font-weight: 600;
-      color: #1a6b4a;
+      font-size: 9.5px;
       margin-bottom: 8px;
     }
 
     .page-info input {
       width: 28px;
       border: none;
-      border-bottom: 2px solid #a8d5b5;
+      border-bottom: 1px solid #999;
       text-align: center;
-      font-size: 10px;
-      font-weight: 700;
-      color: #1a6b4a;
+      font-size: 9.5px;
       outline: none;
       padding: 1px 2px;
-      background: transparent;
     }
 
     .form-title {
       text-align: center;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
-      letter-spacing: 1px;
-      background: linear-gradient(135deg, #1a6b4a, #2e9e6e);
-      color: white;
-      padding: 10px 16px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-      box-shadow: 0 2px 8px rgba(26,107,74,0.25);
+      text-decoration: underline;
+      margin-bottom: 8px;
       color: #111;
     }
 
@@ -490,7 +460,8 @@
 
         let y = margin;
 
-        // ---- JUDUL: rata kiri, hijau bold, tanpa background ----
+        // ---- JUDUL ----
+        // Judul rata kiri, hijau bold, tanpa background
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(13);
         doc.setTextColor(26, 107, 74);
@@ -500,15 +471,19 @@
         doc.setTextColor(100, 100, 100);
         doc.text('PT. KASMAR POLEANG RAYA  |  Page ' + (page + 1) + ' of ' + totalPages, margin, y + 14);
         doc.setTextColor(0, 0, 0);
-        y += 17;
 
-        // ---- INFO BOX: border hijau, background hijau muda ----
-        const infoH = 26;
+        // Page X of Y
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Page : ${page + 1}   Of : ${totalPages}`, pageW - margin, y + 5, { align: 'right' });
+        y += 18;
+
+        // ---- HEADER INFO BOX ----
+        const infoH6 = 26;
         doc.setFillColor(240, 249, 244);
-        doc.rect(margin, y, contentW, infoH, 'F');
-        doc.setDrawColor(26, 107, 74);
-        doc.setLineWidth(0.5);
-        doc.rect(margin, y, contentW, infoH);
+        doc.rect(margin, y, contentW, infoH6, 'F');
+        doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
+        doc.rect(margin, y, contentW, infoH6);
         doc.setDrawColor(0, 0, 0);
 
         const leftLabels  = ['Hole ID', 'No. Lubang', 'Blok', 'Daerah'];
@@ -516,28 +491,25 @@
         const rightLabels = ['Mesin', 'Driller', 'Start', 'Complete'];
         const rightValues = [data.mesin, data.driller, data.start_date, data.complete_date];
 
-        const iy = y + 5; const rowH = 5.5;
-        const lx = margin + 4, vx = margin + 28;
-        const rx = pageW / 2 + 4, rvx = pageW / 2 + 28;
-
+        const iy6 = y + 4.5; const rH6 = 5.5;
         leftLabels.forEach((lbl, i) => {
           doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
-          doc.text(lbl, lx, iy + i * rowH);
+          doc.text(lbl, margin + 4, iy6 + i * rH6);
           doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
-          doc.text((leftValues[i] || '—').toString().toUpperCase(), vx, iy + i * rowH);
+          doc.text((leftValues[i] || '—').toString().toUpperCase(), margin + 28, iy6 + i * rH6);
           doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
-          doc.line(vx, iy + i * rowH + 1, pageW / 2 - 4, iy + i * rowH + 1);
+          doc.line(margin + 28, iy6 + i * rH6 + 1, pageW / 2 - 4, iy6 + i * rH6 + 1);
         });
         rightLabels.forEach((lbl, i) => {
           doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
-          doc.text(lbl, rx, iy + i * rowH);
+          doc.text(lbl, pageW / 2 + 4, iy6 + i * rH6);
           doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
-          doc.text((rightValues[i] || '—').toString().toUpperCase(), rvx, iy + i * rowH);
+          doc.text((rightValues[i] || '—').toString().toUpperCase(), pageW / 2 + 28, iy6 + i * rH6);
           doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
-          doc.line(rvx, iy + i * rowH + 1, pageW - margin - 2, iy + i * rowH + 1);
+          doc.line(pageW / 2 + 28, iy6 + i * rH6 + 1, pageW - margin - 2, iy6 + i * rH6 + 1);
         });
         doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
-        y += infoH + 4;
+        y += infoH6 + 4;
 
         // ---- TABEL HEADER ----
         doc.setLineWidth(0.3);
@@ -592,7 +564,7 @@
           ];
           cols.forEach((col, ci) => {
             doc.rect(x, y, col.w, rowH);
-            if (vals[ci]) doc.text(String(vals[ci]).toUpperCase(), x + col.w / 2, y + rowH / 2 + 1, { align: 'center' });
+            if (vals[ci]) doc.text(String(vals[ci]), x + col.w / 2, y + rowH / 2 + 1, { align: 'center' });
             x += col.w;
           });
           y += rowH;
@@ -604,30 +576,42 @@
           const signW = 50;
           const signH = 18;
 
-          // ---- TANDA TANGAN (style seragam) ----
-          const signW = 60;
+          // Driller
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
           doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
-          doc.text('Diisi oleh : Driller', margin, y);
-          doc.text('Disetujui oleh : Geos Lap', margin + signW + 20, y);
+          doc.text('DIISI OLEH : DRILLER', margin, y);
           doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
           doc.text((data.driller_nama || '').toUpperCase(), margin + signW / 2, y + 5, { align: 'center' });
-          doc.text((data.geos_nama || '').toUpperCase(), margin + signW + 20 + signW / 2, y + 5, { align: 'center' });
+          doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.3);
+          doc.rect(margin, y + 7, signW, signH);
 
-          // Gambar TTD jika ada
+          // Gambar TTD driller jika ada
           if (data.ttd_driller && data.ttd_driller.startsWith('data:image')) {
-            try { doc.addImage(data.ttd_driller, 'PNG', margin, y + 7, signW, 18); } catch(e) {}
-          }
-          if (data.ttd_geos && data.ttd_geos.startsWith('data:image')) {
-            try { doc.addImage(data.ttd_geos, 'PNG', margin + signW + 20, y + 7, signW, 18); } catch(e) {}
+            try {
+              doc.addImage(data.ttd_driller, 'PNG', margin + 2, y + 8, signW - 4, signH - 2);
+            } catch(e) {}
           }
 
-          doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
-          doc.line(margin, y + 26, margin + signW, y + 26);
-          doc.line(margin + signW + 20, y + 26, margin + signW + 20 + signW, y + 26);
-          doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(80, 80, 80);
-          doc.text('Nama: ' + (data.driller_nama || '').toUpperCase(), margin, y + 29);
-          doc.text('Nama: ' + (data.geos_nama || '').toUpperCase(), margin + signW + 20, y + 29);
-          doc.setDrawColor(0, 0, 0); doc.setTextColor(0, 0, 0);
+          // Geos Lap
+          const gx = margin + signW + 20;
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
+          doc.text('DISETUJUI OLEH : GEOS LAP', gx, y);
+          doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5);
+          doc.text((data.geos_nama || '').toUpperCase(), gx + signW / 2, y + 5, { align: 'center' });
+          doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.3);
+          doc.rect(gx, y + 7, signW, signH);
+
+          if (data.ttd_geos && data.ttd_geos.startsWith('data:image')) {
+            try {
+              doc.addImage(data.ttd_geos, 'PNG', gx + 2, y + 8, signW - 4, signH - 2);
+            } catch(e) {}
+          }
+
+          // Garis bawah nama
+          doc.setLineWidth(0.2);
+          doc.line(margin, y + signH + 10, margin + signW, y + signH + 10);
+          doc.line(gx, y + signH + 10, gx + signW, y + signH + 10);
         }
       }
 
