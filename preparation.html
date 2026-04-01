@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Sample Preparation Form</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     .prep-wrap {
       width: 100%; overflow: auto; -webkit-overflow-scrolling: touch;
@@ -1783,8 +1785,102 @@
       const a    = document.createElement('a');
       a.href = url; a.download = fileName; a.click();
       URL.revokeObjectURL(url);
-      showToast('Γ£ô ' + fileName + ' didownload! Menyiapkan PDF...');
-      setTimeout(function() { window.print(); }, 800);
+      showToast('✓ ' + fileName + ' didownload! Menyiapkan PDF...');
+      setTimeout(function() { generatePrepPDF(); }, 800);
+    }
+
+    function generatePrepPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageW = doc.internal.pageSize.getWidth();
+      const margin = 8;
+      const contentW = pageW - margin * 2;
+
+      const U = s => (s || '').toString().toUpperCase();
+      const holeId   = U(document.getElementById('h-holeid').value)   || '—';
+      const sampler  = U(document.getElementById('h-sampler').value)  || '—';
+      const sheet    = U(document.getElementById('h-sheet').value)    || '—';
+      const deposit  = U(document.getElementById('h-deposit').value)  || '—';
+      const depth    = U(document.getElementById('h-depth').value)    || '—';
+      const dateStart= document.getElementById('h-date-start').value  || '—';
+      const dateEnd  = document.getElementById('h-date-finish').value || '—';
+
+      let y = margin;
+
+      // ---- JUDUL ----
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(26, 107, 74);
+      doc.text('SAMPLE PREPARATION FORM', margin, y + 8);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 100, 100);
+      doc.text('PT. KASMAR POLEANG RAYA', margin, y + 14);
+      doc.setTextColor(0, 0, 0);
+      y += 17;
+
+      // ---- INFO BOX ----
+      const infoH = 18;
+      doc.setFillColor(240, 249, 244);
+      doc.rect(margin, y, contentW, infoH, 'F');
+      doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
+      doc.rect(margin, y, contentW, infoH);
+      doc.setDrawColor(0, 0, 0);
+
+      const col1 = margin + 4, col2 = margin + 40, col3 = pageW / 2 + 4, col4 = pageW / 2 + 44;
+      const iy = y + 4.5, rH = 4.5;
+      [['HOLE ID', holeId], ['SHEET/GRID NO', sheet], ['DEPOSIT', deposit], ['TOTAL DEPTH', depth + ' m']].forEach(([lbl, val], i) => {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 107, 74);
+        doc.text(lbl, col1, iy + i * rH);
+        doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
+        doc.text(val, col2, iy + i * rH);
+        doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
+        doc.line(col2, iy + i * rH + 0.8, pageW / 2 - 4, iy + i * rH + 0.8);
+      });
+      [['SAMPLER', sampler], ['DATE START', dateStart], ['DATE FINISH', dateEnd]].forEach(([lbl, val], i) => {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(26, 107, 74);
+        doc.text(lbl, col3, iy + i * rH);
+        doc.setFont('helvetica', 'bold'); doc.setTextColor(20, 20, 20);
+        doc.text(val, col4, iy + i * rH);
+        doc.setDrawColor(168, 213, 181); doc.setLineWidth(0.3);
+        doc.line(col4, iy + i * rH + 0.8, pageW - margin - 2, iy + i * rH + 0.8);
+      });
+      doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
+      y += infoH + 4;
+
+      // ---- SECTION TITLE ----
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(26, 107, 74);
+      doc.text('DATA SAMPEL', margin, y);
+      doc.setDrawColor(26, 107, 74); doc.setLineWidth(0.5);
+      doc.line(margin, y + 1.5, margin + contentW, y + 1.5);
+      doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
+      y += 5;
+
+      // ---- TABEL DATA ----
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      const head = [['From','To','Len','Rec','Grain','Core Wt','From Cum','To Cum','Samp No','Dry Wt','Sample ID','+10 Tot','+10 Rec','+2 Tot','+2 Rec','+0.6 Tot','+0.6 Rec','+0.3-0.6 Tot','+0.3-0.6 Rec','-0.3 Tot','-0.3 Rec','Remarks']];
+      const body = [];
+      domRows.forEach(tr => {
+        const n = tr.dataset.row;
+        const g = (name) => { const el = document.querySelector('[name="'+name+'_'+n+'"]'); return el ? (el.value || '').toUpperCase() : ''; };
+        body.push([
+          g('from'), g('to'), g('len'), g('rec'), g('grain'), g('core_wt'),
+          g('from_cum'), g('to_cum'), g('samp_no'), g('dry_wt'), g('sample_id'),
+          g('a10_tot'), g('a10_rec'), g('a2_tot'), g('a2_rec'),
+          g('a06_tot'), g('a06_rec'), g('m06_tot'), g('m06_rec'),
+          g('p03_tot'), g('p03_rec'), g('remarks')
+        ]);
+      });
+
+      doc.autoTable({
+        head: head, body: body,
+        startY: y, margin: { left: margin, right: margin },
+        styles: { fontSize: 6, cellPadding: 1.2, halign: 'center', valign: 'middle' },
+        headStyles: { fillColor: [26, 107, 74], textColor: 255, fontStyle: 'bold', fontSize: 6.5 },
+        alternateRowStyles: { fillColor: [245, 252, 248] },
+        tableLineColor: [200, 200, 200], tableLineWidth: 0.2,
+        columnStyles: { 10: { halign: 'left' }, 21: { halign: 'left', cellWidth: 18 } }
+      });
+
+      const filename = 'Prep_' + holeId.replace(/\s+/g,'_') + '.pdf';
+      doc.save(filename);
+      showToast('✓ ' + filename + ' berhasil didownload!');
     }
 
     // ===== RESTORE MERGE VISIBILITY SETELAH LOAD =====
