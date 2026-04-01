@@ -475,6 +475,7 @@
     }
 
     // ===== FORMAT WAKTU OTOMATIS =====
+    function fmtWaktu(el) {
       let v = el.value.replace(/\D/g, '').slice(0, 4);
       if (v.length >= 3) v = v.slice(0,2) + ':' + v.slice(2);
       el.value = v;
