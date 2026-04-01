@@ -159,3 +159,67 @@ function updateOnlineStatus() {
 
 window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
+
+// ===== TAB BAR (Sheet Navigator) =====
+const FORM_TABS = [
+  { label: 'Actual Run',   url: 'actual-run.html'  },
+  { label: 'Preparation',  url: 'preparation.html' },
+  { label: 'Daily Sheet',  url: 'daily-sheet.html' },
+  { label: 'Core Loss',    url: 'core-loss.html'   },
+  { label: 'Logging',      url: 'logging.html'     },
+  { label: 'Inspection',   url: 'inspection.html'  },
+  { label: 'P5M',          url: 'p5m.html'         },
+];
+
+function initTabBar() {
+  // Hanya tampil di halaman form (bukan index/login/silica)
+  const cur = window.location.pathname.split('/').pop();
+  const isForm = FORM_TABS.some(t => t.url === cur);
+  if (!isForm) return;
+
+  const bar = document.createElement('div');
+  bar.id = 'tab-bar';
+  bar.style.cssText = [
+    'position:fixed', 'bottom:52px', 'left:0', 'right:0', 'z-index:900',
+    'display:flex', 'overflow-x:auto', 'background:#1a2e22',
+    'border-top:2px solid #2e9e6e', '-webkit-overflow-scrolling:touch',
+    'scrollbar-width:none'
+  ].join(';');
+
+  FORM_TABS.forEach(tab => {
+    const btn = document.createElement('button');
+    const isActive = tab.url === cur;
+    btn.textContent = tab.label;
+    btn.style.cssText = [
+      'flex-shrink:0', 'padding:6px 14px', 'border:none', 'cursor:pointer',
+      'font-size:11px', 'font-weight:' + (isActive ? '700' : '500'),
+      'white-space:nowrap', 'border-right:1px solid #2e4a38',
+      'background:' + (isActive ? '#2e9e6e' : 'transparent'),
+      'color:' + (isActive ? '#fff' : '#a8d5b5'),
+      'border-top:' + (isActive ? '2px solid #7fffd4' : '2px solid transparent'),
+      'transition:background 0.15s'
+    ].join(';');
+
+    if (!isActive) {
+      btn.addEventListener('click', () => { window.location.href = tab.url; });
+      btn.addEventListener('mouseover', () => { btn.style.background = '#243d2e'; btn.style.color = '#fff'; });
+      btn.addEventListener('mouseout',  () => { btn.style.background = 'transparent'; btn.style.color = '#a8d5b5'; });
+    }
+    bar.appendChild(btn);
+  });
+
+  // Scroll tab aktif ke tengah
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.appendChild(bar);
+    // Adjust action-bar margin
+    const actionBar = document.querySelector('.action-bar');
+    if (actionBar) actionBar.style.bottom = '0';
+    bar.style.bottom = (actionBar ? actionBar.offsetHeight : 52) + 'px';
+
+    // Scroll active tab into view
+    const activeBtn = bar.querySelector('[style*="2e9e6e"]');
+    if (activeBtn) activeBtn.scrollIntoView({ inline: 'center', block: 'nearest' });
+  });
+}
+
+initTabBar();
