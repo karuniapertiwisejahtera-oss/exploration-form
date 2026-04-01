@@ -6,96 +6,110 @@
   <title>Logging Form</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .log-row {
-      background: #fafafa;
-      border: 1.5px solid #e0e0e0;
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 10px;
+    .log-section {
+      background: #fff; border: 1.5px solid #e0e0e0;
+      border-radius: 10px; padding: 12px; margin-bottom: 10px;
     }
-    .log-row-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
+    .log-section-title {
+      font-size: 11px; font-weight: 700; color: #1a6b4a;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 1.5px solid #a8d5b5; padding-bottom: 4px; margin-bottom: 8px;
     }
-    .log-row-num {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-    .btn-del-row {
-      background: #fee;
-      border: 1px solid #fcc;
-      color: #c00;
-      border-radius: 6px;
-      padding: 3px 8px;
-      font-size: 11px;
-      cursor: pointer;
-    }
+    .log-entry { background: #f8fffe; border: 1.5px solid #c8e6c9; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .log-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .log-entry-num { font-size: 12px; font-weight: 700; color: #1a6b4a; }
+    .btn-del-entry { background: #ffebee; border: 1px solid #ffcdd2; color: #c62828; border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer; }
+    .calc-btn { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1a6b4a; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: 600; }
+    .hole-id-locked { background: #f5f5f5; color: #888; font-style: italic; }
   </style>
 </head>
 <body>
   <div class="page-header">
     <button class="btn-back" onclick="goBack()">←</button>
-    <h1>Logging Form</h1>
+    <h1>Form Logging</h1>
   </div>
 
   <div class="form-container">
     <form id="logging-form">
-      <!-- Header -->
+
+      <!-- BOREHOLE INFORMATION -->
       <div class="form-section">
+        <div class="form-section-title">Borehole Information</div>
         <div class="form-row">
           <div class="form-group">
-            <label>Hole ID</label>
-            <input type="text" name="hole_id" placeholder="Hole ID">
+            <label>Hole ID *</label>
+            <input type="text" name="hole_id" id="hole-id-input" placeholder="Hole ID" oninput="syncHoleId()">
           </div>
           <div class="form-group">
-            <label>Tanggal</label>
-            <input type="date" name="tanggal">
+            <label>Date Start *</label>
+            <input type="date" name="date_start">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Geologist</label>
-            <input type="text" name="geologist" placeholder="Nama Geologist">
+            <label>Logger *</label>
+            <input type="text" name="logger" placeholder="Nama Logger">
           </div>
           <div class="form-group">
-            <label>Proyek</label>
-            <input type="text" name="proyek" placeholder="Nama Proyek">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Koordinat X</label>
-            <input type="number" name="coord_x" placeholder="0.000" step="0.001">
-          </div>
-          <div class="form-group">
-            <label>Koordinat Y</label>
-            <input type="number" name="coord_y" placeholder="0.000" step="0.001">
+            <label>Compartemen *</label>
+            <input type="text" name="compartemen" placeholder="Compartemen">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Elevasi (m)</label>
-            <input type="number" name="elevasi" placeholder="0">
+            <label>Easting</label>
+            <input type="number" name="easting" placeholder="0.000" step="0.001">
           </div>
           <div class="form-group">
-            <label>Azimuth (°)</label>
-            <input type="number" name="azimuth" placeholder="0">
+            <label>Northing</label>
+            <input type="number" name="northing" placeholder="0.000" step="0.001">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Elevation</label>
+            <input type="number" name="elevation" placeholder="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Drilling *</label>
+            <select name="drilling">
+              <option value="">Pilih drilling...</option>
+              <option>KPR-01</option>
+              <option>KPR-02</option>
+              <option>KPR-03</option>
+              <option>KPR-04</option>
+            </select>
           </div>
         </div>
       </div>
 
-      <!-- Log Entries -->
+      <!-- LOG ENTRIES -->
       <div class="form-section">
-        <div class="form-section-title">Data Log Geologi</div>
+        <div class="form-section-title">Data Log Interval</div>
         <div id="log-entries"></div>
-        <button type="button" onclick="addLogEntry()" style="width:100%;background:var(--teal);color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;">
+        <button type="button" onclick="addLogEntry()" style="width:100%;background:#1a6b4a;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;">
           + Tambah Interval
         </button>
       </div>
+
     </form>
+  </div>
+
+  <!-- Calculator Modal -->
+  <div id="calc-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:14px;padding:20px;width:88%;max-width:340px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <span style="font-weight:700;font-size:14px;color:#1a6b4a;">Calculator Core Recovery</span>
+        <button onclick="closeCalc()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">×</button>
+      </div>
+      <div class="form-group"><label>Panjang Core (m)</label><input type="number" id="calc-core" step="0.01" placeholder="0.00" oninput="calcRecovery()"></div>
+      <div class="form-group"><label>Interval (m)</label><input type="number" id="calc-interval" step="0.01" placeholder="0.00" oninput="calcRecovery()"></div>
+      <div class="form-group"><label>Hasil (%)</label><input type="number" id="calc-result" readonly style="background:#f5f5f5;font-weight:700;color:#1a6b4a;"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="closeCalc()" style="flex:1;padding:10px;border:1px solid #ccc;border-radius:8px;background:#f5f5f5;cursor:pointer;">Cancel</button>
+        <button onclick="applyCalc()" style="flex:1;padding:10px;border:none;border-radius:8px;background:#1a6b4a;color:white;font-weight:700;cursor:pointer;">Apply</button>
+      </div>
+    </div>
   </div>
 
   <div class="action-bar">
@@ -104,72 +118,118 @@
     <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
   </div>
 
-  <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
   <script>
     let entryCount = 0;
+    let calcTargetEntry = null;
+
+    // Dropdown options
+    const ROCK_CODE   = ['CMR','BRC','SS','CLS','SLT'];
+    const GRAIN_SIZE  = ['GVL','CS','FS','CLY'];
+    const SORTASI     = ['PS','MS','WS'];
+    const ROUNDNESS   = ['WRD','RD','SRD','SAG','AG'];
+    const COLOUR      = ['TRP','WHT','BRN','RED','YLW','BLU','GRY','GRN','BLK','PUR'];
+    const STRUCTURE   = ['BDD','GBD','LMN','IGM','LCS','IMB','CRB','MSV'];
+    const FRAGMENT    = ['CMR','BRC','SS','QRT','CLS','SLT','LMS','SCH','SHL'];
+    const MATRIX      = ['CMR','BRC','SS','QRT','CLS','SLT','LMS','SCH','SHL'];
+    const CEMENT      = ['SLC','CBT','IO'];
+    const FABRIC      = ['OPN','CLS'];
+    const COMPACTION  = ['HRD','SFT','FRB','SGY'];
+    const MINERAL     = ['QRT','ILM','MGT','HMT','PRT','ZRC','TRM','OLV','PY','GRT','APT','EPD','ZST','KYN','ADS','SLM','HBL','MSK','BTT','PL','CAL','CLY','OR','DLM','GTH','RTL','ANS','QZ','MNG'];
+    const DEPOSITE    = ['BLOCK 1','BLOCK 2','BLOCK 3'];
+
+    function sel(name, opts, n) {
+      return `<select name="${name}_${n}" style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:8px;font-size:13px;background:white;">
+        <option value="">add items...</option>
+        ${opts.map(o=>`<option>${o}</option>`).join('')}
+      </select>`;
+    }
+
+    function syncHoleId() {
+      const val = document.getElementById('hole-id-input').value;
+      document.querySelectorAll('.hole-id-display').forEach(el => el.value = val);
+    }
 
     function addLogEntry() {
       entryCount++;
+      const n = entryCount;
+      const holeId = document.getElementById('hole-id-input')?.value || '';
       const container = document.getElementById('log-entries');
       const div = document.createElement('div');
-      div.className = 'log-row';
-      div.id = `entry-${entryCount}`;
+      div.className = 'log-entry';
+      div.id = `entry-${n}`;
       div.innerHTML = `
-        <div class="log-row-header">
-          <span class="log-row-num">Interval #${entryCount}</span>
-          <button type="button" class="btn-del-row" onclick="removeEntry(${entryCount})">🗑 Hapus</button>
+        <div class="log-entry-header">
+          <span class="log-entry-num">Interval #${n}</span>
+          <button type="button" class="btn-del-entry" onclick="removeEntry(${n})">🗑 Hapus</button>
         </div>
-        <div class="form-row">
+
+        <!-- HOLE ID -->
+        <div class="log-section">
+          <div class="log-section-title">Hole ID</div>
           <div class="form-group">
-            <label>Dari (m)</label>
-            <input type="number" name="log_${entryCount}_dari" placeholder="0" step="0.1">
+            <label>HOLE ID 🔒 (Tidak dapat diubah)</label>
+            <input type="text" name="log_${n}_hole_id" class="hole-id-display hole-id-locked" value="${holeId}" readonly>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>FROM</label>
+              <input type="number" name="log_${n}_from" placeholder="0.00" step="0.01">
+            </div>
+            <div class="form-group">
+              <label>TO</label>
+              <input type="number" name="log_${n}_to" placeholder="0.00" step="0.01">
+            </div>
           </div>
           <div class="form-group">
-            <label>Ke (m)</label>
-            <input type="number" name="log_${entryCount}_ke" placeholder="0" step="0.1">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Litologi</label>
-            <select name="log_${entryCount}_litologi">
-              <option value="">Pilih</option>
-              <option>Tanah Penutup</option>
-              <option>Lempung</option>
-              <option>Pasir</option>
-              <option>Kerikil</option>
-              <option>Batupasir</option>
-              <option>Batulempung</option>
-              <option>Batugamping</option>
-              <option>Granit</option>
-              <option>Basalt</option>
-              <option>Silika</option>
-              <option>Lainnya</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Warna</label>
-            <input type="text" name="log_${entryCount}_warna" placeholder="Warna batuan">
+            <label>CORE RECOVERY <button type="button" class="calc-btn" onclick="openCalc(${n})">⚙ Hitung</button></label>
+            <input type="number" name="log_${n}_recovery" id="recovery_${n}" placeholder="0.00" step="0.01">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>RQD (%)</label>
-            <input type="number" name="log_${entryCount}_rqd" placeholder="0" min="0" max="100">
+
+        <!-- ROCK & GRAIN -->
+        <div class="log-section">
+          <div class="log-section-title">Rock & Grain</div>
+          <div class="form-row">
+            <div class="form-group"><label>ROCK CODE</label>${sel('log_'+n+'_rock_code', ROCK_CODE, n)}</div>
+            <div class="form-group"><label>GRAIN SIZE</label>${sel('log_'+n+'_grain_size', GRAIN_SIZE, n)}</div>
           </div>
-          <div class="form-group">
-            <label>Recovery (%)</label>
-            <input type="number" name="log_${entryCount}_recovery" placeholder="0" min="0" max="100">
+          <div class="form-row">
+            <div class="form-group"><label>% MATERIAL >1 CM</label><input type="number" name="log_${n}_material_pct" placeholder="0" min="0" max="100"></div>
+            <div class="form-group"><label>SORTASI</label>${sel('log_'+n+'_sortasi', SORTASI, n)}</div>
           </div>
         </div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Deskripsi</label>
-            <textarea name="log_${entryCount}_deskripsi" placeholder="Deskripsi litologi, struktur, mineralisasi..."></textarea>
+
+        <!-- ROUNDNESS & STRUCTURE -->
+        <div class="log-section">
+          <div class="log-section-title">Roundness & Structure</div>
+          <div class="form-row">
+            <div class="form-group"><label>ROUNDNESS</label>${sel('log_'+n+'_roundness', ROUNDNESS, n)}</div>
+            <div class="form-group"><label>COLOUR</label>${sel('log_'+n+'_colour', COLOUR, n)}</div>
           </div>
+          <div class="form-row">
+            <div class="form-group"><label>STRUCTURE</label>${sel('log_'+n+'_structure', STRUCTURE, n)}</div>
+            <div class="form-group"><label>FRAGMENT</label>${sel('log_'+n+'_fragment', FRAGMENT, n)}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>MATRIX</label>${sel('log_'+n+'_matrix', MATRIX, n)}</div>
+            <div class="form-group"><label>CEMENT</label>${sel('log_'+n+'_cement', CEMENT, n)}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>FABRIC</label>${sel('log_'+n+'_fabric', FABRIC, n)}</div>
+            <div class="form-group"><label>COMPACTION</label>${sel('log_'+n+'_compaction', COMPACTION, n)}</div>
+          </div>
+        </div>
+
+        <!-- MINERAL -->
+        <div class="log-section">
+          <div class="log-section-title">Mineral</div>
+          <div class="form-group"><label>MINERAL PRIMER</label>${sel('log_'+n+'_min1', MINERAL, n)}</div>
+          <div class="form-group"><label>MINERAL SEKUNDER</label>${sel('log_'+n+'_min2', MINERAL, n)}</div>
+          <div class="form-group"><label>MINERAL TERSIER</label>${sel('log_'+n+'_min3', MINERAL, n)}</div>
+          <div class="form-group"><label>DEPOSITE</label>${sel('log_'+n+'_deposite', DEPOSITE, n)}</div>
+          <div class="form-group"><label>COMMENT</label><textarea name="log_${n}_comment" placeholder="Keterangan tambahan..." rows="2" style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:8px;font-size:13px;resize:vertical;"></textarea></div>
         </div>
       `;
       container.appendChild(div);
@@ -180,6 +240,30 @@
       if (el) el.remove();
     }
 
+    // ===== CALCULATOR =====
+    function openCalc(n) {
+      calcTargetEntry = n;
+      document.getElementById('calc-core').value = '';
+      document.getElementById('calc-interval').value = '';
+      document.getElementById('calc-result').value = '';
+      document.getElementById('calc-modal').style.display = 'flex';
+    }
+    function closeCalc() { document.getElementById('calc-modal').style.display = 'none'; }
+    function calcRecovery() {
+      const core = parseFloat(document.getElementById('calc-core').value) || 0;
+      const intv = parseFloat(document.getElementById('calc-interval').value) || 0;
+      document.getElementById('calc-result').value = intv > 0 ? ((core / intv * 100).toFixed(2)) : '';
+    }
+    function applyCalc() {
+      const result = document.getElementById('calc-result').value;
+      if (calcTargetEntry && result) {
+        const el = document.getElementById(`recovery_${calcTargetEntry}`);
+        if (el) el.value = result;
+      }
+      closeCalc();
+    }
+
+    // ===== SAVE =====
     function saveData() {
       const data = getFormData('logging-form');
       data.entry_count = entryCount;
@@ -187,43 +271,39 @@
       showToast('Data Logging tersimpan!');
     }
 
+    // ===== CLEAR =====
     function clearData() {
       clearForm('logging-form');
       document.getElementById('log-entries').innerHTML = '';
       entryCount = 0;
+      addLogEntry(); addLogEntry();
       showToast('Form dikosongkan');
     }
 
-    async function uploadData() {
-      saveData();
-      const json = JSON.stringify(DB.getAll('logging'), null, 2);
-      await uploadToDrive(`logging_${new Date().toISOString().slice(0,10)}.json`, json);
-    }
-
+    // ===== SUBMIT =====
     function submitData() {
       saveData();
       const data = getFormData('logging-form');
       const hid  = (data.hole_id || 'unknown').replace(/\s+/g,'_');
-      const tgl  = data.tanggal || new Date().toISOString().slice(0,10);
+      const tgl  = data.date_start || new Date().toISOString().slice(0,10);
       const filename = `Logging_${hid}_${tgl}.xls`;
 
-      let rows = '<tr><th>No</th><th>Dari (m)</th><th>Ke (m)</th><th>Litologi</th><th>Warna</th><th>RQD (%)</th><th>Recovery (%)</th><th>Deskripsi</th></tr>';
+      const headers = ['No','Hole ID','From','To','Recovery','Rock Code','Grain Size','% Mat >1cm','Sortasi','Roundness','Colour','Structure','Fragment','Matrix','Cement','Fabric','Compaction','Min Primer','Min Sekunder','Min Tersier','Deposite','Comment'];
+      let rows = '<tr>' + headers.map(h=>`<th>${h}</th>`).join('') + '</tr>';
       for (let i = 1; i <= entryCount; i++) {
+        const g = f => (data[`log_${i}_${f}`] || '').toUpperCase();
         rows += `<tr>
-          <td>${i}</td>
-          <td>${data['log_'+i+'_dari']||''}</td>
-          <td>${data['log_'+i+'_ke']||''}</td>
-          <td>${data['log_'+i+'_litologi']||''}</td>
-          <td>${data['log_'+i+'_warna']||''}</td>
-          <td>${data['log_'+i+'_rqd']||''}</td>
-          <td>${data['log_'+i+'_recovery']||''}</td>
-          <td>${data['log_'+i+'_deskripsi']||''}</td>
+          <td>${i}</td><td>${g('hole_id')}</td><td>${g('from')}</td><td>${g('to')}</td><td>${g('recovery')}</td>
+          <td>${g('rock_code')}</td><td>${g('grain_size')}</td><td>${g('material_pct')}</td><td>${g('sortasi')}</td>
+          <td>${g('roundness')}</td><td>${g('colour')}</td><td>${g('structure')}</td><td>${g('fragment')}</td>
+          <td>${g('matrix')}</td><td>${g('cement')}</td><td>${g('fabric')}</td><td>${g('compaction')}</td>
+          <td>${g('min1')}</td><td>${g('min2')}</td><td>${g('min3')}</td><td>${g('deposite')}</td><td>${g('comment')}</td>
         </tr>`;
       }
 
-      const info = `<tr><td colspan="8"><b>Hole ID:</b> ${data.hole_id||''} | <b>Tanggal:</b> ${data.tanggal||''} | <b>Geologist:</b> ${data.geologist||''} | <b>Proyek:</b> ${data.proyek||''}</td></tr>
-        <tr><td colspan="8"><b>Koordinat X:</b> ${data.coord_x||''} | <b>Y:</b> ${data.coord_y||''} | <b>Elevasi:</b> ${data.elevasi||''} m | <b>Azimuth:</b> ${data.azimuth||''}°</td></tr>
-        <tr><td colspan="8"></td></tr>`;
+      const info = `<tr><td colspan="22"><b>Hole ID:</b> ${data.hole_id||''} | <b>Date Start:</b> ${data.date_start||''} | <b>Logger:</b> ${data.logger||''} | <b>Compartemen:</b> ${data.compartemen||''} | <b>Drilling:</b> ${data.drilling||''}</td></tr>
+        <tr><td colspan="22"><b>Easting:</b> ${data.easting||''} | <b>Northing:</b> ${data.northing||''} | <b>Elevation:</b> ${data.elevation||''}</td></tr>
+        <tr><td colspan="22"></td></tr>`;
 
       const html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>${info}${rows}</table></body></html>`;
       const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
