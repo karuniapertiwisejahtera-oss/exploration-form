@@ -18,13 +18,32 @@
       background: #fff;
       text-align: center;
     }
+    .cell-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
     .cell-num {
       font-size: 22px;
       font-weight: 800;
       color: #1a2e22;
       line-height: 1;
-      margin-bottom: 4px;
     }
+    .cell-loss {
+      font-size: 10px;
+      font-weight: 700;
+      color: #e53935;
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      border-radius: 4px;
+      padding: 1px 4px;
+      min-width: 28px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .cell-loss.zero { color: #1a6b4a; background: #e8f5e9; border-color: #a5d6a7; }
     /* Sub-angka kecil */
     .sub-nums {
       display: flex;
@@ -203,7 +222,10 @@
           </div>`
         ).join('');
         cell.innerHTML = `
-          <div class="cell-num">${i}</div>
+          <div class="cell-top">
+            <div class="cell-num">${i}</div>
+            <div class="cell-loss zero" id="loss-${i}">100</div>
+          </div>
           <div class="sub-nums">${subHtml}</div>
           <input type="hidden" name="core_${i}" value="">
         `;
@@ -299,6 +321,14 @@
       });
       const inp = document.querySelector(`[name="core_${meter}"]`);
       if (inp) inp.value = total > 0 ? total.toFixed(1) : '';
+
+      // Update loss display (100 - total terarsir)
+      const lossEl = document.getElementById(`loss-${meter}`);
+      if (lossEl) {
+        const loss = Math.max(0, 100 - total);
+        lossEl.textContent = loss % 1 === 0 ? loss : loss.toFixed(1);
+        lossEl.className = 'cell-loss' + (loss === 0 ? ' zero' : '');
+      }
     }
 
     // Restore selected state dari data tersimpan
@@ -340,6 +370,11 @@
           el.classList.remove('full');
           el.querySelector('span').style.color = '#546e7a';
         });
+        // Reset semua loss display
+        for (let i = 1; i <= 80; i++) {
+          const lossEl = document.getElementById(`loss-${i}`);
+          if (lossEl) { lossEl.textContent = '100'; lossEl.className = 'cell-loss zero'; }
+        }
         showToast('Form dikosongkan');
       }
     }
