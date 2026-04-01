@@ -236,12 +236,14 @@
         </div>
         <div class="sign-grid">
           <div class="sign-box">
-            <label>Diisi oleh : Driller / Asisten</label>
+            <label>Diisi oleh : Driller / Sampler</label>
+            <div style="border:1.5px solid #a8d5b5;border-radius:4px;height:60px;margin:6px 0;background:#f9fffe;"></div>
             <input type="text" name="sign_driller_nama" placeholder="Nama">
             <input type="text" name="sign_driller_id" placeholder="No ID">
           </div>
           <div class="sign-box">
             <label>Disetujui oleh : Supervisor / Geost</label>
+            <div style="border:1.5px solid #a8d5b5;border-radius:4px;height:60px;margin:6px 0;background:#f9fffe;"></div>
             <input type="text" name="sign_supv_nama" placeholder="Nama">
             <input type="text" name="sign_supv_id" placeholder="No ID">
           </div>
@@ -596,7 +598,7 @@
       const signW = 75;
       const gx = margin + signW + 10;
       doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(26, 107, 74);
-      doc.text('DIISI OLEH : DRILLER / ASSISTANT', margin, y);
+      doc.text('DIISI OLEH : DRILLER / SAMPLER', margin, y);
       doc.text('DISETUJUI OLEH : SUPERVISOR / GEOST', gx, y);
       doc.setTextColor(0, 0, 0);
       doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.3);
