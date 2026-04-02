@@ -1976,6 +1976,8 @@
       y += infoH + 4;
 
       // ---- HEADER TABEL MULTI-LEVEL (seperti di form) ----
+      function drawTableHeader(startY) {
+        let y = startY;
       // Warna grup sesuai form
       const C10   = [179, 229, 252]; // +10 mm - biru muda
       const C2    = [200, 230, 201]; // +2-10 mm - hijau muda
@@ -2088,6 +2090,7 @@
       });
 
       doc.setTextColor(0, 0, 0); doc.setDrawColor(0, 0, 0);
+      } // end drawTableHeader
       y += totalHdrH;
 
       // ---- DATA ROWS ----
@@ -2110,6 +2113,9 @@
         if (y + rowH > doc.internal.pageSize.getHeight() - margin) {
           doc.addPage();
           y = margin;
+          // Gambar ulang header tabel di halaman baru
+          drawTableHeader(y);
+          y += totalHdrH;
         }
 
         // Background alternating
