@@ -1995,7 +1995,7 @@
         { lbl: 'Grain',     w: 9  }, { lbl: 'Core Wt',  w: 11 },
         { lbl: 'From Cum',  w: 11 }, { lbl: 'To Cum',   w: 11 },
         { lbl: 'Samp No',   w: 11 }, { lbl: 'Dry Wt',   w: 11 },
-        { lbl: 'Sample ID', w: 20 },
+        { lbl: 'Sample ID', w: 22 },
       ];
       const fracGroups = [
         { lbl: '+10 mm',      color: C10,  sub: ['Tot','Rec','Sample ID'] },
@@ -2004,8 +2004,8 @@
         { lbl: '+0.3-0.6 mm', color: Cm06, sub: ['Tot','Rec','Sample ID'] },
         { lbl: '-0.3 mm',     color: Cp03, sub: ['Tot','Rec','Sample ID'] },
       ];
-      const subW = 8;
-      const remW = 16;
+      const subW = 9;
+      const remW = 20;
 
       function drawTableHeader(startY) {
         let y = startY;
