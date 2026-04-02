@@ -1699,7 +1699,7 @@
         });
         const grpDryWt = parseFloat(get('dry_wt', firstRow)) || 0;
         const grpDryWtKg = grpDryWt > 0 ? parseFloat((grpDryWt / 1000).toFixed(6)) : '';
-        const grpDevSieve = (grpTotalWet > 0 && grpDryWt > 0) ? parseFloat(((grpTotalWet - grpDryWt) / 1000).toFixed(6)) : '';
+        const grpDevSieve = (grpTotalWet > 0 && grpDryWt > 0) ? parseFloat(((grpDryWt - grpTotalWet) / 1000).toFixed(6)) : '';
         const grpH2O = (coreWt && grpDryWt > 0) ? parseFloat(((parseFloat(coreWt)*1000 - grpDryWt) / (parseFloat(coreWt)*1000) * 100).toFixed(4)) : '';
         // Ore = kode grain size dominan berdasarkan total Rec_Length
         const GRAIN_MAP = { 'GVL': 'CMR', 'CS': 'CS', 'FS': 'FS', 'CLY': 'CLY' };
