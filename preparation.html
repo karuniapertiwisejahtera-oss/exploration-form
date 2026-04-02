@@ -375,13 +375,21 @@
       domRows.forEach(function(tr) {
         var n = tr.dataset.row;
         var sampNo = document.querySelector('[name="samp_no_' + n + '"]');
-        if (!sampNo || !sampNo.value.trim()) return;
 
         // Tentukan apakah baris ini adalah WS (bukan baris pertama dalam grup)
         var mg = tr.dataset.mergeGroup || ('_single_' + n);
         var groupArr = groupRows[mg] || [n];
         var rowIdxInGroup = groupArr.indexOf(n);
         var isWS = rowIdxInGroup > 0; // baris ke-2, ke-3, dst = washing screen
+
+        // Untuk baris WS, ambil samp_no dari baris pertama grup
+        if (isWS) {
+          var firstRowN = groupArr[0];
+          sampNo = document.querySelector('[name="samp_no_' + firstRowN + '"]');
+        }
+
+        // Skip jika tidak ada samp_no sama sekali
+        if (!sampNo || !sampNo.value.trim()) return;
 
         // Hitung berapa kali tiap SID muncul dalam interval ini (untuk deteksi double)
         var sidCount = {};
