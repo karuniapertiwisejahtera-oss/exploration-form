@@ -2053,6 +2053,7 @@
           doc.setFillColor(...grp.color);
           doc.rect(x + wetW, y + hdrH1, subW, hdrH2 + hdrH3, 'F');
           doc.rect(x + wetW, y + hdrH1, subW, hdrH2 + hdrH3);
+          doc.setFontSize(4.5);
           doc.text('Sample ID', x + wetW + subW / 2, y + hdrH1 + (hdrH2 + hdrH3) / 2 + 1.5, { align: 'center' });
           doc.setFillColor(Math.max(0, grp.color[0]-30), Math.max(0, grp.color[1]-30), Math.max(0, grp.color[2]-30));
           doc.rect(x, y + hdrH1 + hdrH2, subW, hdrH3, 'F');
