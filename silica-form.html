@@ -190,7 +190,7 @@
             </div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
-              <button class="btn-export-csv" onclick="exportRecordCSV('${key}',${rec.id})" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">📥 CSV</button>
+              <button class="btn-export-csv" data-key="${key}" data-id="${rec.id}" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">Export</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -213,7 +213,7 @@
             </div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
-              <button class="btn-export-csv" onclick="exportRecordCSV('${key}',${rec.id})" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">📥 CSV</button>
+              <button class="btn-export-csv" data-key="${key}" data-id="${rec.id}" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">Export</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -241,7 +241,7 @@
           html += `</div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
-              <button class="btn-export-csv" onclick="exportRecordCSV('${key}',${rec.id})" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">📥 CSV</button>
+              <button class="btn-export-csv" data-key="${key}" data-id="${rec.id}" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">Export</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -249,6 +249,14 @@
       }
 
       document.getElementById('dv-content').innerHTML = html;
+      // Pasang event listener untuk tombol Export
+      document.querySelectorAll('.btn-export-csv').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var k = this.dataset.key;
+          var i = this.dataset.id;
+          exportRecordCSV(k, i);
+        });
+      });
       document.getElementById('dataview-overlay').style.display = 'flex';
     }
 
