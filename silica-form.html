@@ -269,7 +269,7 @@
   
     // ===== EXPORT RECORD AS CSV =====
     function exportRecordCSV(key, id) {
-      const rec = DB.getAll(key).find(r => r.id === id);
+      const rec = DB.getAll(key).find(r => String(r.id) === String(id));
       if (!rec) { showToast('Record tidak ditemukan', 'error'); return; }
 
       // Flatten record ke CSV

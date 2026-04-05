@@ -1990,12 +1990,12 @@
 
       // Kolom tetap
       const fixedCols = [
-        { lbl: 'From',      w: 9  }, { lbl: 'To',       w: 9  },
-        { lbl: 'Len',       w: 8  }, { lbl: 'Rec',      w: 8  },
-        { lbl: 'Grain',     w: 9  }, { lbl: 'Core Wt',  w: 11 },
+        { lbl: 'From',      w: 8  }, { lbl: 'To',       w: 8  },
+        { lbl: 'Len',       w: 7  }, { lbl: 'Rec',      w: 7  },
+        { lbl: 'Grain',     w: 8  }, { lbl: 'Core Wt',  w: 11 },
         { lbl: 'From Cum',  w: 11 }, { lbl: 'To Cum',   w: 11 },
         { lbl: 'Samp No',   w: 11 }, { lbl: 'Dry Wt',   w: 11 },
-        { lbl: 'Sample ID', w: 22 },
+        { lbl: 'Sample ID', w: 28 },
       ];
       const fracGroups = [
         { lbl: '+10 mm',      color: C10,  sub: ['Tot','Rec','Sample ID'] },
@@ -2004,8 +2004,8 @@
         { lbl: '+0.3-0.6 mm', color: Cm06, sub: ['Tot','Rec','Sample ID'] },
         { lbl: '-0.3 mm',     color: Cp03, sub: ['Tot','Rec','Sample ID'] },
       ];
-      const subW = 9;
-      const remW = 20;
+      const subW = 10;
+      const remW = 16;
 
       function drawTableHeader(startY) {
         let y = startY;
