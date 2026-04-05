@@ -190,6 +190,7 @@
             </div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
+              <button class="btn-export-csv" onclick="exportRecordCSV('${key}',${rec.id})" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">📥 CSV</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -212,6 +213,7 @@
             </div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
+              <button class="btn-export-csv" onclick="exportRecordCSV('${key}',${rec.id})" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">📥 CSV</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -239,6 +241,7 @@
           html += `</div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
+              <button class="btn-export-csv" onclick="exportRecordCSV('${key}',${rec.id})" style="background:#e3f2fd;color:#0277bd;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;">📥 CSV</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -263,7 +266,37 @@
     function deleteRecord(key, id, label) {
       if (!confirm('Hapus record ini?')) return;
       DB.delete(key, id);
-      loadSummary();
+  
+    // ===== EXPORT RECORD AS CSV =====
+    function exportRecordCSV(key, id) {
+      const rec = DB.getAll(key).find(r => r.id === id);
+      if (!rec) { showToast('Record tidak ditemukan', 'error'); return; }
+
+      // Flatten record ke CSV
+      const rows = [];
+      const headers = Object.keys(rec).filter(k => k !== 'id' && k !== 'timestamp');
+      rows.push(headers.map(h => '"' + h + '"').join(','));
+
+      const vals = headers.map(h => {
+        const v = rec[h] == null ? '' : String(rec[h]);
+        return '"' + v.replace(/"/g, '""') + '"';
+      });
+      rows.push(vals.join(','));
+
+      const csv = rows.join('\r\n');
+      const tgl = (rec.tanggal || rec.date_start || new Date().toISOString().slice(0,10));
+      const hid = (rec.hole_id || rec.hole_no || rec.kode_ttk_bor || 'data').replace(/\s+/g,'_').toUpperCase();
+      const filename = key + '_' + hid + '_' + tgl + '.csv';
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      showToast('✓ ' + filename + ' didownload!');
+    }
+
+    loadSummary();
       const remaining = DB.getAll(key);
       if (remaining.length === 0) closeDataView();
       else viewData(key, label);
