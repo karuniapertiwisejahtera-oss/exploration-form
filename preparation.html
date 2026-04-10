@@ -248,10 +248,13 @@
         <button onclick="cancelMerge()">✕ Batal</button>
       </div>
 
-      <!-- CSV Import -->
+      <!-- CSV Import + Export/Import Form -->
       <div class="csv-bar">
-        <label class="csv-btn" for="csv-input">≡ƒôé Import CSV</label>
+        <label class="csv-btn" for="csv-input">📂 Import Logging</label>
         <input type="file" id="csv-input" accept=".csv,.txt">
+        <button type="button" onclick="exportFormData()" style="background:#0277bd;color:white;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">📤 Export Form</button>
+        <label style="background:#f57c00;color:white;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;" for="import-form-input">📥 Import Form</label>
+        <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">
         <span id="csv-filename">Pilih file .csv dari HP</span>
       </div>
 
@@ -1392,6 +1395,73 @@
         csvInput.addEventListener('change', function() { importCSV(this); });
       }
     });
+
+    // ===== EXPORT FORM DATA =====
+    function exportFormData() {
+      // Simpan dulu
+      saveData();
+      // Export record terbaru sebagai JSON
+      const records = DB.getAll('preparation');
+      if (!records.length) { showToast('Tidak ada data untuk diekspor', 'error'); return; }
+      const rec = records[records.length - 1];
+      const backup = { preparation: [rec] };
+      const json = JSON.stringify(backup, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const hid = (rec.hole_id || 'unknown').replace(/\s+/g,'_').toUpperCase();
+      a.href = url;
+      a.download = 'Prep_' + hid + '_' + new Date().toISOString().slice(0,10) + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('✓ Form berhasil diekspor!');
+    }
+
+    // ===== IMPORT FORM DATA =====
+    function importFormData(input) {
+      const file = input.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const backup = JSON.parse(e.target.result);
+          if (!backup.preparation || !backup.preparation.length) {
+            showToast('Format file tidak valid', 'error'); return;
+          }
+          const rec = backup.preparation[0];
+          // Load ke form
+          ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
+            const el = document.querySelector('[name="'+k+'"]');
+            if (el && rec[k] !== undefined) el.value = rec[k];
+          });
+          // Restore rows
+          document.getElementById('prep-tbody').innerHTML = '';
+          rowCount = 0;
+          const rc = parseInt(rec.row_count) || 0;
+          for (let i = 1; i <= rc; i++) {
+            addRow({
+              from: rec['from_'+i], to: rec['to_'+i], length: rec['len_'+i],
+              recovery: rec['rec_'+i], grain_size: rec['grain_'+i], core_wt: rec['core_wt_'+i],
+              from_cum: rec['from_cum_'+i], to_cum: rec['to_cum_'+i],
+              samp_no: rec['samp_no_'+i], send_cum: rec['send_cum_'+i],
+              sample_id: rec['sample_id_'+i], dry_wt: rec['dry_wt_'+i],
+              a10_tot: rec['a10_tot_'+i], a10_rec: rec['a10_rec_'+i], a10_sid: rec['a10_sid_'+i],
+              a2_tot: rec['a2_tot_'+i], a2_rec: rec['a2_rec_'+i], a2_sid: rec['a2_sid_'+i],
+              a06_tot: rec['a06_tot_'+i], a06_rec: rec['a06_rec_'+i], a06_sid: rec['a06_sid_'+i],
+              m06_tot: rec['m06_tot_'+i], m06_rec: rec['m06_rec_'+i], m06_sid: rec['m06_sid_'+i],
+              p03_tot: rec['p03_tot_'+i], p03_rec: rec['p03_rec_'+i], p03_sid: rec['p03_sid_'+i],
+              qaqc_sid: rec['qaqc_sid_'+i], qaqc_wt: rec['qaqc_wt_'+i],
+              jenis: rec['jenis_'+i], remarks: rec['remarks_'+i],
+              merge_group: rec['merge_group_'+i]
+            });
+          }
+          window._editRecordId = rec.id;
+          restoreMergeVisibility(); recalcSamplingNo(); highlightDuplicates();
+          input.value = '';
+          showToast('✓ Form berhasil diimport!');
+        } catch(e) { showToast('Error: ' + e.message, 'error'); }
+      };
+      reader.readAsText(file, 'UTF-8');
+    }
 
     // ===== IMPORT CSV =====
     function importCSV(input) {
