@@ -198,6 +198,7 @@
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
               <button class="btn-export-csv" style="background:#f57c00;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doExport('${key}',${rec.id})">Export Backup</button>
+              <button style="background:#1a6b4a;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doImport()">Import</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -221,6 +222,7 @@
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
               <button class="btn-export-csv" style="background:#f57c00;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doExport('${key}',${rec.id})">Export Backup</button>
+              <button style="background:#1a6b4a;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doImport()">Import</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -249,6 +251,7 @@
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
               <button class="btn-export-csv" style="background:#f57c00;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doExport('${key}',${rec.id})">Export Backup</button>
+              <button style="background:#1a6b4a;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doImport()">Import</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -277,20 +280,59 @@
   
     // ===== EXPORT PER RECORD (global) =====
     window._doExport = function(key, id) {
-      var records = DB.getAll(key);
-      var rec = records.find(function(r) { return String(r.id) === String(id); });
-      if (!rec) { showToast('Record tidak ditemukan', 'error'); return; }
-      var json = JSON.stringify([rec], null, 2);
-      var blob = new Blob([json], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      var hid = (rec.hole_id || rec.hole_no || rec.kode_ttk_bor || 'data').replace(/\s+/g,'_').toUpperCase();
-      var tgl = rec.tanggal || rec.date_start || new Date().toISOString().slice(0,10);
-      a.href = url;
-      a.download = key + '_' + hid + '_' + tgl + '.json';
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('\u2713 Export berhasil!');
+      try {
+        var records = JSON.parse(localStorage.getItem(key) || '[]');
+        var rec = null;
+        for (var i = 0; i < records.length; i++) {
+          if (String(records[i].id) === String(id)) { rec = records[i]; break; }
+        }
+        if (!rec) { alert('Record tidak ditemukan'); return; }
+        var backup = {}; backup[key] = [rec];
+        var json = JSON.stringify(backup, null, 2);
+        var blob = new Blob([json], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        var hid = (rec.hole_id || rec.hole_no || rec.kode_ttk_bor || 'data').replace(/\s+/g,'_').toUpperCase();
+        var tgl = rec.tanggal || rec.date_start || new Date().toISOString().slice(0,10);
+        a.href = url;
+        a.download = key + '_' + hid + '_' + tgl + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert('Export berhasil: ' + a.download);
+      } catch(e) { alert('Error: ' + e.message); }
+    };
+
+    // ===== IMPORT PER RECORD =====
+    window._doImport = function() {
+      var inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = '.json';
+      inp.onchange = function() {
+        var file = inp.files[0]; if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            var backup = JSON.parse(e.target.result);
+            var count = 0;
+            Object.keys(backup).forEach(function(key) {
+              if (Array.isArray(backup[key])) {
+                var existing = JSON.parse(localStorage.getItem(key) || '[]');
+                backup[key].forEach(function(rec) {
+                  if (!existing.find(function(r) { return r.id === rec.id; })) {
+                    existing.push(rec); count++;
+                  }
+                });
+                localStorage.setItem(key, JSON.stringify(existing));
+              }
+            });
+            alert(count + ' record berhasil diimport!');
+            if (typeof loadSummary === 'function') loadSummary();
+          } catch(e) { alert('Error: ' + e.message); }
+        };
+        reader.readAsText(file, 'UTF-8');
+      };
+      inp.click();
     };
 
     // ===== EXPORT CURRENT VIEW =====

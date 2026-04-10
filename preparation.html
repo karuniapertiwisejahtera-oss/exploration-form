@@ -1540,13 +1540,10 @@
       });
       if (window._editRecordId) {
         DB.delete('preparation', window._editRecordId);
-        DB.save('preparation', data);
-        window._editRecordId = null;
-        showToast('Data diperbarui!');
-      } else {
-        DB.save('preparation', data);
-        showToast('Data tersimpan!');
       }
+      const _saved = DB.save('preparation', data);
+      window._editRecordId = _saved.id;
+      showToast('Data tersimpan!');
     }
 
     // ===== CLEAR =====
