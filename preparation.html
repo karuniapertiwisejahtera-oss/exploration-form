@@ -847,6 +847,65 @@
       });
     }
 
+    // ===== AUTO-FILL ORIGINAL SAMPLE_ID =====
+    // Saat a10_sid diisi, Original Sample_ID otomatis terisi berurut dari S1
+    function autoFillOriginalSampleID(rowNum) {
+      const sidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
+      if (!sidEl) return;
+      // Jangan timpa jika sudah diisi manual
+      if (sidEl.value.trim() && sidEl.dataset.autoOrig !== 'true') return;
+
+      const a10El = document.querySelector(`[name="a10_sid_${rowNum}"]`);
+      if (!a10El || !a10El.value.trim()) return;
+
+      // Cari sample_id dari baris S1 (baris pertama yang punya samp_no S1)
+      let baseSID = '';
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      for (const tr of domRows) {
+        const rn = tr.dataset.row;
+        const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
+        const sidRefEl = document.querySelector(`[name="sample_id_${rn}"]`);
+        if (snEl && snEl.value.trim() && sidRefEl && sidRefEl.value.trim()) {
+          baseSID = sidRefEl.value.trim().toUpperCase();
+          break;
+        }
+      }
+      if (!baseSID) return;
+
+      // Hitung nomor berurut: cari berapa baris sebelum rowNum yang punya samp_no
+      const match = baseSID.match(/^([A-Za-z]+)(\d+)$/);
+      if (!match) return;
+      const prefix = match[1], padLen = match[2].length;
+      let baseNum = parseInt(match[2]);
+
+      // Hitung offset: berapa interval sebelum rowNum yang punya samp_no
+      let offset = 0;
+      for (const tr of domRows) {
+        const rn = tr.dataset.row;
+        if (rn === rowNum) break;
+        const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
+        if (snEl && snEl.value.trim() && /^S\d+$/i.test(snEl.value.trim())) offset++;
+      }
+
+      // Kumpulkan semua ID yang sudah terpakai
+      const used = new Set();
+      domRows.forEach(tr => {
+        const rn = tr.dataset.row;
+        ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'].forEach(f => {
+          const el = document.querySelector(`[name="${f}_${rn}"]`);
+          if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
+        });
+      });
+
+      let nextNum = baseNum + offset;
+      while (used.has(prefix + String(nextNum).padStart(padLen, '0'))) nextNum++;
+      const newSID = prefix + String(nextNum).padStart(padLen, '0');
+
+      sidEl.value = newSID;
+      sidEl.dataset.autoOrig = 'true';
+      highlightDuplicates();
+    }
+
     // ===== AUTO-FILL QAQC SAMPLE_ID =====
     // Hanya aktif jika Jenis = DS atau BS
     function autoFillQAQC(rowNum) {
@@ -882,6 +941,13 @@
       if (grainEl) grainEl.addEventListener('change', recalcSamplingNo);
       const snEl = document.querySelector(`[name="samp_no_${n}"]`);
       if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
+
+      // Auto-fill Original Sample_ID saat fraksi pertama (+10) diisi
+      const a10SidEl = document.querySelector(`[name="a10_sid_${n}"]`);
+      if (a10SidEl) {
+        a10SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n); });
+        a10SidEl.addEventListener('input',  () => { autoFillOriginalSampleID(n); });
+      }
 
       // Auto-fill QAQC saat Jenis berubah ke DS/BS atau Sample_ID diisi
       const jenisEl_r = document.querySelector('[name="jenis_' + n + '"]');
