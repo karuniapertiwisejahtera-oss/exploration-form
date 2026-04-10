@@ -1972,7 +1972,7 @@
 
     function generatePrepPDF() {
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [355.6, 215.9] });
       const pageW = doc.internal.pageSize.getWidth();
       const margin = 5;
       const contentW = pageW - margin * 2;
@@ -2062,7 +2062,7 @@
         { lbl: 'Grain',     w: 8  }, { lbl: 'Core Wt',  w: 11 },
         { lbl: 'From Cum',  w: 11 }, { lbl: 'To Cum',   w: 11 },
         { lbl: 'Samp No',   w: 11 }, { lbl: 'Dry Wt',   w: 11 },
-        { lbl: 'Sample ID', w: 28 },
+        { lbl: 'Sample ID', w: 32 },
       ];
       const fracGroups = [
         { lbl: '+10 mm',      color: C10,  sub: ['Tot','Rec','Sample ID'] },
@@ -2071,8 +2071,8 @@
         { lbl: '+0.3-0.6 mm', color: Cm06, sub: ['Tot','Rec','Sample ID'] },
         { lbl: '-0.3 mm',     color: Cp03, sub: ['Tot','Rec','Sample ID'] },
       ];
-      const subW = 10;
-      const remW = 16;
+      const subW = 13;
+      const remW = 29;
 
       function drawTableHeader(startY) {
         let y = startY;
@@ -2181,6 +2181,19 @@
           doc.text(txt, xv + colWidths[ci] / 2, y + rowH / 2 + 1.5, { align: 'center', maxWidth: colWidths[ci] - 1 });
           xv += colWidths[ci];
         });
+        // Border tebal di baris terakhir grup gabungan
+        const trEl = domRows[ri];
+        const mg = trEl ? trEl.dataset.mergeGroup : null;
+        const isLastInGroup = mg && (ri === domRows.length - 1 || 
+          (domRows[ri+1] && domRows[ri+1].dataset.mergeGroup !== mg));
+        const isSingle = !mg; // baris tunggal (tidak digabung)
+        if (isLastInGroup || isSingle) {
+          // Garis bawah tebal untuk batas interval
+          const totalW2 = fixedCols.reduce((s,col)=>s+col.w,0) + fracGroups.length*3*subW + remW;
+          doc.setDrawColor(100, 100, 100); doc.setLineWidth(0.4);
+          doc.line(margin, y + rowH, margin + totalW2, y + rowH);
+          doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.15);
+        }
         y += rowH;
       });
 
