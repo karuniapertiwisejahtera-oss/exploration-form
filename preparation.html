@@ -2456,6 +2456,8 @@
           highlightDuplicates();
           restoreQAQCClass();
           updateFracLock();
+          // Re-run validasi untuk semua baris agar flag muncul saat Edit
+          for (let _i = 1; _i <= rowCount; _i++) { checkDryWtAlert(_i); }
         }
       } else if (mode === 'continue') {
         const saved = DB.getAll('preparation');
