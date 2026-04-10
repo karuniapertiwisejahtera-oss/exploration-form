@@ -197,8 +197,6 @@
             </div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
-              <button class="btn-export-csv" style="background:#f57c00;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doExport('${key}',${rec.id})">Export Backup</button>
-              <button style="background:#1a6b4a;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doImport()">Import</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -221,8 +219,6 @@
             </div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
-              <button class="btn-export-csv" style="background:#f57c00;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doExport('${key}',${rec.id})">Export Backup</button>
-              <button style="background:#1a6b4a;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doImport()">Import</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
@@ -250,8 +246,6 @@
           html += `</div>
             <div class="dv-actions">
               <button class="btn-edit" onclick="editRecord('${key}',${rec.id},'${form ? form.url : ''}')">✏ Edit</button>
-              <button class="btn-export-csv" style="background:#f57c00;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doExport('${key}',${rec.id})">Export Backup</button>
-              <button style="background:#1a6b4a;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;" onclick="window._doImport()">Import</button>
               <button class="btn-del"  onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
             </div>
           </div>`;
