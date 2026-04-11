@@ -1892,6 +1892,13 @@
               sidToLabRow = subQaqcLab;
             } else if (firstFrac) {
               sidToLabRow = subSidToLab;
+            } else if (frac.label === '-0.3') {
+              // Fraksi -0.3 mm: cari sample_id dari baris WS dalam grup yang sama
+              // Baris WS = baris ke-2+ dalam grup gabungan
+              const wsRow = rowNums.find(function(rn) {
+                return rn !== firstRow && get('sample_id', rn) !== '';
+              });
+              if (wsRow) sidToLabRow = get('sample_id', wsRow);
             }
             const totNum = parseFloat(totVal) || 0;
             const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
