@@ -863,6 +863,7 @@
 
       // Cari sample_id dari baris S1 (baris pertama yang punya samp_no S1)
       let baseSID = '';
+      let baseRowNum = null;
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
       for (const tr of domRows) {
         const rn = tr.dataset.row;
@@ -870,18 +871,18 @@
         const sidRefEl = document.querySelector(`[name="sample_id_${rn}"]`);
         if (snEl && snEl.value.trim() && sidRefEl && sidRefEl.value.trim()) {
           baseSID = sidRefEl.value.trim().toUpperCase();
+          baseRowNum = rn;
           break;
         }
       }
-      if (!baseSID) return;
+      if (!baseSID || baseRowNum === rowNum) return;
 
-      // Hitung nomor berurut: cari berapa baris sebelum rowNum yang punya samp_no
       const match = baseSID.match(/^([A-Za-z]+)(\d+)$/);
       if (!match) return;
       const prefix = match[1], padLen = match[2].length;
-      let baseNum = parseInt(match[2]);
+      const baseNum = parseInt(match[2]);
 
-      // Hitung offset: berapa interval sebelum rowNum yang punya samp_no
+      // Hitung offset: berapa interval S sebelum rowNum (tidak termasuk rowNum sendiri)
       let offset = 0;
       for (const tr of domRows) {
         const rn = tr.dataset.row;
@@ -890,20 +891,8 @@
         if (snEl && snEl.value.trim() && /^S\d+$/i.test(snEl.value.trim())) offset++;
       }
 
-      // Kumpulkan semua ID yang sudah terpakai
-      const used = new Set();
-      domRows.forEach(tr => {
-        const rn = tr.dataset.row;
-        ['sample_id','a10_sid','a2_sid','a06_sid','m06_sid','p03_sid','qaqc_sid'].forEach(f => {
-          const el = document.querySelector(`[name="${f}_${rn}"]`);
-          if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
-        });
-      });
-
-      let nextNum = baseNum + offset;
-      while (used.has(prefix + String(nextNum).padStart(padLen, '0'))) nextNum++;
-      const newSID = prefix + String(nextNum).padStart(padLen, '0');
-
+      // sample_id = baseSID + offset (berurut, tidak skip)
+      const newSID = prefix + String(baseNum + offset).padStart(padLen, '0');
       sidEl.value = newSID;
       sidEl.dataset.autoOrig = 'true';
       highlightDuplicates();
