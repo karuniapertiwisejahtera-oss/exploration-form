@@ -852,14 +852,18 @@
 
     // ===== AUTO-FILL ORIGINAL SAMPLE_ID =====
     // Saat a10_sid diisi, Original Sample_ID otomatis terisi berurut dari S1
-    function autoFillOriginalSampleID(rowNum) {
+    // isWS=true: baris WS (baris ke-2 grup), hitung offset berbeda
+    function autoFillOriginalSampleID(rowNum, isWS) {
       const sidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
       if (!sidEl) return;
       // Jangan timpa jika sudah diisi manual
       if (sidEl.value.trim() && sidEl.dataset.autoOrig !== 'true') return;
 
-      const a10El = document.querySelector(`[name="a10_sid_${rowNum}"]`);
-      if (!a10El || !a10El.value.trim()) return;
+      // Tentukan trigger field
+      const triggerEl = isWS
+        ? document.querySelector(`[name="m06_sid_${rowNum}"]`)
+        : document.querySelector(`[name="a10_sid_${rowNum}"]`);
+      if (!triggerEl || !triggerEl.value.trim()) return;
 
       // Cari sample_id dari baris S1 (baris pertama yang punya samp_no S1)
       let baseSID = '';
@@ -882,7 +886,7 @@
       const prefix = match[1], padLen = match[2].length;
       const baseNum = parseInt(match[2]);
 
-      // Hitung offset: berapa interval S sebelum rowNum (tidak termasuk rowNum sendiri)
+      // Hitung offset: berapa interval S sebelum rowNum
       let offset = 0;
       for (const tr of domRows) {
         const rn = tr.dataset.row;
@@ -891,7 +895,19 @@
         if (snEl && snEl.value.trim() && /^S\d+$/i.test(snEl.value.trim())) offset++;
       }
 
-      // sample_id = baseSID + offset (berurut, tidak skip)
+      // Untuk baris WS: sample_id = sample_id baris utama + jumlah total interval S
+      // Hitung total interval S yang ada
+      if (isWS) {
+        let totalS = 0;
+        domRows.forEach(tr => {
+          const rn = tr.dataset.row;
+          const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
+          if (snEl && snEl.value.trim() && /^S\d+$/i.test(snEl.value.trim())) totalS++;
+        });
+        // WS offset = totalS + offset (setelah semua S normal)
+        offset = totalS + offset;
+      }
+
       const newSID = prefix + String(baseNum + offset).padStart(padLen, '0');
       sidEl.value = newSID;
       sidEl.dataset.autoOrig = 'true';
@@ -939,6 +955,13 @@
       if (a10SidEl) {
         a10SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n); });
         a10SidEl.addEventListener('input',  () => { autoFillOriginalSampleID(n); });
+      }
+
+      // Auto-fill Original Sample_ID saat fraksi +0.3-0.6 diisi (untuk baris WS)
+      const m06SidEl = document.querySelector(`[name="m06_sid_${n}"]`);
+      if (m06SidEl) {
+        m06SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n, true); });
+        m06SidEl.addEventListener('input',  () => { autoFillOriginalSampleID(n, true); });
       }
 
       // Auto-fill QAQC saat Jenis berubah ke DS/BS atau Sample_ID diisi
