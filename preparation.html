@@ -244,8 +244,11 @@
 
       <!-- Merge Banner -->
       <div class="merge-banner" id="merge-banner">
-        🔓 Mode Gabung aktif ΓÇö ketuk baris yang ingin digabung
-        <button onclick="cancelMerge()">✕ Batal</button>
+        � Mode Gabung aktif — ketuk baris yang ingin digabung
+        <div style="display:flex;gap:6px;margin-left:auto;">
+          <button id="merge-apply-btn" onclick="applyMerge()" style="background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">✓ Terapkan</button>
+          <button onclick="cancelMerge()" style="background:white;color:#e65100;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">✕ Batal</button>
+        </div>
       </div>
 
       <!-- CSV Import + Export/Import Form -->
@@ -331,8 +334,7 @@
 
   <div class="action-bar">
     <button class="btn" style="background:#1a6b4a;color:white;" onclick="openWeightInput()">⚖ Input Weight</button>
-    <button class="btn" style="background:#e91e8c;color:white;" onclick="addQAQCRow('DS')">+ DS</button>
-    <button class="btn" style="background:#9c27b0;color:white;" onclick="addQAQCRow('BS')">+ BS</button>
+    <button class="btn" style="background:#1a6b4a;color:white;" onclick="addQAQCRow('DS')">+ QAQC</button>
     <button class="btn btn-save"   onclick="saveData()">💾 Save</button>
     <button class="btn btn-clear"  onclick="clearData()">✕ Clear</button>
     <button class="btn btn-submit" onclick="submitData()">✓ Submit</button>
@@ -1446,14 +1448,8 @@
           restoreQAQCClass();
     }
 
-    // Tombol Terapkan di banner
+    // Tombol Terapkan sudah ada di HTML merge-banner
     document.addEventListener('DOMContentLoaded', () => {
-      const banner = document.getElementById('merge-banner');
-      const applyBtn = document.createElement('button');
-      applyBtn.textContent = 'Γ£ô Terapkan';
-      applyBtn.style.cssText = 'background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;';
-      applyBtn.onclick = applyMerge;
-      banner.insertBefore(applyBtn, banner.querySelector('button'));
 
       // Pasang event listener file input CSV
       const csvInput = document.getElementById('csv-input');
