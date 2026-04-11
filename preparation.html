@@ -244,11 +244,12 @@
 
       <!-- Merge Banner -->
       <div class="merge-banner" id="merge-banner">
-        � Mode Gabung aktif — ketuk baris yang ingin digabung
-        <div style="display:flex;gap:6px;margin-left:auto;">
-          <button id="merge-apply-btn" onclick="applyMerge()" style="background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">✓ Terapkan</button>
-          <button onclick="cancelMerge()" style="background:white;color:#e65100;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">✕ Batal</button>
+        <div style="display:flex;gap:6px;">
+          <button id="merge-apply-btn" onclick="applyMerge()" style="background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">&#10003; Terapkan</button>
+          <button onclick="cancelMerge()" style="background:white;color:#e65100;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">&#10005; Batal</button>
         </div>
+        <span style="flex:1;text-align:right;font-size:11px;">&#128279; Mode Gabung aktif &mdash; ketuk baris yang ingin digabung</span>
+      </div>
       </div>
 
       <!-- CSV Import + Export/Import Form -->
