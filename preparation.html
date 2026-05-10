@@ -1168,7 +1168,7 @@
             if (dEl) setCellTooltip(dEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
             if (cEl) setCellTooltip(cEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
           });
-          showToast('ΓÜá∩╕Å Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
+          showToast('⚠ Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
         }
       }
       // Cek 2: Wet Total > Dry Wt
@@ -1181,7 +1181,7 @@
           const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
             if (dEl) setCellTooltip(dEl, 'Wet Total > Dry Wt', 'cell-error');
         });
-        showToast('ΓÜá∩╕Å Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
+        showToast('⚠ Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
       }
       // Cek 2b: Selisih Wet Total vs Core Wt
       if (totalCoreWt > 0 && totalWet > 0) {
@@ -1199,7 +1199,7 @@
           const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
             if (dEl) setCellTooltip(dEl, 'Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'cell-warn');
         });
-        showToast('ΓÜá∩╕Å Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
+        showToast('⚠ Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
       }
     }
 
@@ -1995,7 +1995,7 @@
       const dupes = checkDuplicateSampleIDs();
       if (dupes.length > 0) {
         const list = dupes.join(', ');
-        if (!confirm('ΓÜá∩╕Å Sample_ID duplikat ditemukan:\n' + list + '\n\nLanjutkan submit?')) return;
+        if (!confirm('⚠ Sample_ID duplikat ditemukan:\n' + list + '\n\nLanjutkan submit?')) return;
       }
       // Cek selisih Core Wt vs Dry Wt untuk semua grup
       const dryWtWarnings = [];
@@ -2021,7 +2021,7 @@
         }
       }
       if (dryWtWarnings.length > 0) {
-        if (!confirm('ΓÜá∩╕Å Selisih Core Wt & Dry Wt >20% pada:\n' + dryWtWarnings.join('\n') + '\n\nLanjutkan submit?')) return;
+        if (!confirm('⚠ Selisih Core Wt & Dry Wt >20% pada:\n' + dryWtWarnings.join('\n') + '\n\nLanjutkan submit?')) return;
       }
       saveData();
 
