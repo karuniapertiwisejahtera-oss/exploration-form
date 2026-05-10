@@ -1549,6 +1549,19 @@
       overlay.style.display = 'flex';
       overlay.dataset.targetRow = rowNum;
 
+      // Tampilkan/sembunyikan section Original Sample ID (hanya untuk S1)
+      const isS1 = sampNo === 'S1';
+      const origSection = document.getElementById('frac-orig-sid-section');
+      if (origSection) origSection.style.display = isS1 ? 'block' : 'none';
+      if (isS1) {
+        const origInp = document.getElementById('frac-orig-sid-input');
+        if (origInp) {
+          // Isi dari kolom sample_id jika sudah ada
+          const existOrig = document.querySelector(`[name="sample_id_${rowNum}"]`);
+          origInp.value = (existOrig && existOrig.value.trim()) ? existOrig.value.trim().toUpperCase() : '';
+        }
+      }
+
       // Tampilkan jumlah fraksi yang sudah terisi saat ini
       let curFrac = 0;
       FRAC_FIELDS_ORDER.forEach(f => {
@@ -1558,10 +1571,8 @@
       const inp = document.getElementById('frac-count-input');
       inp.value = curFrac || '';
 
-      // Isi field SA ID pertama: ambil dari fraksi aktif pertama baris ini jika sudah ada,
-      // atau hitung lanjutan dari SA terakhir yang terpakai
+      // Isi field SA ID pertama
       const saInp = document.getElementById('frac-sa-first-input');
-      // Cek apakah baris ini sudah punya fraksi
       let existingFirst = '';
       for (let i = 0; i < FRAC_FIELDS_ORDER.length; i++) {
         const el = document.querySelector(`[name="${FRAC_FIELDS_ORDER[i]}_${rowNum}"]`);
@@ -1570,17 +1581,19 @@
       if (existingFirst) {
         saInp.value = existingFirst;
       } else {
-        // Gunakan acuan SA global jika ada, lalu hitung lanjutan
-        if (window._saBasePrefix) {
-          saInp.value = getNextSAID();
-        } else {
-          saInp.value = getNextSAID();
-        }
+        saInp.value = getNextSAID();
       }
 
       // Tampilkan preview fraksi
       updateFracPreview(curFrac || 5);
-      setTimeout(() => saInp.focus(), 100);
+      // Focus: S1 → Original SID dulu, lainnya → SA input
+      setTimeout(() => {
+        if (isS1) {
+          const origInp = document.getElementById('frac-orig-sid-input');
+          if (origInp && !origInp.value.trim()) { origInp.focus(); return; }
+        }
+        saInp.focus();
+      }, 100);
     }
 
     // Cari SA ID berikutnya dari semua fraksi yang sudah terisi
@@ -1647,6 +1660,35 @@
         showToast('Jumlah fraksi dinaikkan ke 2 (minimal)', 'error');
       }
 
+      const snEl = document.querySelector(`[name="samp_no_${rowNum}"]`);
+      const sampNo = snEl ? snEl.value.trim().toUpperCase() : '';
+      const isS1 = sampNo === 'S1';
+
+      // Untuk S1: validasi dan simpan Original Sample ID dari field khusus
+      if (isS1) {
+        const origInp = document.getElementById('frac-orig-sid-input');
+        const origVal = origInp ? origInp.value.trim().toUpperCase() : '';
+        if (!origVal) {
+          showToast('Isi Original Sample ID untuk S1', 'error');
+          if (origInp) origInp.focus();
+          return;
+        }
+        const origSidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
+        if (origSidEl) {
+          origSidEl.value = origVal;
+          origSidEl.dataset.autoOrig = 'false';
+        }
+        // Simpan SA acuan global dari SA input
+        const saInpCheck = document.getElementById('frac-sa-first-input');
+        const saValCheck = saInpCheck ? saInpCheck.value.trim().toUpperCase() : '';
+        const saMatchCheck = saValCheck.match(/^([A-Za-z]+)(\d+)$/);
+        if (saMatchCheck) {
+          window._saBasePrefix = saMatchCheck[1];
+          window._saBasePadLen = saMatchCheck[2].length;
+          window._saBaseNum    = parseInt(saMatchCheck[2]);
+        }
+      }
+
       // Ambil SA ID pertama dari input user
       const saInp = document.getElementById('frac-sa-first-input');
       const firstSA = saInp.value.trim().toUpperCase();
@@ -1662,9 +1704,6 @@
 
       // Tentukan fraksi mana yang aktif
       const startIdx = Math.max(0, 5 - finalCount); // index pertama yang aktif
-
-      const snEl = document.querySelector(`[name="samp_no_${rowNum}"]`);
-      const sampNo = snEl ? snEl.value.trim().toUpperCase() : '';
 
       // Kumpulkan semua SID yang sudah terpakai (kecuali baris ini sendiri)
       const used = new Set();
@@ -1693,19 +1732,21 @@
           }
           el.value = candidate;
           el.dataset.auto = 'true';
-          used.add(candidate); // tandai terpakai untuk fraksi berikutnya dalam baris ini
+          used.add(candidate);
           sidCounter++;
         }
       });
 
-      // Update Original Sample ID jika belum diisi manual
-      const origSidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
-      if (origSidEl && (!origSidEl.value.trim() || origSidEl.dataset.autoOrig === 'true')) {
-        const firstActiveFrac = FRAC_FIELDS_ORDER[startIdx];
-        const firstEl = document.querySelector(`[name="${firstActiveFrac}_${rowNum}"]`);
-        if (firstEl && firstEl.value.trim()) {
-          origSidEl.value = firstEl.value.trim();
-          origSidEl.dataset.autoOrig = 'true';
+      // Update Original Sample ID untuk non-S1 jika belum diisi manual
+      if (!isS1) {
+        const origSidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
+        if (origSidEl && (!origSidEl.value.trim() || origSidEl.dataset.autoOrig === 'true')) {
+          const firstActiveFrac = FRAC_FIELDS_ORDER[startIdx];
+          const firstEl = document.querySelector(`[name="${firstActiveFrac}_${rowNum}"]`);
+          if (firstEl && firstEl.value.trim()) {
+            origSidEl.value = firstEl.value.trim();
+            origSidEl.dataset.autoOrig = 'true';
+          }
         }
       }
 
@@ -2896,9 +2937,18 @@
         <button onclick="closeFracModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
       </div>
 
+      <!-- Input Original Sample ID — hanya tampil untuk S1 -->
+      <div id="frac-orig-sid-section" style="display:none;margin-bottom:12px;padding:10px 12px;background:#e8f5e9;border:1.5px solid #a8d5b5;border-radius:10px;">
+        <label style="font-size:11px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID (S1)</label>
+        <input type="text" id="frac-orig-sid-input" placeholder="Contoh: GS001"
+          style="width:100%;border:2px solid #a8d5b5;border-radius:8px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;background:white;"
+          onkeydown="if(event.key==='Enter') document.getElementById('frac-sa-first-input').focus()">
+        <div style="font-size:10px;color:#555;margin-top:4px;">ID yang masuk kolom Original Sample_ID untuk S1.</div>
+      </div>
+
       <!-- Input SA ID pertama -->
       <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Sample ID SA Pertama</label>
+        <label style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Sample ID SA Pertama (fraksi)</label>
         <input type="text" id="frac-sa-first-input" placeholder="Contoh: SA001"
           style="width:100%;border:2px solid #1a6b4a;border-radius:10px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;"
           onkeydown="if(event.key==='Enter'){ document.getElementById('frac-count-input').focus(); }">
