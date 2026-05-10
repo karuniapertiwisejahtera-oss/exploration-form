@@ -2948,6 +2948,7 @@
             send_cum:    rec['send_cum_'+i],
             sample_id:   rec['sample_id_'+i],
             dry_wt:      rec['dry_wt_'+i],
+            m06_orig_sid: rec['m06_orig_sid_'+i],
             a10_tot:     rec['a10_tot_'+i],
             a10_rec:     rec['a10_rec_'+i],
             a10_sid:     rec['a10_sid_'+i],
@@ -3006,7 +3007,26 @@
           restoreQAQCClass();
           updateFracLock();
         }
-      } else { addRow(); }
+      } else {
+        // Cek apakah ada data tersimpan di DB (auto-restore saat refresh)
+        const saved = DB.getAll('preparation');
+        if (saved.length) {
+          const last = saved[saved.length - 1];
+          ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
+            const el = document.querySelector('[name="'+k+'"]');
+            if (el && last[k] !== undefined) el.value = last[k];
+          });
+          restoreRows(last);
+          window._editRecordId = last.id;
+          restoreMergeVisibility();
+          recalcSamplingNo();
+          highlightDuplicates();
+          restoreQAQCClass();
+          updateFracLock();
+        } else {
+          addRow();
+        }
+      }
       sessionStorage.removeItem('form_mode');
       sessionStorage.removeItem('edit_record_id');
     });
