@@ -162,7 +162,7 @@ window.addEventListener('offline', updateOnlineStatus);
 
 // ===== TAB BAR (Sheet Navigator) =====
 const FORM_TABS = [
-  { label: '🏠 Home',      url: 'silica-form.html', key: null          },
+  { label: 'Home',      url: 'silica-form.html', key: null          },
   { label: 'Actual Run',   url: 'actual-run.html',  key: 'actual_run'  },
   { label: 'Preparation',  url: 'preparation.html', key: 'preparation' },
   { label: 'Daily Sheet',  url: 'daily-sheet.html', key: 'daily_sheet' },
