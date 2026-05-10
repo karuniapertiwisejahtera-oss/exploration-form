@@ -1639,9 +1639,12 @@
         showToast('Masukkan angka 1-5', 'error'); inp.focus(); return;
       }
 
-      // Validasi minimal 2 GS (fraksi aktif minimal 2)
-      if (count < 2) {
-        showToast('Minimal 2 fraksi GS per Samp No', 'error'); inp.focus(); return;
+      // Jika count < 2, otomatis naikkan ke 2
+      const finalCount = count < 2 ? 2 : count;
+      if (finalCount !== count) {
+        inp.value = 2;
+        updateFracPreview(2);
+        showToast('Jumlah fraksi dinaikkan ke 2 (minimal)', 'error');
       }
 
       // Ambil SA ID pertama dari input user
@@ -1658,7 +1661,7 @@
       let sidCounter = parseInt(match[2]);
 
       // Tentukan fraksi mana yang aktif
-      const startIdx = Math.max(0, 5 - count); // index pertama yang aktif
+      const startIdx = Math.max(0, 5 - finalCount); // index pertama yang aktif
 
       const snEl = document.querySelector(`[name="samp_no_${rowNum}"]`);
       const sampNo = snEl ? snEl.value.trim().toUpperCase() : '';
@@ -1708,7 +1711,7 @@
 
       highlightDuplicates();
       closeFracModal();
-      showToast(`${count} fraksi diisi untuk ${sampNo}`);
+      showToast(`${finalCount} fraksi diisi untuk ${sampNo}`);
     }
 
     // ===== UNMERGE =====
