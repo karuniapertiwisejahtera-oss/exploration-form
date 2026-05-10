@@ -1495,15 +1495,21 @@
       overlay.style.display = 'flex';
       overlay.dataset.targetRow = rowNum;
 
-      // Tampilkan/sembunyikan section Original Sample ID (hanya untuk S1)
+      // Tampilkan section Original Sample ID (GS) untuk semua Samp No
       const isS1 = sampNo === 'S1';
       const origSection = document.getElementById('frac-orig-sid-section');
-      if (origSection) origSection.style.display = isS1 ? 'block' : 'none';
-      if (isS1) {
-        const origInp = document.getElementById('frac-orig-sid-input');
-        if (origInp) {
-          const existOrig = document.querySelector(`[name="sample_id_${rowNum}"]`);
-          origInp.value = (existOrig && existOrig.value.trim()) ? existOrig.value.trim().toUpperCase() : '';
+      if (origSection) origSection.style.display = 'block';
+      const origInp = document.getElementById('frac-orig-sid-input');
+      if (origInp) {
+        const existOrig = document.querySelector(`[name="sample_id_${rowNum}"]`);
+        if (existOrig && existOrig.value.trim()) {
+          // Sudah ada nilai — tampilkan
+          origInp.value = existOrig.value.trim().toUpperCase();
+        } else if (isS1) {
+          origInp.value = '';
+        } else {
+          // S2+ : auto-fill dari GS terakhir + 1 (dari sample_id semua baris)
+          origInp.value = getNextGSIDFromOriginal();
         }
       }
 
@@ -1558,6 +1564,9 @@
 
     // Cari GS ID berikutnya dari kolom sample_id (Original Sample ID) semua baris
     function getNextGSID() {
+      return getNextGSIDFromOriginal();
+    }
+    function getNextGSIDFromOriginal() {
       let maxNum = 0;
       let prefix = 'GS', padLen = 3;
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
@@ -1567,21 +1576,13 @@
         const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
         if (sidEl && sidEl.value.trim()) {
           const m = sidEl.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
-          if (m) {
-            prefix = m[1];
-            padLen = m[2].length;
-            const n = parseInt(m[2]);
-            if (n > maxNum) maxNum = n;
-          }
+          if (m) { prefix = m[1]; padLen = m[2].length; const n = parseInt(m[2]); if (n > maxNum) maxNum = n; }
         }
-        // Juga cek m06_orig_sid yang sudah terisi (untuk menghindari duplikat)
+        // Cek m06_orig_sid
         const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
         if (m06El && m06El.value.trim()) {
           const m = m06El.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
-          if (m && m[1] === prefix) {
-            const n = parseInt(m[2]);
-            if (n > maxNum) maxNum = n;
-          }
+          if (m && m[1] === prefix) { const n = parseInt(m[2]); if (n > maxNum) maxNum = n; }
         }
       }
       if (maxNum === 0) return '';
@@ -1656,21 +1657,21 @@
       const sampNo = snEl ? snEl.value.trim().toUpperCase() : '';
       const isS1 = sampNo === 'S1';
 
-      // Untuk S1: validasi dan simpan Original Sample ID dari field khusus
+      // Simpan Original Sample ID (GS) untuk semua Samp No
+      const origInp = document.getElementById('frac-orig-sid-input');
+      const origVal = origInp ? origInp.value.trim().toUpperCase() : '';
+      if (!origVal) {
+        showToast('Isi Original Sample ID (GS)', 'error');
+        if (origInp) origInp.focus();
+        return;
+      }
+      const origSidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
+      if (origSidEl) {
+        origSidEl.value = origVal;
+        origSidEl.dataset.autoOrig = 'false';
+      }
+      // Untuk S1: simpan SA acuan global
       if (isS1) {
-        const origInp = document.getElementById('frac-orig-sid-input');
-        const origVal = origInp ? origInp.value.trim().toUpperCase() : '';
-        if (!origVal) {
-          showToast('Isi Original Sample ID untuk S1', 'error');
-          if (origInp) origInp.focus();
-          return;
-        }
-        const origSidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
-        if (origSidEl) {
-          origSidEl.value = origVal;
-          origSidEl.dataset.autoOrig = 'false';
-        }
-        // Simpan SA acuan global dari SA input
         const saInpCheck = document.getElementById('frac-sa-first-input');
         const saValCheck = saInpCheck ? saInpCheck.value.trim().toUpperCase() : '';
         const saMatchCheck = saValCheck.match(/^([A-Za-z]+)(\d+)$/);
@@ -1729,14 +1730,7 @@
         }
       });
 
-      // Update Original Sample ID untuk non-S1: kosongkan saja, jangan auto-fill dari SA
-      if (!isS1) {
-        const origSidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
-        if (origSidEl && origSidEl.dataset.autoOrig === 'true') {
-          origSidEl.value = '';
-          origSidEl.dataset.autoOrig = 'false';
-        }
-      }
+      // m06_orig_sid sudah disimpan di atas, tidak perlu kosongkan sample_id
 
       // Simpan Original Sample ID fraksi +0.3 (m06_orig_sid) jika diisi
       const p03Inp = document.getElementById('frac-p03-orig-input');
@@ -3018,13 +3012,13 @@
         <button onclick="closeFracModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
       </div>
 
-      <!-- Input Original Sample ID — hanya tampil untuk S1 -->
+      <!-- Input Original Sample ID — tampil untuk semua Samp No -->
       <div id="frac-orig-sid-section" style="display:none;margin-bottom:12px;padding:10px 12px;background:#e8f5e9;border:1.5px solid #a8d5b5;border-radius:10px;">
-        <label style="font-size:11px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID (S1)</label>
+        <label style="font-size:11px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID (GS)</label>
         <input type="text" id="frac-orig-sid-input" placeholder="Contoh: GS001"
           style="width:100%;border:2px solid #a8d5b5;border-radius:8px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;background:white;"
           onkeydown="if(event.key==='Enter') document.getElementById('frac-sa-first-input').focus()">
-        <div style="font-size:10px;color:#555;margin-top:4px;">ID yang masuk kolom Original Sample_ID untuk S1.</div>
+        <div style="font-size:10px;color:#555;margin-top:4px;">ID yang masuk kolom Original Sample_ID.</div>
       </div>
 
       <!-- Input SA ID pertama -->
