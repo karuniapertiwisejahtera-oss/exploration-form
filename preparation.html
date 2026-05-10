@@ -83,7 +83,7 @@
     /* Kolom non-freeze */
     .prep-table th.c-std  { min-width: 44px; width: 44px; }
     .prep-table th.c-wide { min-width: 88px; width: 88px; } /* colspan=2: 44+44 */
-    .prep-table th.c-sid  { min-width: 80px; width: 80px; }
+    .prep-table th.c-sid  { min-width: 90px; width: 90px; }
     .prep-table th.c-rem  { min-width: 140px; width: 140px; }
     .prep-table th.c-cum  { min-width: 55px; width: 55px; background: #fff3e0; }
     .prep-table th.c-send { min-width: 55px; width: 55px; background: #e8f5e9; }
@@ -593,9 +593,9 @@
         <td><input type="text" name="samp_no_${n}" id="samp_no_${n}" value="${v.samp_no || ''}" style="cursor:pointer;text-align:center;width:100%;border:none;outline:none;font-size:11px;background:transparent;text-transform:uppercase;" onclick="openFracModal(${n})" readonly title="Klik untuk isi fraksi"></td>
         <td>${num('dry_wt', v.dry_wt)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
-        <td style="padding:0;">
-          <input type="text" name="sample_id_${n}" id="sample_id_${n}" value="${v.sample_id || ''}" style="width:100%;border:none;border-bottom:1px dashed #ccc;outline:none;font-size:11px;text-align:center;padding:2px 2px 1px;background:transparent;text-transform:uppercase;" placeholder="GS">
-          <input type="text" name="m06_orig_sid_${n}" id="m06_orig_sid_${n}" value="${v.m06_orig_sid || ''}" style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:1px 2px 2px;background:transparent;text-transform:uppercase;color:#f57f17;" placeholder="+0.3-0.6">
+        <td style="padding:0;vertical-align:top;">
+          <input type="text" name="sample_id_${n}" id="sample_id_${n}" value="${v.sample_id || ''}" style="width:100%;border:none;border-bottom:1px dashed #ccc;outline:none;font-size:11px;text-align:center;padding:3px 2px 2px;background:transparent;text-transform:uppercase;display:block;" placeholder="GS">
+          <input type="text" name="m06_orig_sid_${n}" id="m06_orig_sid_${n}" value="${v.m06_orig_sid || ''}" style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:2px 2px 3px;background:transparent;text-transform:uppercase;color:#f57f17;display:block;" placeholder="+0.3-0.6">
         </td>
         <td class="g10 g-start frac-cell">${num('a10_tot', v.a10_tot)}</td>
         <td class="g10 frac-cell">${numRO('a10_rec', v.a10_rec)}</td>
@@ -1732,15 +1732,13 @@
 
       // m06_orig_sid sudah disimpan di atas, tidak perlu kosongkan sample_id
 
-      // Simpan Original Sample ID fraksi +0.3 (m06_orig_sid) jika diisi
+      // Simpan Original Sample ID fraksi +0.3 (m06_orig_sid) ke baris sumber
       const p03Inp = document.getElementById('frac-p03-orig-input');
       const p03Val = p03Inp ? p03Inp.value.trim().toUpperCase() : '';
-      if (p03Val) {
-        const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
-        if (m06OrigEl) {
-          m06OrigEl.value = p03Val;
-          m06OrigEl.dataset.auto = 'true';
-        }
+      const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
+      if (m06OrigEl) {
+        m06OrigEl.value = p03Val; // simpan meski kosong
+        m06OrigEl.dataset.auto = 'true';
       }
 
       highlightDuplicates();
@@ -3032,7 +3030,7 @@
       <!-- Input Original Sample ID fraksi +0.3 — tampil untuk semua Samp No -->
       <div id="frac-p03-orig-section" style="display:none;margin-bottom:12px;padding:10px 12px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:10px;">
         <label style="font-size:11px;font-weight:700;color:#f57f17;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID — Fraksi +0.3-0.6 mm</label>
-        <input type="text" id="frac-p03-orig-input" placeholder="Contoh: SA001 (opsional)"
+        <input type="text" id="frac-p03-orig-input" placeholder="Contoh: GS001 (opsional)"
           style="width:100%;border:2px solid #ffe082;border-radius:8px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;background:white;"
           onkeydown="if(event.key==='Enter') document.getElementById('frac-count-input').focus()">
         <div style="font-size:10px;color:#888;margin-top:4px;">ID untuk kolom Sample_ID fraksi +0.3-0.6 mm. Kosongkan jika tidak ada.</div>
