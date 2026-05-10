@@ -2563,15 +2563,17 @@
         const grainEl = document.querySelector('[name="grain_'+n+'"]');
         const grainChanged = grainEl && grainEl.classList.contains('grain-changed');
 
-        // Autofit row height: hitung tinggi berdasarkan teks terpanjang di setiap kolom
+        // Autofit row height: hitung tinggi berdasarkan teks terpanjang di masing-masing kolom baris ini
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(5.5);
         let maxLines = 1;
         vals.forEach((val, ci) => {
           const txt = (val || '').toString().toUpperCase();
-          const lines = doc.splitTextToSize(txt, colWidths[ci] - 1);
+          if (!txt) return;
+          const lines = doc.splitTextToSize(txt, colWidths[ci] - 1.5);
           if (lines.length > maxLines) maxLines = lines.length;
         });
-        const rowH = Math.max(MIN_ROW_H, maxLines * 3.2 + 1.5);
+        const rowH = Math.max(MIN_ROW_H, maxLines * 3.5 + 1.5);
 
         // Cek apakah perlu halaman baru
         if (y + rowH > doc.internal.pageSize.getHeight() - margin) {
@@ -2610,8 +2612,8 @@
           }
 
           doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(0, 0, 0);
-          const lines = doc.splitTextToSize(txt, colWidths[ci] - 1);
-          const lineH = 3.2;
+          const lines = doc.splitTextToSize(txt, colWidths[ci] - 1.5);
+          const lineH = 3.5;
           const totalTextH = lines.length * lineH;
           const textStartY = y + (rowH - totalTextH) / 2 + lineH * 0.8;
           lines.forEach((ln, li) => {
