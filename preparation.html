@@ -739,6 +739,19 @@
 
     // Hitung ulang Sampling No untuk semua baris (S1, S2... hanya jika from_cum tidak kosong)
     // Jika semua grain_size dalam grup = CLY, samp_no dikosongkan
+    function recalcOriginalSampleIDs() {
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      domRows.forEach(tr => {
+        const n = tr.dataset.row;
+        const sidEl = document.querySelector(`[name="sample_id_${n}"]`);
+        if (sidEl && sidEl.dataset.autoOrig === 'true') {
+          sidEl.value = '';
+          const a10El = document.querySelector(`[name="a10_sid_${n}"]`);
+          if (a10El && a10El.value.trim()) autoFillOriginalSampleID(n);
+        }
+      });
+    }
+
     function recalcSamplingNo() {
       // Bangun map: mergeGroup ΓåÆ array rowNums
       const groupRows = {};
@@ -958,6 +971,12 @@
       }
 
       // Auto-fill Original Sample_ID saat fraksi +0.3-0.6 diisi (untuk baris WS)
+      // Auto-fill Original Sample_ID saat fraksi -0.3 (p03_sid) diisi
+      const p03SidEl = document.querySelector(`[name="p03_sid_${n}"]`);
+      if (p03SidEl) {
+        p03SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n); });
+        p03SidEl.addEventListener('input',  () => { autoFillOriginalSampleID(n); });
+      }
       const m06SidEl = document.querySelector(`[name="m06_sid_${n}"]`);
       if (m06SidEl) {
         m06SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n, true); });
@@ -1169,6 +1188,16 @@
             if (dEl) setCellTooltip(dEl, 'Wet Total > Dry Wt', 'cell-error');
         });
         showToast('ΓÜá∩╕Å Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
+      }
+      // Cek 2b: Selisih Wet Total vs Core Wt
+      if (totalCoreWt > 0 && totalWet > 0) {
+        const diffWetCore = Math.abs(totalWet - totalCoreWt * 1000);
+        if (diffWetCore > 500) {
+          groupRows.forEach(function(i) {
+            const cEl = document.querySelector('[name="core_wt_' + i + '"]');
+            if (cEl) setCellTooltip(cEl, 'Selisih Wet Total & Core Wt = ' + diffWetCore.toFixed(0) + ' g (>500)', 'cell-warn');
+          });
+        }
       }
       // Cek 3: Selisih Wet Total vs Dry Wt > 500
       if (totalDryWt > 0 && totalWet > 0 && Math.abs(totalWet - totalDryWt) > 500) {
@@ -1887,18 +1916,18 @@
               (subIsQAQC || !isFirstRecord) ? '' : coreWt,
               (subIsQAQC || !isFirstRecord) ? '' : insitu
             ];
+            const wsRow1 = rowNums.find(function(rn) {
+              return rn !== firstRow && get('sample_id', rn) !== '';
+            });
+            const wsSampleId = wsRow1 ? get('sample_id', wsRow1) : '';
+
             let sidToLabRow = '';
             if (subIsQAQC) {
               sidToLabRow = subQaqcLab;
             } else if (firstFrac) {
               sidToLabRow = subSidToLab;
-            } else if (frac.label === '-0.3') {
-              // Fraksi -0.3 mm: cari sample_id dari baris WS dalam grup yang sama
-              // Baris WS = baris ke-2+ dalam grup gabungan
-              const wsRow = rowNums.find(function(rn) {
-                return rn !== firstRow && get('sample_id', rn) !== '';
-              });
-              if (wsRow) sidToLabRow = get('sample_id', wsRow);
+            } else if (frac.label === '-0.3' && wsSampleId) {
+              sidToLabRow = wsSampleId;
             }
             const totNum = parseFloat(totVal) || 0;
             const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
