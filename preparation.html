@@ -1928,7 +1928,7 @@
               ...fixedAll.map(v => q(v)),
               q(frac.label), q(sidVal), q(washVal),
               q(dryWtVal), q(sidToLabRow), q(''),
-              isFirstRecord ? q(grpDevSieve) : q(''), isFirstRecord ? q(grpH2O) : q(''), firstFrac ? q(subRemarks) : q(''), isFirstRecord ? q(grpOre) : q('')
+              isFirstRecord ? q(grpDevSieve) : q(''), isFirstRecord ? q(grpH2O) : q(''), (firstFrac || subIsQAQC) ? q(subRemarks) : q(''), isFirstRecord ? q(grpOre) : q('')
             ];
             rows.push(row.join(','));
             firstFrac = false;
