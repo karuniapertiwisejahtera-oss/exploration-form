@@ -1736,6 +1736,12 @@
       const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
       if (m06OrigEl) { m06OrigEl.value = p03Val; m06OrigEl.dataset.auto = 'true'; }
 
+      // Jika m06_orig_sid kosong → kosongkan juga m06_sid (SA fraksi +0.3-0.6)
+      if (!p03Val) {
+        const m06SidEl = document.querySelector(`[name="m06_sid_${rowNum}"]`);
+        if (m06SidEl) { m06SidEl.value = ''; m06SidEl.dataset.auto = 'false'; }
+      }
+
       highlightDuplicates();
       closeFracModal();
       showToast(`${finalCount} fraksi diisi untuk ${sampNo}`);
