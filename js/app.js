@@ -162,6 +162,7 @@ window.addEventListener('offline', updateOnlineStatus);
 
 // ===== TAB BAR (Sheet Navigator) =====
 const FORM_TABS = [
+  { label: '🏠 Home',      url: 'silica-form.html', key: null          },
   { label: 'Actual Run',   url: 'actual-run.html',  key: 'actual_run'  },
   { label: 'Preparation',  url: 'preparation.html', key: 'preparation' },
   { label: 'Daily Sheet',  url: 'daily-sheet.html', key: 'daily_sheet' },
@@ -251,6 +252,11 @@ function initTabBar() {
 
     if (!isActive) {
       btn.addEventListener('click', () => {
+        // Home: langsung navigasi tanpa peringatan
+        if (tab.url === 'silica-form.html') {
+          window.location.href = tab.url;
+          return;
+        }
         // Peringatan save sebelum pindah
         const confirmed = confirm('⚠ Pastikan data sudah di-Save sebelum berpindah form.\n\nLanjutkan ke ' + tab.label + '?');
         if (!confirmed) return;
