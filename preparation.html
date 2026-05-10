@@ -1946,7 +1946,7 @@
               subIsQRow ? q('') : q(coreWt),
               subIsQRow ? q('') : q(insitu),
               q(''), q(''), q(''),
-              q(''), subIsQRow ? q(subSampleId) : q(''), q(''),
+              q(''), subIsQRow ? q(subSampleId || subQaqcSid) : q(''), q(''),
               q(''), q(''), firstSubRow ? q(subRemarks) : q(''), subAllCLY ? q(grpOre) : q('')
             ];
             rows.push(row.join(','));
