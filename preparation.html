@@ -2048,6 +2048,20 @@
 
     // ===== SAVE =====
     function saveData() {
+      // Validasi wajib: Sampler dan Date Start
+      const samplerEl   = document.querySelector('[name="sampler"]');
+      const dateStartEl = document.querySelector('[name="date_start"]');
+      if (!samplerEl || !samplerEl.value.trim()) {
+        showToast('Sampler wajib diisi sebelum Save', 'error');
+        if (samplerEl) samplerEl.focus();
+        return;
+      }
+      if (!dateStartEl || !dateStartEl.value.trim()) {
+        showToast('Date Start wajib diisi sebelum Save', 'error');
+        if (dateStartEl) dateStartEl.focus();
+        return;
+      }
+
       const data = {};
       ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
         const el = document.querySelector('[name="' + k + '"]');
