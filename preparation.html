@@ -1920,8 +1920,6 @@
               sidToLabRow = subQaqcLab;
             } else if (firstFrac) {
               sidToLabRow = wsSampleId || subSidToLab;
-            } else if (frac.label === '-0.3' && wsSampleId) {
-              sidToLabRow = wsSampleId;
             }
             const totNum = parseFloat(totVal) || 0;
             const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
