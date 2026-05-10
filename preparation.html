@@ -593,7 +593,10 @@
         <td><input type="text" name="samp_no_${n}" id="samp_no_${n}" value="${v.samp_no || ''}" style="cursor:pointer;text-align:center;width:100%;border:none;outline:none;font-size:11px;background:transparent;text-transform:uppercase;" onclick="openFracModal(${n})" readonly title="Klik untuk isi fraksi"></td>
         <td>${num('dry_wt', v.dry_wt)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
-        <td>${txt('sample_id', v.sample_id)}</td>
+        <td style="padding:0;">
+          <input type="text" name="sample_id_${n}" id="sample_id_${n}" value="${v.sample_id || ''}" style="width:100%;border:none;border-bottom:1px dashed #ccc;outline:none;font-size:11px;text-align:center;padding:2px 2px 1px;background:transparent;text-transform:uppercase;" placeholder="GS">
+          <input type="text" name="m06_orig_sid_${n}" id="m06_orig_sid_${n}" value="${v.m06_orig_sid || ''}" style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:1px 2px 2px;background:transparent;text-transform:uppercase;color:#f57f17;" placeholder="+0.3-0.6">
+        </td>
         <td class="g10 g-start frac-cell">${num('a10_tot', v.a10_tot)}</td>
         <td class="g10 frac-cell">${numRO('a10_rec', v.a10_rec)}</td>
         <td class="g10 frac-cell">${txt('a10_sid', v.a10_sid)}</td>
@@ -1509,8 +1512,8 @@
       if (p03Section) p03Section.style.display = 'block';
       const p03Inp = document.getElementById('frac-p03-orig-input');
       if (p03Inp) {
-        // Jika m06_sid baris ini sudah ada, pakai itu
-        const existM06 = document.querySelector(`[name="m06_sid_${rowNum}"]`);
+        // Jika m06_orig_sid baris ini sudah ada, pakai itu
+        const existM06 = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
         if (existM06 && existM06.value.trim()) {
           p03Inp.value = existM06.value.trim().toUpperCase();
         } else {
@@ -1571,8 +1574,8 @@
             if (n > maxNum) maxNum = n;
           }
         }
-        // Juga cek m06_sid yang sudah terisi (untuk menghindari duplikat)
-        const m06El = document.querySelector(`[name="m06_sid_${rn}"]`);
+        // Juga cek m06_orig_sid yang sudah terisi (untuk menghindari duplikat)
+        const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
         if (m06El && m06El.value.trim()) {
           const m = m06El.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
           if (m && m[1] === prefix) {
@@ -1735,14 +1738,14 @@
         }
       }
 
-      // Simpan Original Sample ID fraksi +0.3 (m06_sid) jika diisi
+      // Simpan Original Sample ID fraksi +0.3 (m06_orig_sid) jika diisi
       const p03Inp = document.getElementById('frac-p03-orig-input');
       const p03Val = p03Inp ? p03Inp.value.trim().toUpperCase() : '';
       if (p03Val) {
-        const m06El = document.querySelector(`[name="m06_sid_${rowNum}"]`);
-        if (m06El) {
-          m06El.value = p03Val;
-          m06El.dataset.auto = 'false';
+        const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
+        if (m06OrigEl) {
+          m06OrigEl.value = p03Val;
+          m06OrigEl.dataset.auto = 'true';
         }
       }
 
@@ -1987,7 +1990,7 @@
       // Simpan berdasarkan urutan DOM agar baris Q tetap pada posisi yang benar
       const FIELDS = [
         'from','to','len','rec','grain','core_wt','from_cum','to_cum',
-        'samp_no','send_cum','sample_id','dry_wt',
+        'samp_no','send_cum','sample_id','dry_wt','m06_orig_sid',
         'a10_tot','a10_rec','a10_sid','a2_tot','a2_rec','a2_sid',
         'a06_tot','a06_rec','a06_sid','m06_tot','m06_rec','m06_sid',
         'p03_tot','p03_rec','p03_sid','qaqc_sid','qaqc_wt','jenis','remarks'
