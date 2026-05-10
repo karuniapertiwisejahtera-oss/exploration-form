@@ -1545,10 +1545,19 @@
       if (isS1) {
         const origInp = document.getElementById('frac-orig-sid-input');
         if (origInp) {
-          // Isi dari kolom sample_id jika sudah ada
           const existOrig = document.querySelector(`[name="sample_id_${rowNum}"]`);
           origInp.value = (existOrig && existOrig.value.trim()) ? existOrig.value.trim().toUpperCase() : '';
         }
+      }
+
+      // Tampilkan section Original SID +0.3 untuk semua Samp No
+      const p03Section = document.getElementById('frac-p03-orig-section');
+      if (p03Section) p03Section.style.display = 'block';
+      const p03Inp = document.getElementById('frac-p03-orig-input');
+      if (p03Inp) {
+        // Isi dari m06_sid jika sudah ada
+        const existM06 = document.querySelector(`[name="m06_sid_${rowNum}"]`);
+        p03Inp.value = (existM06 && existM06.value.trim()) ? existM06.value.trim().toUpperCase() : '';
       }
 
       // Tampilkan jumlah fraksi yang sudah terisi saat ini
@@ -1732,6 +1741,17 @@
         if (origSidEl && origSidEl.dataset.autoOrig === 'true') {
           origSidEl.value = '';
           origSidEl.dataset.autoOrig = 'false';
+        }
+      }
+
+      // Simpan Original Sample ID fraksi +0.3 (m06_sid) jika diisi
+      const p03Inp = document.getElementById('frac-p03-orig-input');
+      const p03Val = p03Inp ? p03Inp.value.trim().toUpperCase() : '';
+      if (p03Val) {
+        const m06El = document.querySelector(`[name="m06_sid_${rowNum}"]`);
+        if (m06El) {
+          m06El.value = p03Val;
+          m06El.dataset.auto = 'false';
         }
       }
 
@@ -2982,7 +3002,16 @@
         <label style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Sample ID SA Pertama (fraksi)</label>
         <input type="text" id="frac-sa-first-input" placeholder="Contoh: SA001"
           style="width:100%;border:2px solid #1a6b4a;border-radius:10px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;"
-          onkeydown="if(event.key==='Enter'){ document.getElementById('frac-count-input').focus(); }">
+          onkeydown="if(event.key==='Enter'){ document.getElementById('frac-p03-orig-input').focus(); }">
+      </div>
+
+      <!-- Input Original Sample ID fraksi +0.3 — tampil untuk semua Samp No -->
+      <div id="frac-p03-orig-section" style="display:none;margin-bottom:12px;padding:10px 12px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:10px;">
+        <label style="font-size:11px;font-weight:700;color:#f57f17;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID — Fraksi +0.3-0.6 mm</label>
+        <input type="text" id="frac-p03-orig-input" placeholder="Contoh: SA001 (opsional)"
+          style="width:100%;border:2px solid #ffe082;border-radius:8px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;background:white;"
+          onkeydown="if(event.key==='Enter') document.getElementById('frac-count-input').focus()">
+        <div style="font-size:10px;color:#888;margin-top:4px;">ID untuk kolom Sample_ID fraksi +0.3-0.6 mm. Kosongkan jika tidak ada.</div>
       </div>
 
       <!-- Input jumlah fraksi -->
