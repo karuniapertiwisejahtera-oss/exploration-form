@@ -1466,55 +1466,9 @@
             const sidEl = document.querySelector(`[name="sample_id_${i}"]`);
             if (sidEl && sidEl.value.trim()) { hasAnySID = true; break; }
           }
-          if (!hasAnySID) openFirstSIDModal(firstRowN);
+          if (!hasAnySID) openFracModal(parseInt(firstRowN));
         }
       }, 100);
-    }
-
-    // ===== MODAL: INPUT ORIGINAL SAMPLE ID PERTAMA (S1) =====
-    function openFirstSIDModal(rowNum) {
-      document.getElementById('first-sid-modal-overlay').style.display = 'flex';
-      const inp = document.getElementById('first-sid-input');
-      inp.value = '';
-      inp.dataset.targetRow = rowNum;
-      // Reset SA input
-      const saInp = document.getElementById('first-sa-input');
-      if (saInp) saInp.value = '';
-      setTimeout(() => { if (saInp) saInp.focus(); else inp.focus(); }, 100);
-    }
-    function closeFirstSIDModal() {
-      document.getElementById('first-sid-modal-overlay').style.display = 'none';
-    }
-    function saveFirstSID() {
-      const inp    = document.getElementById('first-sid-input');
-      const saInp  = document.getElementById('first-sa-input');
-      const origVal = inp.value.trim().toUpperCase();
-      const saVal   = saInp ? saInp.value.trim().toUpperCase() : '';
-
-      if (!origVal) { inp.focus(); showToast('Isi Original Sample ID', 'error'); return; }
-      if (!saVal)   { if (saInp) saInp.focus(); showToast('Isi Sample ID SA pertama', 'error'); return; }
-
-      // Validasi format SA: harus prefix + angka
-      const saMatch = saVal.match(/^([A-Za-z]+)(\d+)$/);
-      if (!saMatch) { showToast('Format SA tidak valid. Contoh: SA001', 'error'); if (saInp) saInp.focus(); return; }
-
-      const rowNum = inp.dataset.targetRow;
-      const sidEl  = document.querySelector(`[name="sample_id_${rowNum}"]`);
-      if (sidEl) {
-        sidEl.value = origVal;
-        sidEl.dataset.autoOrig = 'false';
-        highlightDuplicates();
-      }
-      // Simpan SA acuan ke dataset global
-      window._saBasePrefix = saMatch[1];
-      window._saBasePadLen = saMatch[2].length;
-      window._saBaseNum    = parseInt(saMatch[2]);
-
-      closeFirstSIDModal();
-      showToast('S1 disimpan. SA acuan: ' + saVal);
-
-      // Langsung buka modal fraksi untuk S1
-      setTimeout(() => openFracModal(parseInt(rowNum)), 200);
     }
 
     // ===== MODAL: INPUT JUMLAH FRAKSI PER SAMP NO =====
@@ -2949,36 +2903,6 @@
       sessionStorage.removeItem('edit_record_id');
     });
   </script>
-
-  <!-- MODAL: ORIGINAL SAMPLE ID PERTAMA (S1) -->
-  <div id="first-sid-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
-    <div style="background:white;border-radius:16px;width:100%;max-width:360px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <span style="font-weight:700;font-size:16px;color:#1a6b4a;">🆔 Setup S1 — Hole Baru</span>
-        <button onclick="closeFirstSIDModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
-      </div>
-      <p style="font-size:12px;color:#666;margin-bottom:14px;">Isi Original Sample ID dan Sample ID SA pertama sebagai acuan penomoran seluruh hole ini.</p>
-
-      <!-- Original Sample ID -->
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID (S1)</label>
-        <input type="text" id="first-sid-input" placeholder="Contoh: GS001"
-          style="width:100%;border:2px solid #a8d5b5;border-radius:10px;padding:11px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;"
-          onkeydown="if(event.key==='Enter') document.getElementById('first-sa-input').focus()">
-      </div>
-
-      <!-- SA ID Pertama -->
-      <div style="margin-bottom:14px;">
-        <label style="font-size:11px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Sample ID SA Pertama (acuan fraksi)</label>
-        <input type="text" id="first-sa-input" placeholder="Contoh: SA001"
-          style="width:100%;border:2px solid #1a6b4a;border-radius:10px;padding:11px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;"
-          onkeydown="if(event.key==='Enter') saveFirstSID()">
-        <div style="font-size:10px;color:#888;margin-top:4px;">SA ini menjadi ID fraksi pertama S1. Fraksi berikutnya dihitung otomatis.</div>
-      </div>
-
-      <button onclick="saveFirstSID()" style="width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Simpan &amp; Lanjut ke Fraksi</button>
-    </div>
-  </div>
 
   <!-- MODAL: INPUT JUMLAH FRAKSI -->
   <div id="frac-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
