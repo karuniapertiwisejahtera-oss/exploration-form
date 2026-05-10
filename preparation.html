@@ -1752,6 +1752,72 @@
       highlightDuplicates();
       closeFracModal();
       showToast(`${finalCount} fraksi diisi untuk ${sampNo}`);
+
+      // Jika baris ini single (tidak ada merge group), otomatis tambah baris WS dan gabungkan
+      const trEl = document.getElementById('prep-row-' + rowNum);
+      if (trEl && !trEl.dataset.mergeGroup) {
+        setTimeout(() => autoAddWSRow(rowNum, p03Val), 50);
+      }
+    }
+
+    // ===== AUTO ADD WS ROW =====
+    // Jika Samp No hanya 1 baris, otomatis tambah baris WS dan gabungkan
+    function autoAddWSRow(sourceRowNum, m06OrigVal) {
+      const sourceTr = document.getElementById('prep-row-' + sourceRowNum);
+      if (!sourceTr) return;
+      // Jika sudah punya merge group, skip
+      if (sourceTr.dataset.mergeGroup) return;
+
+      // Ambil data dari baris sumber untuk baris WS baru
+      const g = (name) => {
+        const el = document.querySelector(`[name="${name}_${sourceRowNum}"]`);
+        return el ? el.value : '';
+      };
+
+      // Tambah baris baru (WS) dengan data minimal
+      addRow({
+        from: g('from'), to: g('to'), length: g('len'),
+        recovery: g('rec'), grain_size: g('grain'),
+        m06_orig_sid: m06OrigVal || ''
+      });
+      const wsRowNum = rowCount;
+      const wsTr = document.getElementById('prep-row-' + wsRowNum);
+      if (!wsTr) return;
+
+      // Sisipkan baris WS tepat setelah baris sumber di DOM
+      sourceTr.after(wsTr);
+
+      // Gabungkan kedua baris
+      const groupId = 'G' + Date.now();
+      const fromCum = g('from_cum');
+      const toCum   = g('to_cum');
+
+      // Baris sumber (pertama dalam grup)
+      sourceTr.classList.add('row-merged', 'row-merged-first');
+      sourceTr.classList.remove('row-merged-last');
+      sourceTr.dataset.mergeGroup = groupId;
+      const srcFcEl = document.getElementById('from_cum_' + sourceRowNum);
+      const srcTcEl = document.getElementById('to_cum_' + sourceRowNum);
+      const srcBtn  = sourceTr.querySelector('.btn-merge');
+      if (srcFcEl) { srcFcEl.style.visibility = 'visible'; }
+      if (srcTcEl) { srcTcEl.style.visibility = 'visible'; }
+      if (srcBtn)  { srcBtn.textContent = '🔒'; srcBtn.title = 'Lepas gabungan'; srcBtn.onclick = () => unmerge(groupId); srcBtn.classList.remove('active'); }
+
+      // Baris WS (kedua dalam grup)
+      wsTr.classList.add('row-merged', 'row-merged-last');
+      wsTr.classList.remove('row-merged-first');
+      wsTr.dataset.mergeGroup = groupId;
+      const wsFcEl = document.getElementById('from_cum_' + wsRowNum);
+      const wsTcEl = document.getElementById('to_cum_' + wsRowNum);
+      const wsBtn  = wsTr.querySelector('.btn-merge');
+      if (wsFcEl) { wsFcEl.value = fromCum; wsFcEl.style.visibility = 'hidden'; }
+      if (wsTcEl) { wsTcEl.value = toCum;   wsTcEl.style.visibility = 'hidden'; }
+      if (wsBtn)  { wsBtn.style.visibility = 'hidden'; }
+
+      recalcSamplingNo();
+      updateFracLock();
+      highlightDuplicates();
+      showToast('Baris WS otomatis ditambahkan');
     }
 
     // ===== UNMERGE =====
