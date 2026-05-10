@@ -32,25 +32,25 @@
     .prep-table thead tr:nth-child(1) th { top: 0; border-top: 1px solid #bbb; }
     .prep-table thead tr:nth-child(2) th { top: 22px; }
     .prep-table thead tr:nth-child(3) th { top: 44px; }
-    .prep-table thead th.g10  { background: #b3e5fc; color: #01579b; }
-    .prep-table thead th.g2   { background: #c8e6c9; color: #1b5e20; }
-    .prep-table thead th.g06  { background: #fff9c4; color: #f57f17; }
-    .prep-table thead th.gm06 { background: #ffe0b2; color: #bf360c; }
-    .prep-table thead th.gp03 { background: #f3e5f5; color: #6a1b9a; }
+    .prep-table thead th.g10  { background: #f0f0f0; color: #222; }
+    .prep-table thead th.g2   { background: #f0f0f0; color: #222; }
+    .prep-table thead th.g06  { background: #f0f0f0; color: #222; }
+    .prep-table thead th.gm06 { background: #f0f0f0; color: #222; }
+    .prep-table thead th.gp03 { background: #f0f0f0; color: #222; }
     .prep-table thead th.gqaqc{ background: #fce4ec; color: #880e4f; }
     /* Row 2 = Wet(Kg): warna sama dengan grup */
-    .prep-table thead tr:nth-child(2) th.g10  { background: #b3e5fc; }
-    .prep-table thead tr:nth-child(2) th.g2   { background: #c8e6c9; }
-    .prep-table thead tr:nth-child(2) th.g06  { background: #fff9c4; }
-    .prep-table thead tr:nth-child(2) th.gm06 { background: #ffe0b2; }
-    .prep-table thead tr:nth-child(2) th.gp03 { background: #f3e5f5; }
+    .prep-table thead tr:nth-child(2) th.g10  { background: #f0f0f0; }
+    .prep-table thead tr:nth-child(2) th.g2   { background: #f0f0f0; }
+    .prep-table thead tr:nth-child(2) th.g06  { background: #f0f0f0; }
+    .prep-table thead tr:nth-child(2) th.gm06 { background: #f0f0f0; }
+    .prep-table thead tr:nth-child(2) th.gp03 { background: #f0f0f0; }
     .prep-table thead tr:nth-child(2) th.gqaqc{ background: #fce4ec; }
     /* Row 3 = Total/Rec: sedikit lebih gelap */
-    .prep-table thead tr:nth-child(3) th.g10  { background: #81d4fa; }
-    .prep-table thead tr:nth-child(3) th.g2   { background: #a5d6a7; }
-    .prep-table thead tr:nth-child(3) th.g06  { background: #fff176; }
-    .prep-table thead tr:nth-child(3) th.gm06 { background: #ffcc80; }
-    .prep-table thead tr:nth-child(3) th.gp03 { background: #e1bee7; }
+    .prep-table thead tr:nth-child(3) th.g10  { background: #e0e0e0; }
+    .prep-table thead tr:nth-child(3) th.g2   { background: #e0e0e0; }
+    .prep-table thead tr:nth-child(3) th.g06  { background: #e0e0e0; }
+    .prep-table thead tr:nth-child(3) th.gm06 { background: #e0e0e0; }
+    .prep-table thead tr:nth-child(3) th.gp03 { background: #e0e0e0; }
     .prep-table thead tr:nth-child(3) th.gqaqc{ background: #fce4ec; }
     /* Baris data: tidak ada background warna, hanya garis tebal kiri sebagai pemisah grup */
     .prep-table td.g10  { background: transparent; }
@@ -62,12 +62,12 @@
     /* Garis tebal kiri sebagai pemisah antar grup ΓÇö berlaku di header dan data */
     .prep-table th.g-start { border-left: 3px solid #888 !important; }
     .prep-table td.g-start { border-left: 3px solid #888 !important; }
-    .prep-table th.g-start.g10,  .prep-table td.g-start.g10  { border-left-color: #29b6f6 !important; }
-    .prep-table th.g-start.g2,   .prep-table td.g-start.g2   { border-left-color: #66bb6a !important; }
-    .prep-table th.g-start.g06,  .prep-table td.g-start.g06  { border-left-color: #fdd835 !important; }
-    .prep-table th.g-start.gm06, .prep-table td.g-start.gm06 { border-left-color: #ffa726 !important; }
-    .prep-table th.g-start.gp03, .prep-table td.g-start.gp03 { border-left-color: #ab47bc !important; }
-    .prep-table th.g-start.gqaqc,.prep-table td.g-start.gqaqc{ border-left-color: #ec407a !important; }
+    .prep-table th.g-start.g10,  .prep-table td.g-start.g10  { border-left-color: #555 !important; }
+    .prep-table th.g-start.g2,   .prep-table td.g-start.g2   { border-left-color: #555 !important; }
+    .prep-table th.g-start.g06,  .prep-table td.g-start.g06  { border-left-color: #555 !important; }
+    .prep-table th.g-start.gm06, .prep-table td.g-start.gm06 { border-left-color: #555 !important; }
+    .prep-table th.g-start.gp03, .prep-table td.g-start.gp03 { border-left-color: #555 !important; }
+    .prep-table th.g-start.gqaqc,.prep-table td.g-start.gqaqc{ border-left-color: #555 !important; }
 
     /* Freeze kolom kiri */
     .prep-table th.col-freeze, .prep-table td.col-freeze {
@@ -2144,12 +2144,12 @@
       const hdrH1 = 5, hdrH2 = 4, hdrH3 = 4;
       const totalHdrH = hdrH1 + hdrH2 + hdrH3;
 
-      // Warna grup
-      const C10   = [179, 229, 252];
-      const C2    = [200, 230, 201];
-      const C06   = [255, 249, 196];
-      const Cm06  = [255, 224, 178];
-      const Cp03  = [243, 229, 245];
+      // Warna header - netral, tanpa warna grup
+      const C10   = [240, 240, 240];
+      const C2    = [240, 240, 240];
+      const C06   = [240, 240, 240];
+      const Cm06  = [240, 240, 240];
+      const Cp03  = [240, 240, 240];
       const CHDR  = [26, 107, 74];
       const WHITE = [255, 255, 255];
 
@@ -2192,8 +2192,12 @@
           doc.rect(x, y, grpW, hdrH1, 'F');
           doc.setDrawColor(200,200,200); doc.setLineWidth(0.2);
           doc.rect(x, y, grpW, hdrH1);
+          // Garis kiri tebal sebagai batas antar grup
+          doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.6);
+          doc.line(x, y, x, y + totalHdrH);
+          doc.setDrawColor(200,200,200); doc.setLineWidth(0.2);
           doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5);
-          const txtColor = grp.color === C10 ? [1,87,155] : grp.color === C2 ? [27,94,32] : grp.color === C06 ? [245,127,23] : grp.color === Cm06 ? [191,54,12] : [106,27,154];
+          const txtColor = [40, 40, 40];
           doc.setTextColor(...txtColor);
           doc.text(grp.lbl, x + grpW / 2, y + hdrH1 / 2 + 1.5, { align: 'center' });
           x += grpW;
@@ -2212,7 +2216,7 @@
           doc.rect(x, y + hdrH1, wetW, hdrH2, 'F');
           doc.setDrawColor(200,200,200); doc.setLineWidth(0.2);
           doc.rect(x, y + hdrH1, wetW, hdrH2);
-          const txtColor2 = grp.color === C10 ? [1,87,155] : grp.color === C2 ? [27,94,32] : grp.color === C06 ? [245,127,23] : grp.color === Cm06 ? [191,54,12] : [106,27,154];
+          const txtColor2 = [40, 40, 40];
           doc.setFont('helvetica', 'bold'); doc.setFontSize(5); doc.setTextColor(...txtColor2);
           doc.text('Wet (Kg)', x + wetW / 2, y + hdrH1 + hdrH2 / 2 + 1.5, { align: 'center' });
           doc.setFillColor(...grp.color);
