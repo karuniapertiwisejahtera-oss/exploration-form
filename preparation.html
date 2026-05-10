@@ -984,19 +984,8 @@
       const snEl = document.querySelector(`[name="samp_no_${n}"]`);
       if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
 
-      // Auto-fill Original Sample_ID real-time saat fraksi SID diisi
-      ['a10_sid','a2_sid','a06_sid','p03_sid'].forEach(fld => {
-        const fldEl = document.querySelector(`[name="${fld}_${n}"]`);
-        if (fldEl) {
-          fldEl.addEventListener('change', () => { autoFillOriginalSampleID(n); });
-          fldEl.addEventListener('input',  () => { autoFillOriginalSampleID(n); });
-        }
-      });
-      const m06SidEl = document.querySelector(`[name="m06_sid_${n}"]`);
-      if (m06SidEl) {
-        m06SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n, true); });
-        m06SidEl.addEventListener('input',  () => { autoFillOriginalSampleID(n, true); });
-      }
+      // Auto-fill Original Sample_ID: dinonaktifkan, diisi via modal fraksi
+      // ['a10_sid','a2_sid','a06_sid','p03_sid'].forEach(fld => { ... });
 
       // Auto-fill QAQC saat Jenis berubah ke DS/BS atau Sample_ID diisi
       const jenisEl_r = document.querySelector('[name="jenis_' + n + '"]');
@@ -1737,16 +1726,12 @@
         }
       });
 
-      // Update Original Sample ID untuk non-S1 jika belum diisi manual
+      // Update Original Sample ID untuk non-S1: kosongkan saja, jangan auto-fill dari SA
       if (!isS1) {
         const origSidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
-        if (origSidEl && (!origSidEl.value.trim() || origSidEl.dataset.autoOrig === 'true')) {
-          const firstActiveFrac = FRAC_FIELDS_ORDER[startIdx];
-          const firstEl = document.querySelector(`[name="${firstActiveFrac}_${rowNum}"]`);
-          if (firstEl && firstEl.value.trim()) {
-            origSidEl.value = firstEl.value.trim();
-            origSidEl.dataset.autoOrig = 'true';
-          }
+        if (origSidEl && origSidEl.dataset.autoOrig === 'true') {
+          origSidEl.value = '';
+          origSidEl.dataset.autoOrig = 'false';
         }
       }
 
