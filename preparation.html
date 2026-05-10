@@ -1183,16 +1183,7 @@
         });
         showToast('⚠ Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
       }
-      // Cek 2b: Selisih Wet Total vs Core Wt
-      if (totalCoreWt > 0 && totalWet > 0) {
-        const diffWetCore = Math.abs(totalWet - totalCoreWt * 1000);
-        if (diffWetCore > 500) {
-          groupRows.forEach(function(i) {
-            const cEl = document.querySelector('[name="core_wt_' + i + '"]');
-            if (cEl) setCellTooltip(cEl, 'Selisih Wet Total & Core Wt = ' + diffWetCore.toFixed(0) + ' g (>500)', 'cell-warn');
-          });
-        }
-      }
+
       // Cek 3: Selisih Wet Total vs Dry Wt > 500
       if (totalDryWt > 0 && totalWet > 0 && Math.abs(totalWet - totalDryWt) > 500) {
         groupRows.forEach(function(i) {
