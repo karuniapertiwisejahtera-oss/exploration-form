@@ -963,20 +963,14 @@
       const snEl = document.querySelector(`[name="samp_no_${n}"]`);
       if (snEl) snEl.addEventListener('input', () => { snEl.dataset.auto = 'false'; });
 
-      // Auto-fill Original Sample_ID saat fraksi pertama (+10) diisi
-      const a10SidEl = document.querySelector(`[name="a10_sid_${n}"]`);
-      if (a10SidEl) {
-        a10SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n); });
-        a10SidEl.addEventListener('input',  () => { autoFillOriginalSampleID(n); });
-      }
-
-      // Auto-fill Original Sample_ID saat fraksi +0.3-0.6 diisi (untuk baris WS)
-      // Auto-fill Original Sample_ID saat fraksi -0.3 (p03_sid) diisi
-      const p03SidEl = document.querySelector(`[name="p03_sid_${n}"]`);
-      if (p03SidEl) {
-        p03SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n); });
-        p03SidEl.addEventListener('input',  () => { autoFillOriginalSampleID(n); });
-      }
+      // Auto-fill Original Sample_ID real-time saat fraksi SID diisi
+      ['a10_sid','a2_sid','a06_sid','p03_sid'].forEach(fld => {
+        const fldEl = document.querySelector(`[name="${fld}_${n}"]`);
+        if (fldEl) {
+          fldEl.addEventListener('change', () => { autoFillOriginalSampleID(n); });
+          fldEl.addEventListener('input',  () => { autoFillOriginalSampleID(n); });
+        }
+      });
       const m06SidEl = document.querySelector(`[name="m06_sid_${n}"]`);
       if (m06SidEl) {
         m06SidEl.addEventListener('change', () => { autoFillOriginalSampleID(n, true); });
@@ -1936,7 +1930,7 @@
               ...fixedAll.map(v => q(v)),
               q(frac.label), q(sidVal), q(washVal),
               q(dryWtVal), q(sidToLabRow), q(''),
-              isFirstRecord ? q(grpDevSieve) : q(''), isFirstRecord ? q(grpH2O) : q(''), (firstFrac && firstSubRow) ? q(subRemarks) : q(''), isFirstRecord ? q(grpOre) : q('')
+              isFirstRecord ? q(grpDevSieve) : q(''), isFirstRecord ? q(grpH2O) : q(''), firstFrac ? q(subRemarks) : q(''), isFirstRecord ? q(grpOre) : q('')
             ];
             rows.push(row.join(','));
             firstFrac = false;
@@ -2292,17 +2286,23 @@
           doc.text(txt, xv + colWidths[ci] / 2, y + rowH / 2 + 1.5, { align: 'center', maxWidth: colWidths[ci] - 1 });
           xv += colWidths[ci];
         });
-        // Border tebal di baris terakhir grup gabungan
+        // Border antar baris gabungan
         const trEl = domRows[ri];
         const mg = trEl ? trEl.dataset.mergeGroup : null;
-        const isLastInGroup = mg && (ri === domRows.length - 1 || 
+        const isLastInGroup = mg && (ri === domRows.length - 1 ||
           (domRows[ri+1] && domRows[ri+1].dataset.mergeGroup !== mg));
-        const isSingle = !mg; // baris tunggal (tidak digabung)
+        const isSingle = !mg;
+        const isInGroup = mg && !isLastInGroup;
+        const totalW2 = fixedCols.reduce((s,col)=>s+col.w,0) + fracGroups.length*3*subW + remW;
         if (isLastInGroup || isSingle) {
-          // Garis bawah tebal untuk batas interval
-          const totalW2 = fixedCols.reduce((s,col)=>s+col.w,0) + fracGroups.length*3*subW + remW;
-          doc.setDrawColor(100, 100, 100); doc.setLineWidth(0.4);
+          doc.setDrawColor(60, 60, 60); doc.setLineWidth(0.5);
           doc.line(margin, y + rowH, margin + totalW2, y + rowH);
+          doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.15);
+        } else if (isInGroup) {
+          doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.2);
+          doc.setLineDashPattern([1, 1], 0);
+          doc.line(margin, y + rowH, margin + totalW2, y + rowH);
+          doc.setLineDashPattern([], 0);
           doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.15);
         }
         y += rowH;
