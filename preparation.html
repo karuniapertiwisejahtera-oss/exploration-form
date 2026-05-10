@@ -1919,7 +1919,11 @@
             if (subIsQAQC) {
               sidToLabRow = subQaqcLab;
             } else if (firstFrac) {
-              sidToLabRow = wsSampleId || subSidToLab;
+              // Baris pertama fraksi: pakai sample_id normal (ID pertama)
+              sidToLabRow = subSidToLab;
+            } else if (frac.label === '+0.3' && wsSampleId) {
+              // Fraksi +0.3: pakai sample_id WS (ID kedua)
+              sidToLabRow = wsSampleId;
             }
             const totNum = parseFloat(totVal) || 0;
             const washVal = subIsQAQC ? '' : (totNum > 0 ? parseFloat((totNum / 1000).toFixed(6)) : '');
