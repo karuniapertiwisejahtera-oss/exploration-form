@@ -1695,6 +1695,10 @@
       // Tentukan fraksi mana yang aktif
       const startIdx = Math.max(0, 5 - finalCount); // index pertama yang aktif
 
+      // Baca p03Val lebih awal agar bisa dipakai di loop fraksi
+      const p03InpEarly = document.getElementById('frac-p03-orig-input');
+      const p03Val = p03InpEarly ? p03InpEarly.value.trim().toUpperCase() : '';
+
       // Kumpulkan semua SID yang sudah terpakai (kecuali baris ini sendiri)
       const used = new Set();
       for (let i = 1; i <= rowCount; i++) {
@@ -1706,11 +1710,17 @@
       }
 
       // Isi fraksi mulai dari startIdx
+      // Jika m06_orig_sid kosong, skip slot SA untuk m06_sid agar p03_sid tetap berurut
+      const skipM06 = !p03Val;
       FRAC_FIELDS_ORDER.forEach((field, idx) => {
         const el = document.querySelector(`[name="${field}_${rowNum}"]`);
         if (!el) return;
         if (idx < startIdx) {
           // Fraksi tidak aktif: kosongkan
+          el.value = '';
+          el.dataset.auto = 'false';
+        } else if (field === 'm06_sid' && skipM06) {
+          // m06_orig_sid kosong → kosongkan m06_sid, jangan increment counter
           el.value = '';
           el.dataset.auto = 'false';
         } else {
@@ -1729,9 +1739,6 @@
 
       // m06_orig_sid sudah disimpan di atas, tidak perlu kosongkan sample_id
 
-      // Ambil nilai Original SID +0.3-0.6 untuk baris WS
-      const p03Inp = document.getElementById('frac-p03-orig-input');
-      const p03Val = p03Inp ? p03Inp.value.trim().toUpperCase() : '';
       // Simpan ke m06_orig_sid baris sumber
       const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
       if (m06OrigEl) { m06OrigEl.value = p03Val; m06OrigEl.dataset.auto = 'true'; }
