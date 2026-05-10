@@ -1509,9 +1509,14 @@
       if (p03Section) p03Section.style.display = 'block';
       const p03Inp = document.getElementById('frac-p03-orig-input');
       if (p03Inp) {
-        // Isi dari m06_sid jika sudah ada
+        // Jika m06_sid baris ini sudah ada, pakai itu
         const existM06 = document.querySelector(`[name="m06_sid_${rowNum}"]`);
-        p03Inp.value = (existM06 && existM06.value.trim()) ? existM06.value.trim().toUpperCase() : '';
+        if (existM06 && existM06.value.trim()) {
+          p03Inp.value = existM06.value.trim().toUpperCase();
+        } else {
+          // Cari GS terakhir dari kolom sample_id semua baris, lalu +1
+          p03Inp.value = getNextGSID();
+        }
       }
 
       // Tampilkan jumlah fraksi yang sudah terisi saat ini
@@ -1546,6 +1551,38 @@
         }
         saInp.focus();
       }, 100);
+    }
+
+    // Cari GS ID berikutnya dari kolom sample_id (Original Sample ID) semua baris
+    function getNextGSID() {
+      let maxNum = 0;
+      let prefix = 'GS', padLen = 3;
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      for (const tr of domRows) {
+        const rn = tr.dataset.row;
+        // Cek kolom sample_id (Original Sample ID)
+        const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
+        if (sidEl && sidEl.value.trim()) {
+          const m = sidEl.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
+          if (m) {
+            prefix = m[1];
+            padLen = m[2].length;
+            const n = parseInt(m[2]);
+            if (n > maxNum) maxNum = n;
+          }
+        }
+        // Juga cek m06_sid yang sudah terisi (untuk menghindari duplikat)
+        const m06El = document.querySelector(`[name="m06_sid_${rn}"]`);
+        if (m06El && m06El.value.trim()) {
+          const m = m06El.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
+          if (m && m[1] === prefix) {
+            const n = parseInt(m[2]);
+            if (n > maxNum) maxNum = n;
+          }
+        }
+      }
+      if (maxNum === 0) return '';
+      return prefix + String(maxNum + 1).padStart(padLen, '0');
     }
 
     // Cari SA ID berikutnya dari semua fraksi yang sudah terisi
