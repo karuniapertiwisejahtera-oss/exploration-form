@@ -732,6 +732,10 @@
         <td class="frac-cell">${txt('remarks',  v.remarks)}</td>
       `;
       tbody.appendChild(tr);
+      if (v.grain_changed) {
+        const grainSelEl = tr.querySelector('select[name="grain_' + n + '"]');
+        if (grainSelEl) grainSelEl.classList.add('grain-changed');
+      }
       attachRowListeners(n);
       attachTotListeners(n);
       updateTotalSample();
@@ -2204,6 +2208,8 @@
           const el = document.querySelector('[name="' + field + '_' + origN + '"]');
           data[field + '_' + pos] = el ? el.value : '';
         });
+        const grainEl = document.querySelector('[name="grain_' + origN + '"]');
+        data['grain_changed_' + pos] = grainEl && grainEl.classList.contains('grain-changed') ? '1' : '';
       });
       if (window._editRecordId) {
         DB.delete('preparation', window._editRecordId);
@@ -2799,11 +2805,6 @@
         }
 
         // Background alternating
-        if (ri % 2 === 1) {
-          doc.setFillColor(245, 252, 248);
-          doc.rect(margin, y, totalW2, rowH, 'F');
-        }
-
         // Tulis nilai per kolom
         let xv = margin;
         vals.forEach((val, ci) => {
@@ -2811,11 +2812,6 @@
           const isGrainCol = ci === GRAIN_COL_IDX;
 
           // Background kuning jika grain diubah
-          if (isGrainCol && grainChanged) {
-            doc.setFillColor(255, 249, 196); // kuning muda
-            doc.rect(xv, y, colWidths[ci], rowH, 'F');
-          }
-
           doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.15);
           doc.rect(xv, y, colWidths[ci], rowH);
 
@@ -3085,6 +3081,8 @@
             const el = document.querySelector('[name="' + field + '_' + origN + '"]');
             data[field + '_' + pos] = el ? el.value : '';
           });
+          const grainEl = document.querySelector('[name="grain_' + origN + '"]');
+          data['grain_changed_' + pos] = grainEl && grainEl.classList.contains('grain-changed') ? '1' : '';
         });
         localStorage.setItem('prep_draft', JSON.stringify(data));
       } catch(e) {}
@@ -3114,6 +3112,7 @@
             length:      rec['len_'+i],
             recovery:    rec['rec_'+i],
             grain_size:  rec['grain_'+i],
+            grain_changed: rec['grain_changed_'+i] === '1' || rec['grain_changed_'+i] === 'true',
             core_wt:     rec['core_wt_'+i],
             from_cum:    rec['from_cum_'+i],
             to_cum:      rec['to_cum_'+i],
