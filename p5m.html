@@ -3,252 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>P5M Form</title>
+  <title>Form Submission</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    .p5m-card {
-      background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
-      border: 1.5px solid #a5d6a7;
+    .submission-card {
+      background: #fff;
+      border: 1px solid #ddd;
       border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
     }
-    .p5m-card-title {
-      font-size: 14px;
-      font-weight: 700;
+    .submission-card h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
       color: var(--primary);
-      margin-bottom: 10px;
+    }
+    .import-panel {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .import-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: #333;
     }
-    .attendance-grid {
+    .import-meta span {
+      white-space: nowrap;
+    }
+    .scan-panel {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 10px;
+      margin-top: 12px;
     }
-    .attendance-item {
-      background: white;
-      border-radius: 8px;
-      padding: 8px;
+    #scan-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #bbb;
+      font-size: 15px;
+    }
+    .status-summary {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #1f2937;
+      font-size: 13px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+    table.submission-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 640px;
+    }
+    table.submission-table th,
+    table.submission-table td {
+      padding: 11px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+    }
+    table.submission-table th {
+      background: #10b981;
+      color: white;
+      font-weight: 600;
+    }
+    table.submission-table tr.pending td {
+      background: #ffffff;
+    }
+    table.submission-table tr.checked td {
+      background: #ecfdf5;
+    }
+    table.submission-table tr.missing td {
+      background: #fef2f2;
+    }
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .action-row .btn {
+      flex: 1 1 auto;
+    }
+    .empty-state {
+      padding: 18px;
+      border: 1px dashed #9ca3af;
+      border-radius: 10px;
+      color: #4b5563;
+      background: #f8fafc;
       text-align: center;
-      border: 1.5px solid #ddd;
-    }
-    .attendance-item input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-    .attendance-item label {
-      display: block;
-      font-size: 11px;
-      color: #555;
-      margin-top: 4px;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <div class="page-header">
     <button class="btn-back" onclick="goBack()">←</button>
-    <h1>P5M Form</h1>
+    <h1>Form Submission</h1>
   </div>
 
   <div class="form-container">
-    <form id="p5m-form">
-      <!-- Header -->
-      <div class="form-section">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tanggal</label>
-            <input type="date" name="tanggal">
-          </div>
-          <div class="form-group">
-            <label>Shift</label>
-            <select name="shift">
-              <option value="">Pilih</option>
-              <option>Pagi (06:00-18:00)</option>
-              <option>Malam (18:00-06:00)</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Lokasi Kerja</label>
-            <input type="text" name="lokasi" placeholder="Lokasi">
-          </div>
-          <div class="form-group">
-            <label>Supervisor</label>
-            <input type="text" name="supervisor" placeholder="Nama Supervisor">
-          </div>
+    <div class="submission-card">
+      <h2>Import CSV Submission</h2>
+      <div class="import-panel">
+        <label class="btn btn-upload" style="max-width: 260px;">
+          Pilih file .csv
+          <input id="csv-input" type="file" accept=".csv" onchange="importCSV(this)" style="display:none;">
+        </label>
+        <div class="import-meta">
+          <span>Nama file: <strong id="csv-filename">-</strong></span>
+          <span>Total data: <strong id="total-count">0</strong></span>
+          <span>Tercentang: <strong id="checked-count">0</strong></span>
+          <span>Sisa: <strong id="remaining-count">0</strong></span>
         </div>
       </div>
 
-      <!-- 5M: Man -->
-      <div class="p5m-card">
-        <div class="p5m-card-title">👷 Man (Manusia)</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Jumlah Hadir</label>
-            <input type="number" name="man_hadir" placeholder="0">
-          </div>
-          <div class="form-group">
-            <label>Jumlah Rencana</label>
-            <input type="number" name="man_rencana" placeholder="0">
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Kondisi Fisik Tim</label>
-            <select name="man_kondisi">
-              <option value="">Pilih</option>
-              <option>Fit - Semua siap kerja</option>
-              <option>Ada yang kurang fit</option>
-              <option>Ada yang sakit</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Catatan</label>
-            <textarea name="man_catatan" placeholder="Catatan kondisi tim..."></textarea>
-          </div>
+      <div class="scan-panel">
+        <label>Scan Barcode Sample ID</label>
+        <input id="scan-input" type="text" placeholder="Scan atau ketik Sample ID lalu tekan Enter" onkeydown="handleScanKey(event)">
+        <div class="status-summary">
+          <div class="status-chip">Total: <span id="summary-total">0</span></div>
+          <div class="status-chip">Checked: <span id="summary-checked">0</span></div>
+          <div class="status-chip">Pending: <span id="summary-pending">0</span></div>
         </div>
       </div>
 
-      <!-- 5M: Machine -->
-      <div class="p5m-card">
-        <div class="p5m-card-title">⚙️ Machine (Mesin)</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>No Mesin</label>
-            <input type="text" name="machine_no" placeholder="No Mesin">
-          </div>
-          <div class="form-group">
-            <label>Kondisi Mesin</label>
-            <select name="machine_kondisi">
-              <option value="">Pilih</option>
-              <option>Baik</option>
-              <option>Perlu Perawatan</option>
-              <option>Rusak</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Masalah / Kerusakan</label>
-            <textarea name="machine_masalah" placeholder="Deskripsi masalah mesin..."></textarea>
-          </div>
-        </div>
+      <div class="table-wrap">
+        <table class="submission-table" id="submission-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Batch</th>
+              <th>Sample ID</th>
+              <th>Cek</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4"><div class="empty-state">Belum ada data. Silakan impor file .csv.</div></td></tr>
+          </tbody>
+        </table>
       </div>
 
-      <!-- 5M: Material -->
-      <div class="p5m-card">
-        <div class="p5m-card-title">🪨 Material</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Stok Bit (pcs)</label>
-            <input type="number" name="material_bit" placeholder="0">
-          </div>
-          <div class="form-group">
-            <label>Stok Rod (batang)</label>
-            <input type="number" name="material_rod" placeholder="0">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Stok Bentonit (kg)</label>
-            <input type="number" name="material_bentonit" placeholder="0">
-          </div>
-          <div class="form-group">
-            <label>Stok BBM (liter)</label>
-            <input type="number" name="material_bbm" placeholder="0">
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Material Kurang</label>
-            <textarea name="material_kurang" placeholder="Material yang perlu ditambah..."></textarea>
-          </div>
-        </div>
+      <div class="action-row">
+        <button class="btn btn-clear" onclick="clearSubmission()">✕ Hapus Daftar</button>
+        <button class="btn btn-save" onclick="saveSubmission()">💾 Simpan</button>
+        <button class="btn btn-upload" onclick="uploadSubmission()">☁️ Upload</button>
       </div>
-
-      <!-- 5M: Method -->
-      <div class="p5m-card">
-        <div class="p5m-card-title">📋 Method (Metode)</div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Metode Pengeboran</label>
-            <select name="method_type">
-              <option value="">Pilih</option>
-              <option>Rotary Drilling</option>
-              <option>Core Drilling</option>
-              <option>Percussion Drilling</option>
-              <option>Reverse Circulation</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>SOP yang Digunakan</label>
-            <input type="text" name="method_sop" placeholder="No SOP">
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Perubahan Metode</label>
-            <textarea name="method_perubahan" placeholder="Jika ada perubahan metode..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5M: Mother Nature / Environment -->
-      <div class="p5m-card">
-        <div class="p5m-card-title">🌿 Mother Nature (Lingkungan)</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Cuaca</label>
-            <select name="env_cuaca">
-              <option value="">Pilih</option>
-              <option>Cerah</option>
-              <option>Berawan</option>
-              <option>Hujan Ringan</option>
-              <option>Hujan Lebat</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Suhu (°C)</label>
-            <input type="number" name="env_suhu" placeholder="0">
-          </div>
-        </div>
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Kondisi Lingkungan</label>
-            <textarea name="env_kondisi" placeholder="Kondisi lingkungan sekitar..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tanda Tangan -->
-      <div class="form-section">
-        <div class="form-section-title">Persetujuan</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Dibuat Oleh</label>
-            <input type="text" name="dibuat_oleh" placeholder="Nama">
-          </div>
-          <div class="form-group">
-            <label>Disetujui Oleh</label>
-            <input type="text" name="disetujui_oleh" placeholder="Nama Supervisor">
-          </div>
-        </div>
-      </div>
-    </form>
-  </div>
-
-  <div class="action-bar">
-    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
-    <button class="btn btn-clear" onclick="clearData()">✕ Clear</button>
-    <button class="btn btn-upload" onclick="uploadData()">☁️ Upload</button>
+    </div>
   </div>
 
   <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -256,20 +174,204 @@
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
   <script>
-    function saveData() {
-      const data = getFormData('p5m-form');
-      DB.save('p5m', data);
-      showToast('Data P5M tersimpan!');
+    let submissionData = [];
+    let sampleField = 'sample_id';
+    let batchField = 'batch';
+
+    function goBack() {
+      window.history.back();
     }
-    function clearData() {
-      clearForm('p5m-form');
-      showToast('Form dikosongkan');
+
+    function importCSV(input) {
+      if (!input.files.length) return;
+      const file = input.files[0];
+      document.getElementById('csv-filename').textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target.result;
+        const rows = parseCSV(text);
+        if (!rows.length) {
+          showToast('File CSV kosong atau format tidak valid.');
+          return;
+        }
+        const headers = Object.keys(rows[0]);
+        const sampleKey = findSampleKey(headers);
+        if (!sampleKey) {
+          showToast('Kolom Sample ID tidak ditemukan. Pastikan header berisi sample_id, id, atau sampleid.');
+          return;
+        }
+        const batchKey = findBatchKey(headers);
+        sampleField = sampleKey;
+        batchField = batchKey || 'batch';
+        submissionData = rows.map((row) => ({
+          batch: (batchKey ? row[batchKey] : row['batch'] || row['batch_no'] || row['lot'] || '').toString().trim(),
+          id: (row[sampleKey] || '').toString().trim(),
+          info: formatInfo(row, sampleKey),
+          status: 'pending'
+        })).filter(item => item.id);
+        if (!submissionData.length) {
+          showToast('Tidak ada Sample ID valid dalam file.');
+        }
+        renderSubmissionTable();
+      };
+      reader.readAsText(file, 'UTF-8');
     }
-    async function uploadData() {
-      saveData();
-      const json = JSON.stringify(DB.getAll('p5m'), null, 2);
-      await uploadToDrive(`p5m_${new Date().toISOString().slice(0,10)}.json`, json);
+
+    function parseCSV(csvText) {
+      const rows = [];
+      const delimiter = detectDelimiter(csvText);
+      const lines = csvText.trim().split(/\r?\n/).filter(line => line.trim());
+      if (!lines.length) return rows;
+      const headers = csvRowToArray(lines[0], delimiter).map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
+      for (let i = 1; i < lines.length; i++) {
+        const values = csvRowToArray(lines[i], delimiter);
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = (values[index] || '').trim();
+        });
+        rows.push(row);
+      }
+      return rows;
     }
+
+    function detectDelimiter(text) {
+      const sample = text.split(/\r?\n/)[0];
+      if (sample.includes(';')) return ';';
+      if (sample.includes('\t')) return '\t';
+      return ',';
+    }
+
+    function csvRowToArray(text, delimiter) {
+      const pattern = new RegExp(
+        (
+          "(\\" + delimiter + "|\\r?\\n|\\r|^)" +
+          "(?:\\\"([^\\\"]*(?:\\\"\\\"[^\\\"]*)*)\\\"|" +
+          "([^\\\"" + delimiter + "]*))"
+        ),
+        'gi'
+      );
+      const row = [];
+      let matches = null;
+      while ((matches = pattern.exec(text))) {
+        const matchedValue = matches[2] ? matches[2].replace(/\\\"\\\"/g, '"') : matches[3];
+        row.push(matchedValue);
+        if (matches[1] === '\r' || matches[1] === '\n' || matches[1] === '\r\n') break;
+      }
+      return row;
+    }
+
+    function findSampleKey(keys) {
+      const normalized = keys.map(k => k.toLowerCase());
+      const candidates = ['sample_id', 'sampleid', 'id', 'sample'];
+      return candidates.find(key => normalized.includes(key));
+    }
+
+    function findBatchKey(keys) {
+      const normalized = keys.map(k => k.toLowerCase());
+      const candidates = ['batch', 'batch_no', 'lot', 'package', 'pack'];
+      return candidates.find(key => normalized.includes(key));
+    }
+
+    function formatInfo(row, sampleKey) {
+      return Object.entries(row)
+        .filter(([key, value]) => key !== sampleKey && value)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(' | ');
+    }
+
+    function renderSubmissionTable() {
+      const tbody = document.querySelector('#submission-table tbody');
+      tbody.innerHTML = '';
+      if (!submissionData.length) {
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">Belum ada data. Silakan impor file .csv.</div></td></tr>`;
+      } else {
+        submissionData.forEach((item, index) => {
+          const row = document.createElement('tr');
+          row.className = item.status === 'checked' ? 'checked' : 'pending';
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.batch || '-'}</td>
+            <td>${item.id}</td>
+            <td>${item.status === 'checked' ? '✅ Cek list' : ''}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const total = submissionData.length;
+      const checked = submissionData.filter(item => item.status === 'checked').length;
+      const remaining = total - checked;
+      document.getElementById('total-count').textContent = total;
+      document.getElementById('checked-count').textContent = checked;
+      document.getElementById('remaining-count').textContent = remaining;
+      document.getElementById('summary-total').textContent = total;
+      document.getElementById('summary-checked').textContent = checked;
+      document.getElementById('summary-pending').textContent = remaining;
+    }
+
+    function handleScanKey(event) {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      const value = event.target.value.trim();
+      if (!value) return;
+      checkSampleId(value);
+      event.target.value = '';
+    }
+
+    function checkSampleId(code) {
+      const normalized = code.toString().trim().toLowerCase();
+      const target = submissionData.find(item => item.id.toLowerCase() === normalized);
+      if (!target) {
+        showToast(`Sample ID ${code} tidak ditemukan.`);
+        return;
+      }
+      if (target.status === 'checked') {
+        showToast(`Sample ID ${code} sudah discan.`);
+        return;
+      }
+      target.status = 'checked';
+      renderSubmissionTable();
+      showToast(`Sample ID ${code} berhasil diverifikasi.`);
+    }
+
+    function clearSubmission() {
+      submissionData = [];
+      document.getElementById('csv-input').value = '';
+      document.getElementById('csv-filename').textContent = '-';
+      renderSubmissionTable();
+      showToast('Daftar submission dikosongkan.');
+    }
+
+    function saveSubmission() {
+      if (!submissionData.length) {
+        showToast('Tidak ada data untuk disimpan.');
+        return;
+      }
+      const record = {
+        createdAt: new Date().toISOString(),
+        sourceFile: document.getElementById('csv-filename').textContent,
+        entries: submissionData
+      };
+      DB.save('submission', record);
+      showToast('Data submission tersimpan.');
+    }
+
+    async function uploadSubmission() {
+      if (!submissionData.length) {
+        showToast('Silakan impor data sebelum mengupload.');
+        return;
+      }
+      const json = JSON.stringify({
+        createdAt: new Date().toISOString(),
+        entries: submissionData
+      }, null, 2);
+      await uploadToDrive(`submission_${new Date().toISOString().slice(0,10)}.json`, json);
+    }
+
+    renderSubmissionTable();
   </script>
 </body>
 </html>
