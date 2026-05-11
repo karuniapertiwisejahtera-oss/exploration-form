@@ -13,6 +13,11 @@
       flex: 1; min-height: 0; position: relative;
       border: 1px solid #ccc; border-radius: 6px;
     }
+    /* Scrollbar horizontal prep-wrap selalu terlihat */
+    .prep-wrap::-webkit-scrollbar { height: 8px; width: 8px; }
+    .prep-wrap::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
+    .prep-wrap::-webkit-scrollbar-thumb { background: #aaa; border-radius: 4px; }
+    .prep-wrap::-webkit-scrollbar-thumb:hover { background: #888; }
     /* Body/html tidak scroll — hanya tabel yang scroll */
     html, body { overflow: hidden; height: 100%; }
     html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
@@ -22,12 +27,12 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 48px);
+      height: calc(100vh - 80px);
       padding: 4px 8px 0;
       gap: 0;
     }
     .form-section {
-      display: contents; /* biarkan children langsung masuk flex parent */
+      display: contents;
     }
     /* Kurangi space info-grid */
     .info-grid { margin-bottom: 2px; gap: 2px 10px; }
