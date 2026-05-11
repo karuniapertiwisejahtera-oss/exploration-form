@@ -215,17 +215,131 @@
     <div class="bottom-section">
       <h2 class="bottom-title">Welcome to<br>Exploration Form</h2>
       <p class="bottom-desc">Explore. Collect. Learn. Dive into a world of seamless field data and discovery. Start your journey today!</p>
-      <a href="silica-form.html" class="btn-start">GET STARTED</a>
+
+      <!-- Step 1: Tombol GET STARTED -->
+      <div id="step-start">
+        <button class="btn-start" onclick="handleGetStarted()">GET STARTED</button>
+      </div>
+
+      <!-- Step 2: Input OTP -->
+      <div id="step-otp" style="display:none;width:100%;">
+        <p style="font-size:12px;color:#888;text-align:center;margin-bottom:10px;">
+          Kode akses dikirim ke <strong>evi.intan47@gmail.com</strong>
+        </p>
+        <input type="text" id="otp-input" maxlength="6" placeholder="Masukkan 6 digit kode"
+          style="width:100%;border:2px solid #1a3d8f;border-radius:12px;padding:14px;font-size:22px;font-weight:700;text-align:center;letter-spacing:6px;outline:none;margin-bottom:10px;"
+          oninput="this.value=this.value.replace(/\D/g,'')">
+        <button class="btn-start" onclick="verifyOTP()" style="margin-top:0;">VERIFIKASI</button>
+        <button onclick="resendOTP()" id="btn-resend"
+          style="margin-top:8px;width:100%;background:none;border:none;color:#888;font-size:12px;cursor:pointer;">
+          Kirim ulang kode
+        </button>
+        <div id="otp-error" style="color:#e53935;font-size:12px;text-align:center;margin-top:6px;display:none;"></div>
+      </div>
+
+      <!-- Step 3: Loading -->
+      <div id="step-loading" style="display:none;text-align:center;padding:10px 0;">
+        <div style="font-size:13px;color:#1a6b4a;font-weight:600;">⏳ Mengirim kode...</div>
+      </div>
     </div>
 
   </div>
 
-  <script src="https://apis.google.com/js/api.js" async defer></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/drive.js"></script>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+    const EMAILJS_SERVICE  = 'service_zlgqpjd';
+    const EMAILJS_TEMPLATE = 'template_oskjo1g';
+    const EMAILJS_KEY      = 'dMGRap90eRCOhlpC6';
+    const TARGET_EMAIL     = 'evi.intan47@gmail.com';
+    const AUTH_KEY         = 'exploration_auth';
+
+    emailjs.init(EMAILJS_KEY);
+
+    let _currentOTP = '';
+
+    function generateOTP() {
+      return String(Math.floor(100000 + Math.random() * 900000));
+    }
+
+    function getTodayStr() {
+      return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    }
+
+    function isAuthValid() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(AUTH_KEY) || '{}');
+        return stored.date === getTodayStr();
+      } catch(e) { return false; }
+    }
+
+    function setAuthValid() {
+      localStorage.setItem(AUTH_KEY, JSON.stringify({ date: getTodayStr() }));
+    }
+
+    function handleGetStarted() {
+      // Cek apakah device sudah diaktivasi hari ini
+      if (isAuthValid()) {
+        window.location.href = 'silica-form.html';
+        return;
+      }
+      sendOTP();
+    }
+
+    function sendOTP() {
+      _currentOTP = generateOTP();
+      document.getElementById('step-start').style.display   = 'none';
+      document.getElementById('step-otp').style.display     = 'none';
+      document.getElementById('step-loading').style.display = 'block';
+
+      emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+        otp_code: _currentOTP
+      }).then(() => {
+        document.getElementById('step-loading').style.display = 'none';
+        document.getElementById('step-otp').style.display     = 'block';
+        setTimeout(() => document.getElementById('otp-input').focus(), 100);
+      }).catch(err => {
+        document.getElementById('step-loading').style.display = 'none';
+        document.getElementById('step-start').style.display   = 'block';
+        alert('Gagal mengirim kode: ' + (err.text || JSON.stringify(err)));
+      });
+    }
+
+    function verifyOTP() {
+      const input = document.getElementById('otp-input').value.trim();
+      const errEl = document.getElementById('otp-error');
+      if (input === _currentOTP) {
+        setAuthValid();
+        window.location.href = 'silica-form.html';
+      } else {
+        errEl.textContent = '❌ Kode salah. Coba lagi.';
+        errEl.style.display = 'block';
+        document.getElementById('otp-input').value = '';
+        document.getElementById('otp-input').focus();
+      }
+    }
+
+    function resendOTP() {
+      document.getElementById('otp-error').style.display = 'none';
+      document.getElementById('otp-input').value = '';
+      sendOTP();
+    }
+
+    // Enter key untuk verifikasi
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.getElementById('step-otp').style.display !== 'none') {
+        verifyOTP();
+      }
+    });
+
+    // Cek saat halaman load — jika sudah auth hari ini, langsung masuk
+    window.addEventListener('load', () => {
+      if (isAuthValid()) {
+        window.location.href = 'silica-form.html';
+      }
+    });
   </script>
 </body>
 </html>
