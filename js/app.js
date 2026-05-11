@@ -220,7 +220,8 @@ function showTabPopup(tab) {
 
 function initTabBar() {
   const cur = window.location.pathname.split('/').pop();
-  const isForm = FORM_TABS.some(t => t.url === cur);
+  // Tab bar hanya muncul di halaman form, bukan di menu utama (silica-form.html)
+  const isForm = FORM_TABS.some(t => t.url === cur && t.url !== 'silica-form.html');
   if (!isForm) return;
 
   const bar = document.createElement('div');
