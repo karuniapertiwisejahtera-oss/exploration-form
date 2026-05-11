@@ -32,26 +32,26 @@
     .prep-table thead tr:nth-child(1) th { top: 0; border-top: 1px solid #bbb; }
     .prep-table thead tr:nth-child(2) th { top: 22px; }
     .prep-table thead tr:nth-child(3) th { top: 44px; }
-    .prep-table thead th.g10  { background: #f0f0f0; color: #222; }
-    .prep-table thead th.g2   { background: #f0f0f0; color: #222; }
-    .prep-table thead th.g06  { background: #f0f0f0; color: #222; }
-    .prep-table thead th.gm06 { background: #f0f0f0; color: #222; }
-    .prep-table thead th.gp03 { background: #f0f0f0; color: #222; }
-    .prep-table thead th.gqaqc{ background: #fce4ec; color: #880e4f; }
+    .prep-table thead th.g10  { background: #1a6b4a; color: #fff; }
+    .prep-table thead th.g2   { background: #1a6b4a; color: #fff; }
+    .prep-table thead th.g06  { background: #1a6b4a; color: #fff; }
+    .prep-table thead th.gm06 { background: #1a6b4a; color: #fff; }
+    .prep-table thead th.gp03 { background: #1a6b4a; color: #fff; }
+    .prep-table thead th.gqaqc{ background: #1a6b4a; color: #fff; }
     /* Row 2 = Wet(Kg): warna sama dengan grup */
-    .prep-table thead tr:nth-child(2) th.g10  { background: #f0f0f0; }
-    .prep-table thead tr:nth-child(2) th.g2   { background: #f0f0f0; }
-    .prep-table thead tr:nth-child(2) th.g06  { background: #f0f0f0; }
-    .prep-table thead tr:nth-child(2) th.gm06 { background: #f0f0f0; }
-    .prep-table thead tr:nth-child(2) th.gp03 { background: #f0f0f0; }
-    .prep-table thead tr:nth-child(2) th.gqaqc{ background: #fce4ec; }
+    .prep-table thead tr:nth-child(2) th.g10  { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(2) th.g2   { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(2) th.g06  { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(2) th.gm06 { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(2) th.gp03 { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(2) th.gqaqc{ background: #1a6b4a; }
     /* Row 3 = Total/Rec: sedikit lebih gelap */
-    .prep-table thead tr:nth-child(3) th.g10  { background: #e0e0e0; }
-    .prep-table thead tr:nth-child(3) th.g2   { background: #e0e0e0; }
-    .prep-table thead tr:nth-child(3) th.g06  { background: #e0e0e0; }
-    .prep-table thead tr:nth-child(3) th.gm06 { background: #e0e0e0; }
-    .prep-table thead tr:nth-child(3) th.gp03 { background: #e0e0e0; }
-    .prep-table thead tr:nth-child(3) th.gqaqc{ background: #fce4ec; }
+    .prep-table thead tr:nth-child(3) th.g10  { background: #134d36; }
+    .prep-table thead tr:nth-child(3) th.g2   { background: #134d36; }
+    .prep-table thead tr:nth-child(3) th.g06  { background: #134d36; }
+    .prep-table thead tr:nth-child(3) th.gm06 { background: #134d36; }
+    .prep-table thead tr:nth-child(3) th.gp03 { background: #134d36; }
+    .prep-table thead tr:nth-child(3) th.gqaqc{ background: #134d36; }
     /* Baris data: tidak ada background warna, hanya garis tebal kiri sebagai pemisah grup */
     .prep-table td.g10  { background: transparent; }
     .prep-table td.g2   { background: transparent; }
@@ -85,8 +85,8 @@
     .prep-table th.c-wide { min-width: 88px; width: 88px; } /* colspan=2: 44+44 */
     .prep-table th.c-sid  { min-width: 80px; width: 80px; }
     .prep-table th.c-rem  { min-width: 140px; width: 140px; }
-    .prep-table th.c-cum  { min-width: 55px; width: 55px; background: #fff3e0; }
-    .prep-table th.c-send { min-width: 55px; width: 55px; background: #e8f5e9; }
+    .prep-table th.c-cum  { min-width: 55px; width: 55px; background: #1a6b4a; color: #fff; }
+    .prep-table th.c-send { min-width: 55px; width: 55px; background: #1a6b4a; color: #fff; }
     /* Lebar data cell ikut header */
     .prep-table td { min-width: 44px; }
 
@@ -278,15 +278,15 @@
         </div>
         <!-- Kanan: semua tombol lainnya -->
         <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
-          <button type="button" onclick="exportFormData()" style="background:#0277bd;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">📤 Export</button>
+          <button type="button" onclick="exportFormData()" style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">📤 Export Data</button>
           <label style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;" for="import-form-input">📥 Import</label>
           <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">
           <div style="width:1px;height:20px;background:#ccc;"></div>
-          <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="openWeightInput()">Weight</button>
-          <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="addQAQCRow('DS')">QAQC</button>
-          <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="saveData()">Save</button>
-          <button style="background:#e74c3c;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="clearData()">Clear</button>
-          <button style="background:#555;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="submitData()">Submit</button>
+          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="openWeightInput()">Input Weight</button>
+          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="addQAQCRow('DS')">QAQC</button>
+          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="saveData()">Save Data</button>
+          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="clearData()">Clear</button>
+          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="submitData()">Submit</button>
         </div>
       </div>
 
