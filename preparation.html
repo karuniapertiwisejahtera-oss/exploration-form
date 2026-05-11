@@ -269,24 +269,25 @@
       </div>
       </div>
 
-      <!-- Toolbar: Import/Export + Action buttons dalam satu baris -->
-      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;padding:6px 8px;background:#f8fffe;border:1px solid #d0ece4;border-radius:10px;">
-        <!-- Import Logging -->
-        <label style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;" for="csv-input">📂 Import</label>
-        <input type="file" id="csv-input" accept=".csv,.txt">
-        <!-- Export Form -->
-        <button type="button" onclick="exportFormData()" style="background:#0277bd;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">📤 Export</button>
-        <!-- Import Form -->
-        <label style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;" for="import-form-input">📥 Import</label>
-        <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">
-        <!-- Divider -->
-        <div style="width:1px;height:22px;background:#ccc;margin:0 2px;"></div>
-        <!-- Action buttons -->
-        <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="openWeightInput()">Weight</button>
-        <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="addQAQCRow('DS')">QAQC</button>
-        <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="saveData()">Save</button>
-        <button style="background:#e74c3c;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="clearData()">Clear</button>
-        <button style="background:#555;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="submitData()">Submit</button>
+      <!-- Toolbar: Import Logging kiri, tombol lainnya kanan -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;padding:6px 8px;background:#f8fffe;border:1px solid #d0ece4;border-radius:10px;">
+        <!-- Kiri: Import Logging -->
+        <div style="display:flex;align-items:center;gap:6px;">
+          <label style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;" for="csv-input">📂 Import Logging</label>
+          <input type="file" id="csv-input" accept=".csv,.txt">
+        </div>
+        <!-- Kanan: semua tombol lainnya -->
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <button type="button" onclick="exportFormData()" style="background:#0277bd;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">📤 Export</button>
+          <label style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;" for="import-form-input">📥 Import</label>
+          <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">
+          <div style="width:1px;height:20px;background:#ccc;"></div>
+          <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="openWeightInput()">Weight</button>
+          <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="addQAQCRow('DS')">QAQC</button>
+          <button style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="saveData()">Save</button>
+          <button style="background:#e74c3c;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="clearData()">Clear</button>
+          <button style="background:#555;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="submitData()">Submit</button>
+        </div>
       </div>
 
       <!-- Tabel -->
