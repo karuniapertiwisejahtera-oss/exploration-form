@@ -9,7 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
     .prep-wrap {
-      width: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
+      width: 100%; overflow: auto; -webkit-overflow-scrolling: touch;
       position: relative;
       border: 1px solid #ccc; border-radius: 6px;
       max-height: calc(100vh - 220px);
@@ -476,7 +476,7 @@
     // Jalankan setelah semua elemen render
     setTimeout(resizeAll, 100);
     setTimeout(resizeAll, 500);
-  </script>
+
     window.onerror = function(msg, src, line, col, err) {
       alert('JS Error: ' + msg + '\nLine: ' + line + '\n' + (err ? err.stack : ''));
       return false;
