@@ -31,10 +31,69 @@
       gap: 0;
     }
     .form-section { display: contents; }
-    .info-grid { margin-bottom: 2px; gap: 2px 10px; }
-    .info-row { font-size: 13px; }
-    .info-row label { font-size: 13px; }
-    .info-row input { font-size: 13px; padding: 1px 3px; }
+    .header-panel {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 20px;
+      background: #ffffff;
+      border: 1px solid #d9e4e2;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      box-shadow: 0 6px 18px rgba(13, 45, 48, 0.05);
+    }
+    .header-group {
+      display: grid;
+      gap: 10px;
+      min-width: 260px;
+      flex: 1 1 320px;
+    }
+    .header-group:nth-child(2) {
+      border-left: 1px solid #e6edec;
+      padding-left: 18px;
+      margin-left: 8px;
+    }
+    .header-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #eef3f2;
+    }
+    .header-field:last-child {
+      border-bottom: none;
+    }
+    .header-field label {
+      flex: 0 0 118px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #263238;
+      white-space: nowrap;
+    }
+    .header-field input {
+      flex: 1;
+      min-width: 130px;
+      padding: 8px 0;
+      border: none;
+      border-bottom: 1px solid #c7d2d0;
+      background: transparent;
+      font-size: 13px;
+      color: #1d3330;
+      outline: none;
+    }
+    .header-field input:focus {
+      border-bottom-color: #1a6b4a;
+    }
+    .header-field input[readonly] {
+      background: transparent;
+      color: #1a6b4a;
+      font-weight: 700;
+    }
+    .header-group .header-field input[type="date"] {
+      max-width: 175px;
+    }
 
     /* ===== MOBILE / HP RESPONSIVE ===== */
     @media (max-width: 768px) {
@@ -310,17 +369,18 @@
     <div class="form-section">
 
       <!-- Header Info -->
-      <div class="info-grid">
-        <div class="info-row"><label>Hole_ID:</label><input type="text" id="h-holeid" name="hole_id"></div>
-        <div class="info-row"><label>Sampler:</label><input type="text" id="h-sampler" name="sampler"></div>
-        <div class="info-row"><label>Sheet/Grid No.:</label><input type="text" id="h-sheet" name="sheet_no"></div>
-        <div class="info-row"><label>Date Start:</label><input type="date" id="h-date-start" name="date_start"></div>
-        <div class="info-row"><label>Deposit:</label><input type="text" id="h-deposit" name="deposit"></div>
-        <div class="info-row"><label>Date Finish:</label><input type="date" id="h-date-finish" name="date_finish"></div>
-        <div class="info-row"><label>Total Depth:</label><input type="number" id="h-depth" name="total_depth" step="0.01"></div>
-        <div class="info-row" style="justify-content:flex-end;">
-          <label>Total Sample:</label>
-          <input type="text" id="h-total-sample" name="total_sample" style="max-width:70px;" readonly>
+      <div class="header-panel">
+        <div class="header-group">
+          <div class="header-field"><label for="h-holeid">Hole_ID:</label><input type="text" id="h-holeid" name="hole_id"></div>
+          <div class="header-field"><label for="h-sheet">Sheet/Grid No.:</label><input type="text" id="h-sheet" name="sheet_no"></div>
+          <div class="header-field"><label for="h-deposit">Deposit:</label><input type="text" id="h-deposit" name="deposit"></div>
+          <div class="header-field"><label for="h-depth">Total Depth:</label><input type="number" id="h-depth" name="total_depth" step="0.01"></div>
+        </div>
+        <div class="header-group">
+          <div class="header-field"><label for="h-sampler">Sampler:</label><input type="text" id="h-sampler" name="sampler"></div>
+          <div class="header-field"><label for="h-date-start">Date Start:</label><input type="date" id="h-date-start" name="date_start"></div>
+          <div class="header-field"><label for="h-date-finish">Date Finish:</label><input type="date" id="h-date-finish" name="date_finish"></div>
+          <div class="header-field"><label for="h-total-sample">Total Sample:</label><input type="text" id="h-total-sample" name="total_sample" readonly></div>
         </div>
       </div>
 
