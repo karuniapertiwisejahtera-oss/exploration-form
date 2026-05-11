@@ -19,6 +19,135 @@ const DB = {
   }
 };
 
+// ===== UNDO / REDO MANAGER =====
+const UndoManager = {
+  _stack: [],   // history snapshots
+  _future: [],  // redo snapshots
+  _maxSize: 30,
+  _paused: false,
+
+  // Ambil snapshot semua input/select/textarea di halaman
+  _snapshot() {
+    const state = {};
+    document.querySelectorAll('input:not([type=file]), select, textarea').forEach(el => {
+      const key = el.id || el.name;
+      if (key) state[key] = el.value;
+    });
+    return JSON.stringify(state);
+  },
+
+  // Restore snapshot ke form
+  _restore(snap) {
+    this._paused = true;
+    try {
+      const state = JSON.parse(snap);
+      Object.entries(state).forEach(([key, val]) => {
+        const el = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
+        if (el && el.value !== val) {
+          el.value = val;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    } catch(e) {}
+    this._paused = false;
+    this._updateButtons();
+  },
+
+  // Simpan state saat ini ke history
+  push() {
+    if (this._paused) return;
+    const snap = this._snapshot();
+    // Jangan push jika sama dengan state terakhir
+    if (this._stack.length && this._stack[this._stack.length - 1] === snap) return;
+    this._stack.push(snap);
+    if (this._stack.length > this._maxSize) this._stack.shift();
+    this._future = []; // clear redo saat ada perubahan baru
+    this._updateButtons();
+  },
+
+  undo() {
+    if (this._stack.length < 2) { showToast('Tidak ada yang bisa di-undo', 'error'); return; }
+    const current = this._stack.pop();
+    this._future.push(current);
+    this._restore(this._stack[this._stack.length - 1]);
+    showToast('Undo');
+  },
+
+  redo() {
+    if (!this._future.length) { showToast('Tidak ada yang bisa di-redo', 'error'); return; }
+    const next = this._future.pop();
+    this._stack.push(next);
+    this._restore(next);
+    showToast('Redo');
+  },
+
+  _updateButtons() {
+    const undoBtn = document.getElementById('btn-undo');
+    const redoBtn = document.getElementById('btn-redo');
+    if (undoBtn) undoBtn.disabled = this._stack.length < 2;
+    if (redoBtn) redoBtn.disabled = this._future.length === 0;
+  },
+
+  // Pasang listener pada semua input di halaman
+  init() {
+    // Simpan state awal
+    setTimeout(() => { this.push(); }, 500);
+
+    // Pasang listener dengan debounce
+    let timer = null;
+    const handler = () => {
+      if (this._paused) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => this.push(), 600);
+    };
+    document.addEventListener('input',  handler);
+    document.addEventListener('change', handler);
+
+    // Keyboard shortcut Ctrl+Z / Ctrl+Y
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault(); this.undo();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault(); this.redo();
+      }
+    });
+
+    // Inject tombol undo/redo ke action-bar jika ada
+    document.addEventListener('DOMContentLoaded', () => {
+      const bar = document.querySelector('.action-bar');
+      if (!bar) return;
+      const undoBtn = document.createElement('button');
+      undoBtn.id = 'btn-undo';
+      undoBtn.className = 'btn';
+      undoBtn.title = 'Undo (Ctrl+Z)';
+      undoBtn.disabled = true;
+      undoBtn.style.cssText = 'background:#f5f5f5;color:#555;flex:0 0 auto;padding:6px 10px;font-size:16px;min-width:40px;';
+      undoBtn.innerHTML = '↩';
+      undoBtn.addEventListener('click', () => this.undo());
+
+      const redoBtn = document.createElement('button');
+      redoBtn.id = 'btn-redo';
+      redoBtn.className = 'btn';
+      redoBtn.title = 'Redo (Ctrl+Y)';
+      redoBtn.disabled = true;
+      redoBtn.style.cssText = 'background:#f5f5f5;color:#555;flex:0 0 auto;padding:6px 10px;font-size:16px;min-width:40px;';
+      redoBtn.innerHTML = '↪';
+      redoBtn.addEventListener('click', () => this.redo());
+
+      bar.insertBefore(redoBtn, bar.firstChild);
+      bar.insertBefore(undoBtn, bar.firstChild);
+    });
+  }
+};
+
+// Auto-init UndoManager di semua halaman form
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.querySelector('.action-bar, .form-container')) {
+    UndoManager.init();
+  }
+});
+
 // ===== TOAST NOTIFICATION =====
 function showToast(msg, type = 'success') {
   let toast = document.getElementById('toast');
