@@ -8,7 +8,7 @@ const ASSETS = [
   '/core-loss.html',
   '/daily-sheet.html',
   '/inspection.html',
-  '/p5m.html',
+  '/submission.html',
   '/logging.html',
   '/preparation.html',
   '/css/style.css',

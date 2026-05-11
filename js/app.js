@@ -301,7 +301,7 @@ const FORM_TABS = [
   { label: 'Core Loss',    url: 'core-loss.html',   key: 'core_loss'   },
   { label: 'Logging',      url: 'logging.html',     key: 'logging'     },
   { label: 'Inspection',   url: 'inspection.html',  key: 'inspection'  },
-  { label: 'P5M',          url: 'p5m.html',         key: 'p5m'         },
+  { label: 'Submission',   url: 'submission.html',  key: 'submission'  },
 ];
 
 // Popup NEW / CONTINUE
