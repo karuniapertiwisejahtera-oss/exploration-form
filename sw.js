@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'exploration-form-v149';
+﻿const CACHE_NAME = 'exploration-form-v150';
 const ASSETS = [
   '/',
   '/index.html',

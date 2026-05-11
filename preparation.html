@@ -13,6 +13,18 @@
       max-height: calc(100vh - 240px); position: relative;
       border: 1px solid #ccc; border-radius: 6px;
     }
+    /* Sembunyikan scrollbar vertikal halaman */
+    html, body {
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+    .form-container {
+      overflow-y: auto;
+      max-height: calc(100vh - 80px);
+    }
+    /* Sembunyikan scrollbar browser */
+    html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
+    html, body { scrollbar-width: none; -ms-overflow-style: none; }
     .prep-table {
       border-collapse: separate; border-spacing: 0;
       font-size: 11px; white-space: nowrap;
