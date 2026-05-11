@@ -101,7 +101,7 @@
       padding: 4px 5px; text-align: center; vertical-align: middle;
     }
     .prep-table thead th {
-      background: #c5d8f7; font-weight: 700; font-size: 10px;
+      background: #1a6b4a; color: #fff; font-weight: 700; font-size: 10px;
       line-height: 1.2; position: sticky; z-index: 3;
       padding: 2px 4px; height: 22px; max-height: 22px;
       overflow: hidden;
@@ -124,13 +124,13 @@
     .prep-table thead tr:nth-child(2) th.gm06 { background: #1a6b4a; }
     .prep-table thead tr:nth-child(2) th.gp03 { background: #1a6b4a; }
     .prep-table thead tr:nth-child(2) th.gqaqc{ background: #1a6b4a; }
-    /* Row 3 = Total/Rec: sedikit lebih gelap */
-    .prep-table thead tr:nth-child(3) th.g10  { background: #134d36; }
-    .prep-table thead tr:nth-child(3) th.g2   { background: #134d36; }
-    .prep-table thead tr:nth-child(3) th.g06  { background: #134d36; }
-    .prep-table thead tr:nth-child(3) th.gm06 { background: #134d36; }
-    .prep-table thead tr:nth-child(3) th.gp03 { background: #134d36; }
-    .prep-table thead tr:nth-child(3) th.gqaqc{ background: #134d36; }
+    /* Row 3 = Total/Rec: hijau */
+    .prep-table thead tr:nth-child(3) th.g10  { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(3) th.g2   { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(3) th.g06  { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(3) th.gm06 { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(3) th.gp03 { background: #1a6b4a; }
+    .prep-table thead tr:nth-child(3) th.gqaqc{ background: #1a6b4a; }
     /* Baris data: tidak ada background warna, hanya garis tebal kiri sebagai pemisah grup */
     .prep-table td.g10  { background: transparent; }
     .prep-table td.g2   { background: transparent; }
@@ -152,7 +152,7 @@
     .prep-table th.col-freeze, .prep-table td.col-freeze {
       position: sticky; background: #e8f4fd; z-index: 2;
     }
-    .prep-table thead th.col-freeze { background: #b8d4f0; z-index: 5; }
+    .prep-table thead th.col-freeze { background: #1a6b4a; z-index: 5; }
     .prep-table .cf1 { left: 0;     min-width: 52px; width: 52px; }
     .prep-table .cf2 { left: 53px;  min-width: 52px; width: 52px; }
     .prep-table .cf3 { left: 106px; min-width: 54px; width: 54px; }
@@ -232,10 +232,6 @@
       outline: 2px solid #f9a825 !important;
       border-radius: 3px;
     }
-      background: transparent; color: #ff9800; border: none;
-      border-radius: 3px; padding: 1px 3px; font-size: 14px;
-      cursor: pointer; white-space: nowrap; line-height: 1;
-    }
     .btn-merge.active { color: #e65100; }
 
     /* Mode pilih baris */
@@ -256,16 +252,6 @@
       background: white; color: #e65100; border: none;
       border-radius: 6px; padding: 4px 10px; font-size: 11px;
       font-weight: 700; cursor: pointer; margin-left: auto;
-    }
-
-    /* Info grid */
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; margin-bottom: 10px; }
-    .info-row { display: flex; align-items: center; gap: 4px; font-size: 15px; }
-    .info-row label { font-weight: 700; white-space: nowrap; flex-shrink: 0; font-size: 15px; }
-    .info-row input {
-      flex: 1; border: none; border-bottom: 1px solid #999; outline: none;
-      font-size: 15px; padding: 2px 3px; background: transparent; min-width: 0; width: 0;
-      text-transform: uppercase;
     }
 
     /* CSV bar */
@@ -357,6 +343,8 @@
         </div>
         <!-- Kanan: semua tombol lainnya -->
         <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
+          <button id="btn-undo" type="button" onclick="UndoManager.undo()" title="Undo (Ctrl+Z)" style="background:#f5f5f5;color:#555;padding:5px 10px;border-radius:7px;font-size:16px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;min-width:40px;" disabled>↩</button>
+          <button id="btn-redo" type="button" onclick="UndoManager.redo()" title="Redo (Ctrl+Y)" style="background:#f5f5f5;color:#555;padding:5px 10px;border-radius:7px;font-size:16px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;min-width:40px;" disabled>↪</button>
           <button type="button" onclick="exportFormData()" style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">📤 Export Data</button>
           <label style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;" for="import-form-input">📥 Import</label>
           <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">

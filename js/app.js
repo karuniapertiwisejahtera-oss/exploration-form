@@ -141,6 +141,9 @@ const UndoManager = {
   }
 };
 
+// Make UndoManager globally available
+window.UndoManager = UndoManager;
+
 // Auto-init UndoManager di semua halaman form
 document.addEventListener('DOMContentLoaded', () => {
   if (document.querySelector('.action-bar, .form-container')) {
