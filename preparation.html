@@ -2102,6 +2102,7 @@
       document.getElementById('csv-filename').textContent = 'Pilih file .csv dari HP';
       document.getElementById('csv-input').value = '';
       rowCount = 0; window._editRecordId = null;
+      localStorage.removeItem('prep_draft');
       cancelMerge();
       addRow();
       showToast('Form dikosongkan');
@@ -2941,6 +2942,46 @@
       } catch(e) {}
     }
 
+    // ===== AUTO-SAVE DRAFT (tanpa validasi, untuk restore saat refresh) =====
+    function autoSaveDraft() {
+      try {
+        const data = {};
+        ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
+          const el = document.querySelector('[name="' + k + '"]');
+          if (el) data[k] = el.value;
+        });
+        const FIELDS_DRAFT = [
+          'from','to','len','rec','grain','core_wt','from_cum','to_cum',
+          'samp_no','send_cum','sample_id','dry_wt','m06_orig_sid',
+          'a10_tot','a10_rec','a10_sid','a2_tot','a2_rec','a2_sid',
+          'a06_tot','a06_rec','a06_sid','m06_tot','m06_rec','m06_sid',
+          'p03_tot','p03_rec','p03_sid','qaqc_sid','qaqc_wt','jenis','remarks'
+        ];
+        const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+        data.row_count = domRows.length;
+        domRows.forEach((tr, idx) => {
+          const pos = idx + 1;
+          const origN = tr.dataset.row;
+          if (tr.dataset.mergeGroup) data['merge_group_' + pos] = tr.dataset.mergeGroup;
+          FIELDS_DRAFT.forEach(field => {
+            const el = document.querySelector('[name="' + field + '_' + origN + '"]');
+            data[field + '_' + pos] = el ? el.value : '';
+          });
+        });
+        localStorage.setItem('prep_draft', JSON.stringify(data));
+      } catch(e) {}
+    }
+
+    // Pasang auto-save draft pada setiap input/change di form
+    function attachAutoSave() {
+      document.getElementById('prep-tbody').addEventListener('input',  autoSaveDraft);
+      document.getElementById('prep-tbody').addEventListener('change', autoSaveDraft);
+      document.querySelectorAll('.info-row input').forEach(el => {
+        el.addEventListener('input',  autoSaveDraft);
+        el.addEventListener('change', autoSaveDraft);
+      });
+    }
+
     // ===== LOAD MODE EDIT / CONTINUE =====
     window.addEventListener('load', () => {
       const mode = sessionStorage.getItem('form_mode');
@@ -3022,27 +3063,49 @@
           updateFracLock();
         }
       } else {
-        // Cek apakah ada data tersimpan di DB (auto-restore saat refresh)
-        const saved = DB.getAll('preparation');
-        if (saved.length) {
-          const last = saved[saved.length - 1];
-          ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
-            const el = document.querySelector('[name="'+k+'"]');
-            if (el && last[k] !== undefined) el.value = last[k];
-          });
-          restoreRows(last);
-          window._editRecordId = last.id;
-          restoreMergeVisibility();
-          recalcSamplingNo();
-          highlightDuplicates();
-          restoreQAQCClass();
-          updateFracLock();
+        // Cek draft localStorage dulu (paling fresh, termasuk data belum di-Save)
+        const draftStr = localStorage.getItem('prep_draft');
+        if (draftStr) {
+          try {
+            const draft = JSON.parse(draftStr);
+            ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
+              const el = document.querySelector('[name="'+k+'"]');
+              if (el && draft[k] !== undefined) el.value = draft[k];
+            });
+            restoreRows(draft);
+            restoreMergeVisibility();
+            recalcSamplingNo();
+            highlightDuplicates();
+            restoreQAQCClass();
+            updateFracLock();
+          } catch(e) {
+            addRow();
+          }
         } else {
-          addRow();
+          // Fallback: cek DB
+          const saved = DB.getAll('preparation');
+          if (saved.length) {
+            const last = saved[saved.length - 1];
+            ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
+              const el = document.querySelector('[name="'+k+'"]');
+              if (el && last[k] !== undefined) el.value = last[k];
+            });
+            restoreRows(last);
+            window._editRecordId = last.id;
+            restoreMergeVisibility();
+            recalcSamplingNo();
+            highlightDuplicates();
+            restoreQAQCClass();
+            updateFracLock();
+          } else {
+            addRow();
+          }
         }
       }
       sessionStorage.removeItem('form_mode');
       sessionStorage.removeItem('edit_record_id');
+      // Pasang auto-save setelah semua baris di-restore
+      setTimeout(attachAutoSave, 300);
     });
   </script>
 
