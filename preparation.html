@@ -35,6 +35,63 @@
     .info-row { font-size: 13px; }
     .info-row label { font-size: 13px; }
     .info-row input { font-size: 13px; padding: 1px 3px; }
+
+    /* ===== MOBILE / HP RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      /* Info grid: 1 kolom di HP */
+      .info-grid {
+        grid-template-columns: 1fr !important;
+        gap: 2px 0 !important;
+        margin-bottom: 3px;
+      }
+      .info-row { font-size: 12px; }
+      .info-row label { font-size: 12px; min-width: 90px; }
+      .info-row input { font-size: 12px; }
+
+      /* Page header lebih kecil */
+      .page-header { padding: 8px 12px; }
+      .page-header h1 { font-size: 14px; }
+
+      /* Toolbar tombol: wrap ke baris baru jika perlu */
+      .prep-toolbar { flex-wrap: wrap !important; gap: 4px !important; }
+      .prep-toolbar button, .prep-toolbar label {
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+        border-radius: 6px !important;
+      }
+
+      /* Tabel: font lebih kecil agar muat lebih banyak kolom */
+      .prep-table { font-size: 10px !important; }
+      .prep-table th, .prep-table td { padding: 3px 3px !important; }
+      .prep-table thead th { font-size: 9px !important; height: 18px !important; max-height: 18px !important; }
+      .prep-table thead tr { height: 18px !important; }
+      .prep-table thead tr:nth-child(1) th { top: 0 !important; }
+      .prep-table thead tr:nth-child(2) th { top: 18px !important; }
+      .prep-table thead tr:nth-child(3) th { top: 36px !important; }
+
+      /* Input dalam tabel lebih kecil */
+      .prep-table td input, .prep-table td select {
+        font-size: 10px !important;
+        padding: 1px 1px !important;
+      }
+
+      /* Tombol hapus dan merge lebih kecil */
+      .btn-del-row { font-size: 12px !important; padding: 1px 2px !important; }
+      .btn-merge { font-size: 12px !important; padding: 1px 2px !important; }
+
+      /* Freeze kolom lebih sempit di HP */
+      .prep-table .cf1 { min-width: 36px !important; width: 36px !important; left: 0 !important; }
+      .prep-table .cf2 { min-width: 36px !important; width: 36px !important; left: 37px !important; }
+      .prep-table .cf3 { min-width: 36px !important; width: 36px !important; left: 74px !important; }
+      .prep-table .cf4 { min-width: 50px !important; width: 50px !important; left: 111px !important; }
+      .prep-table .cf5 { min-width: 50px !important; width: 50px !important; left: 162px !important; }
+    }
+
+    /* Touch: tap area lebih besar */
+    @media (pointer: coarse) {
+      .btn-del-row, .btn-merge { min-width: 28px; min-height: 28px; }
+      .prep-table td input, .prep-table td select { min-height: 28px; }
+    }
     .prep-table {
       border-collapse: separate; border-spacing: 0;
       font-size: 11px; white-space: nowrap;
@@ -292,7 +349,7 @@
       </div>
 
       <!-- Toolbar: Import Logging kiri, tombol lainnya kanan -->
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;padding:6px 8px;background:#f8fffe;border:1px solid #d0ece4;border-radius:10px;">
+      <div class="prep-toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px;padding:5px 6px;background:#f8fffe;border:1px solid #d0ece4;border-radius:8px;">
         <!-- Kiri: Import Logging -->
         <div style="display:flex;align-items:center;gap:6px;">
           <label style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;" for="csv-input">📂 Import Logging</label>
