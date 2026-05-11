@@ -197,13 +197,24 @@
           </div>`;
         });
       } else if (HOLE_ID_KEYS.includes(key)) {
-        // Tampilkan hanya Hole ID
-        records.forEach((rec, idx) => {
+        // Tampilkan hanya Hole ID — urutkan terbaru ke terlama
+        const sortedRecords = [...records].sort((a, b) => b.id - a.id);
+
+        // Box pencarian Hole ID (khusus preparation)
+        const searchId = 'dv-search-' + key;
+        html += `<div style="padding:8px 12px 4px;">
+          <input type="text" id="${searchId}" placeholder="🔍 Cari Hole ID..."
+            style="width:100%;border:1.5px solid #a8d5b5;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;"
+            oninput="filterDvRecords('${key}','${searchId}')">
+        </div>`;
+
+        sortedRecords.forEach((rec, idx) => {
           const ts  = new Date(rec.timestamp).toLocaleString('id-ID');
-          const hid = rec.hole_id || '—';
-          html += `<div class="dv-record">
+          const hid = (rec.hole_id || '—').toUpperCase();
+          const recNum = records.length - records.indexOf(rec); // nomor dari terbaru
+          html += `<div class="dv-record" data-holeid="${hid}" data-key="${key}">
             <div class="dv-record-header">
-              <span>Record #${idx+1}</span>
+              <span>Record #${recNum}</span>
               <span style="opacity:0.8;font-weight:400;">${ts}</span>
             </div>
             <div class="dv-record-body" style="padding:10px 12px;">
@@ -254,6 +265,14 @@
 
     function closeDataView() { document.getElementById('dataview-overlay').style.display = 'none'; }
     function closeDataViewOutside(e) { if (e.target===document.getElementById('dataview-overlay')) closeDataView(); }
+
+    function filterDvRecords(key, searchId) {
+      const q = document.getElementById(searchId).value.trim().toUpperCase();
+      document.querySelectorAll(`.dv-record[data-key="${key}"]`).forEach(el => {
+        const hid = (el.dataset.holeid || '').toUpperCase();
+        el.style.display = (!q || hid.includes(q)) ? '' : 'none';
+      });
+    }
 
     function editRecord(key, id, url) {
       sessionStorage.setItem('form_mode', 'edit');
