@@ -10,21 +10,28 @@
   <style>
     .prep-wrap {
       width: 100%; overflow: auto; -webkit-overflow-scrolling: touch;
-      max-height: calc(100vh - 240px); position: relative;
+      flex: 1; min-height: 0; position: relative;
       border: 1px solid #ccc; border-radius: 6px;
     }
-    /* Sembunyikan scrollbar vertikal halaman */
-    html, body {
-      overflow-x: hidden;
-      overflow-y: hidden;
-    }
-    .form-container {
-      overflow-y: auto;
-      max-height: calc(100vh - 80px);
-    }
-    /* Sembunyikan scrollbar browser */
+    /* Body/html tidak scroll — hanya tabel yang scroll */
+    html, body { overflow: hidden; height: 100%; }
     html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     html, body { scrollbar-width: none; -ms-overflow-style: none; }
+    /* form-container mengisi sisa tinggi layar */
+    .form-container {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 80px);
+      padding-bottom: 4px;
+    }
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
     .prep-table {
       border-collapse: separate; border-spacing: 0;
       font-size: 11px; white-space: nowrap;
