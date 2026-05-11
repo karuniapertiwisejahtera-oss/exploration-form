@@ -18,10 +18,9 @@
     .prep-wrap::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
     .prep-wrap::-webkit-scrollbar-thumb { background: #aaa; border-radius: 4px; }
     .prep-wrap::-webkit-scrollbar-thumb:hover { background: #888; }
-    /* Body/html tidak scroll */
-    html, body { overflow: hidden; height: 100%; }
-    html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
-    html, body { scrollbar-width: none; -ms-overflow-style: none; }
+    /* Body/html: sembunyikan scrollbar horizontal saja */
+    html, body { overflow-x: hidden; }
+    html::-webkit-scrollbar:horizontal, body::-webkit-scrollbar:horizontal { display: none; }
     /* Layout */
     .form-container {
       overflow: hidden;
