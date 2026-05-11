@@ -10,41 +10,31 @@
   <style>
     .prep-wrap {
       width: 100%; overflow: auto; -webkit-overflow-scrolling: touch;
-      flex: 1; min-height: 0; position: relative;
+      position: relative;
       border: 1px solid #ccc; border-radius: 6px;
     }
-    /* Scrollbar horizontal prep-wrap selalu terlihat */
+    /* Scrollbar prep-wrap selalu terlihat */
     .prep-wrap::-webkit-scrollbar { height: 8px; width: 8px; }
     .prep-wrap::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
     .prep-wrap::-webkit-scrollbar-thumb { background: #aaa; border-radius: 4px; }
     .prep-wrap::-webkit-scrollbar-thumb:hover { background: #888; }
-    /* Body/html tidak scroll — hanya tabel yang scroll */
+    /* Body/html tidak scroll */
     html, body { overflow: hidden; height: 100%; }
     html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; }
     html, body { scrollbar-width: none; -ms-overflow-style: none; }
-    /* Layout utama: header → toolbar → tabel, tanpa gap */
+    /* Layout */
     .form-container {
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 80px);
       padding: 4px 8px 0;
       gap: 0;
     }
-    .form-section {
-      display: contents;
-    }
-    /* Kurangi space info-grid */
+    .form-section { display: contents; }
     .info-grid { margin-bottom: 2px; gap: 2px 10px; }
     .info-row { font-size: 13px; }
     .info-row label { font-size: 13px; }
     .info-row input { font-size: 13px; padding: 1px 3px; }
-    /* prep-wrap mengisi sisa ruang */
-    .prep-wrap {
-      flex: 1 !important;
-      min-height: 0 !important;
-      max-height: none !important;
-    }
     .prep-table {
       border-collapse: separate; border-spacing: 0;
       font-size: 11px; white-space: nowrap;
@@ -398,6 +388,38 @@
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
   <script>
+    // Hitung tinggi prep-wrap secara dinamis
+    function fitPrepWrap() {
+      const wrap = document.querySelector('.prep-wrap');
+      const container = document.querySelector('.form-container');
+      if (!wrap || !container) return;
+      // Hitung total tinggi semua sibling sebelum prep-wrap
+      let usedH = 0;
+      Array.from(container.children).forEach(el => {
+        if (el === wrap) return;
+        usedH += el.getBoundingClientRect().height;
+      });
+      // Tinggi tersedia = tinggi container - tinggi sibling
+      const containerH = container.getBoundingClientRect().height;
+      const available = containerH - usedH - 2;
+      wrap.style.height = Math.max(100, available) + 'px';
+    }
+    // Set tinggi form-container dulu
+    function fitContainer() {
+      const container = document.querySelector('.form-container');
+      if (!container) return;
+      const pageHeader = document.querySelector('.page-header');
+      const tabBar = document.getElementById('tab-bar');
+      const headerH = pageHeader ? pageHeader.getBoundingClientRect().height : 48;
+      const tabH = tabBar ? tabBar.getBoundingClientRect().height : 0;
+      container.style.height = (window.innerHeight - headerH - tabH) + 'px';
+    }
+    function resizeAll() { fitContainer(); fitPrepWrap(); }
+    window.addEventListener('resize', resizeAll);
+    // Jalankan setelah semua elemen render
+    setTimeout(resizeAll, 100);
+    setTimeout(resizeAll, 500);
+  </script>
     window.onerror = function(msg, src, line, col, err) {
       alert('JS Error: ' + msg + '\nLine: ' + line + '\n' + (err ? err.stack : ''));
       return false;
