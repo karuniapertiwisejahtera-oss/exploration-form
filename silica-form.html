@@ -37,17 +37,22 @@
     .btn-edit { background:#e8f5e9; color:#1a6b4a; border:none; padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:600; }
     .btn-del  { background:#fdecea; color:#c62828; border:none; padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:600; }
 
-    /* Menu tombol kompak */
-    .menu-btn {
-      display:flex; align-items:center; gap:10px;
-      background:white; border:1.5px solid #e0f0e8; border-radius:12px;
-      padding:12px 14px; cursor:pointer; font-size:13px; font-weight:600;
-      color:#1a2e22; text-align:left; transition:background 0.15s, transform 0.1s;
-      box-shadow:0 1px 4px rgba(0,0,0,0.07);
+    /* Menu tombol icon grid */
+    .menu-grid-new {
+      display:flex; flex-wrap:wrap; gap:12px;
+      justify-content:flex-start; padding:4px 0;
     }
-    .menu-btn:active { transform:scale(0.97); background:#e8f5e9; }
+    .menu-btn {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:6px; background:white; border:1.5px solid #e0f0e8; border-radius:14px;
+      padding:14px 10px; cursor:pointer; font-size:11px; font-weight:600;
+      color:#1a2e22; text-align:center; transition:background 0.15s, transform 0.1s;
+      box-shadow:0 1px 4px rgba(0,0,0,0.07);
+      width:80px; min-height:80px;
+    }
+    .menu-btn:active { transform:scale(0.95); background:#e8f5e9; }
     .menu-btn:hover  { background:#f0faf4; }
-    .menu-btn-icon   { font-size:20px; line-height:1; flex-shrink:0; }
+    .menu-btn-icon   { font-size:32px; line-height:1; }
   </style>
 </head>
 <body>
@@ -57,7 +62,7 @@
   </div>
 
   <div class="menu-container" style="padding:12px 16px;">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+    <div class="menu-grid-new">
       <button class="menu-btn" onclick="openModal('actual-run.html','actual_run','Actual Run','⏱️')">
         <span class="menu-btn-icon">⏱️</span><span>Actual Run</span>
       </button>
@@ -76,7 +81,7 @@
       <button class="menu-btn" onclick="openModal('preparation.html','preparation','Preparation','🧪')">
         <span class="menu-btn-icon">🧪</span><span>Preparation</span>
       </button>
-      <button class="menu-btn" style="grid-column:1/-1;" onclick="openModal('p5m.html','p5m','P5M','⛑️')">
+      <button class="menu-btn" onclick="openModal('p5m.html','p5m','P5M','⛑️')">
         <span class="menu-btn-icon">⛑️</span><span>P5M</span>
       </button>
     </div>
