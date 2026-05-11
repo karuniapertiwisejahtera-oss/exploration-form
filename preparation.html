@@ -625,6 +625,7 @@
 
     function updateTotalSample() {
       document.getElementById('h-total-sample').value = rowCount;
+      if (typeof autoSaveDraft === 'function') autoSaveDraft();
     }
 
     // ===== HAPUS BARIS =====
@@ -1752,6 +1753,7 @@
       highlightDuplicates();
       closeFracModal();
       showToast(`${finalCount} fraksi diisi untuk ${sampNo}`);
+      autoSaveDraft();
 
       // Jika baris ini single (tidak ada merge group), otomatis tambah baris WS dan gabungkan
       const trEl = document.getElementById('prep-row-' + rowNum);
@@ -1819,6 +1821,7 @@
       updateFracLock();
       highlightDuplicates();
       showToast('Baris WS otomatis ditambahkan');
+      autoSaveDraft();
     }
 
     // ===== UNMERGE =====
@@ -1848,7 +1851,8 @@
       showToast('Gabungan dilepas');
       recalcSamplingNo();
       highlightDuplicates();
-          restoreQAQCClass();
+      restoreQAQCClass();
+      autoSaveDraft();
     }
 
     // Tombol Terapkan sudah ada di HTML merge-banner
