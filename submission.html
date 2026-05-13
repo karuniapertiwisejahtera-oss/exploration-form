@@ -6,17 +6,28 @@
   <title>Form Submission</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
+    html, body { height: 100%; overflow: hidden; }
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 80px);
+      padding: 8px;
+      overflow: hidden;
+    }
     .submission-card {
       background: #fff;
       border: 1px solid #ddd;
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
     }
     .submission-card h2 {
-      margin: 0 0 14px;
-      font-size: 18px;
+      margin: 0 0 10px;
+      font-size: 16px;
       color: var(--primary);
     }
     .import-panel {
@@ -77,9 +88,9 @@
     }
     .table-wrap {
       overflow-x: auto;
-      margin: 12px auto 0;
-      max-width: 920px;
-      max-height: 320px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
     }
@@ -254,19 +265,24 @@
           return;
         }
         const headers = Object.keys(rows[0]);
+        // Debug: tampilkan header yang ditemukan
+        console.log('CSV Headers:', headers);
         const sampleKey = findSampleKey(headers);
-        if (!sampleKey) {
-          showToast('Kolom tidak ditemukan. Header CSV: ' + headers.join(', '), 'error');
-          return;
-        }
         const batchKey = findBatchKey(headers);
         const subNoKey = findSubmissionNoKey(headers);
+        console.log('sampleKey:', sampleKey, '| batchKey:', batchKey, '| subNoKey:', subNoKey);
+        if (!sampleKey) {
+          showToast('Kolom tidak ditemukan. Header: ' + headers.join(' | '), 'error');
+          return;
+        }
         sampleField = sampleKey;
         batchField = batchKey || 'batch';
 
         // Ambil No Submission dari baris pertama
         if (subNoKey && rows[0][subNoKey]) {
           document.getElementById('submission-number').textContent = rows[0][subNoKey];
+        } else {
+          document.getElementById('submission-number').textContent = '-';
         }
 
         submissionData = rows.map((row) => ({
@@ -335,24 +351,36 @@
     }
 
     function findSampleKey(keys) {
-      const normalized = keys.map(k => k.toLowerCase().replace(/[\s_-]/g, ''));
-      const candidates = ['sampleid', 'sample_id', 'sample', 'id', 'waybill', 'nowaybill', 'no', 'barcode', 'code'];
-      const found = candidates.find(key => normalized.includes(key));
-      if (found) return keys[normalized.indexOf(found)];
-      return keys[0] || null;
+      // Cari exact match dulu (case-insensitive)
+      const exactMatch = keys.find(k => k.trim().toLowerCase() === 'sample id' || k.trim().toLowerCase() === 'sample_id' || k.trim().toLowerCase() === 'sampleid');
+      if (exactMatch) return exactMatch;
+      // Cari yang mengandung "sample"
+      const sampleMatch = keys.find(k => k.trim().toLowerCase().includes('sample'));
+      if (sampleMatch) return sampleMatch;
+      // Cari yang mengandung "gs" atau "id" tapi bukan "no"
+      const idMatch = keys.find(k => {
+        const n = k.trim().toLowerCase();
+        return (n.includes('id') || n.includes('gs')) && !n.startsWith('no');
+      });
+      if (idMatch) return idMatch;
+      // Fallback: kolom terakhir sebelum "cek"
+      const cekIdx = keys.findIndex(k => k.trim().toLowerCase() === 'cek');
+      if (cekIdx > 0) return keys[cekIdx - 1];
+      return keys[keys.length - 1] || null;
+    }
+
+    function findSubmissionNoKey(keys) {
+      // Cari exact match "no submission" atau "no. submission"
+      const exact = keys.find(k => /no[\s._-]*submission/i.test(k.trim()));
+      if (exact) return exact;
+      const sub = keys.find(k => /submission/i.test(k.trim()));
+      if (sub) return sub;
+      return null;
     }
 
     function findBatchKey(keys) {
       const normalized = keys.map(k => k.toLowerCase().replace(/[\s_-]/g, ''));
       const candidates = ['batch', 'batchno', 'lot', 'package', 'pack', 'grup', 'group'];
-      const found = candidates.find(key => normalized.includes(key));
-      if (found) return keys[normalized.indexOf(found)];
-      return null;
-    }
-
-    function findSubmissionNoKey(keys) {
-      const normalized = keys.map(k => k.toLowerCase().replace(/[\s_-]/g, ''));
-      const candidates = ['nosubmission', 'submissionno', 'submission', 'nosub', 'subno'];
       const found = candidates.find(key => normalized.includes(key));
       if (found) return keys[normalized.indexOf(found)];
       return null;
