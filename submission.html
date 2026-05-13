@@ -515,7 +515,14 @@
       document.body.removeChild(link);
     }
 
-    loadSubmissionState();
+    // Cek mode: jika NEW, bersihkan state dulu
+    const _formMode = sessionStorage.getItem('form_mode');
+    if (_formMode === 'new') {
+      clearSubmissionState();
+      sessionStorage.removeItem('form_mode');
+    } else {
+      loadSubmissionState();
+    }
     renderSubmissionTable();
   </script>
 </body>
