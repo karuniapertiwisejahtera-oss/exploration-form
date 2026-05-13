@@ -163,8 +163,8 @@
       </div>
 
       <div class="scan-panel">
-        <label>Scan Barcode No. Waybill</label>
-        <input id="scan-input" type="text" placeholder="Scan atau ketik No. Waybill lalu tekan Enter" onkeydown="handleScanKey(event)">
+        <label>Scan Barcode Sample ID</label>
+        <input id="scan-input" type="text" placeholder="Scan atau ketik Sample ID lalu tekan Enter" onkeydown="handleScanKey(event)">
         <div class="scan-actions">
           <div class="status-summary">
             <div class="status-chip">Total: <span id="summary-total">0</span></div>
@@ -185,7 +185,7 @@
             <tr>
               <th>No</th>
               <th>Batch</th>
-              <th>No. Waybill</th>
+              <th>Sample ID</th>
               <th>Cek</th>
             </tr>
           </thead>
@@ -260,10 +260,17 @@
           return;
         }
         const batchKey = findBatchKey(headers);
+        const subNoKey = findSubmissionNoKey(headers);
         sampleField = sampleKey;
         batchField = batchKey || 'batch';
+
+        // Ambil No Submission dari baris pertama
+        if (subNoKey && rows[0][subNoKey]) {
+          document.getElementById('submission-number').textContent = rows[0][subNoKey];
+        }
+
         submissionData = rows.map((row) => ({
-          batch: (batchKey ? row[batchKey] : row['batch'] || row['batch_no'] || row['lot'] || '').toString().trim(),
+          batch: (batchKey ? row[batchKey] : '').toString().trim(),
           id: (row[sampleKey] || '').toString().trim(),
           info: formatInfo(row, sampleKey),
           status: 'pending'
@@ -329,16 +336,23 @@
 
     function findSampleKey(keys) {
       const normalized = keys.map(k => k.toLowerCase().replace(/[\s_-]/g, ''));
-      const candidates = ['sampleid', 'sample', 'id', 'waybill', 'nowaybill', 'no', 'barcode', 'code'];
+      const candidates = ['sampleid', 'sample_id', 'sample', 'id', 'waybill', 'nowaybill', 'no', 'barcode', 'code'];
       const found = candidates.find(key => normalized.includes(key));
       if (found) return keys[normalized.indexOf(found)];
-      // Fallback: ambil kolom pertama
       return keys[0] || null;
     }
 
     function findBatchKey(keys) {
       const normalized = keys.map(k => k.toLowerCase().replace(/[\s_-]/g, ''));
       const candidates = ['batch', 'batchno', 'lot', 'package', 'pack', 'grup', 'group'];
+      const found = candidates.find(key => normalized.includes(key));
+      if (found) return keys[normalized.indexOf(found)];
+      return null;
+    }
+
+    function findSubmissionNoKey(keys) {
+      const normalized = keys.map(k => k.toLowerCase().replace(/[\s_-]/g, ''));
+      const candidates = ['nosubmission', 'submissionno', 'submission', 'nosub', 'subno'];
       const found = candidates.find(key => normalized.includes(key));
       if (found) return keys[normalized.indexOf(found)];
       return null;
@@ -398,17 +412,17 @@
       const normalized = code.toString().trim().toLowerCase();
       const target = submissionData.find(item => item.id.toLowerCase() === normalized);
       if (!target) {
-        showToast(`No. Waybill ${code} tidak ditemukan.`);
+        showToast(`Sample ID ${code} tidak ditemukan.`);
         return;
       }
       if (target.status === 'checked') {
-        showToast(`No. Waybill ${code} sudah discan.`);
+        showToast(`Sample ID ${code} sudah discan.`);
         return;
       }
       target.status = 'checked';
       renderSubmissionTable();
       saveSubmissionState();
-      showToast(`No. Waybill ${code} berhasil diverifikasi.`);
+      showToast(`Sample ID ${code} berhasil diverifikasi.`);
     }
 
     function clearSubmission() {
