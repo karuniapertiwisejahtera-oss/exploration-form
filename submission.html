@@ -262,12 +262,43 @@
   <script src="js/app.js"></script>
   <script src="js/drive.js"></script>
   <script>
+    const STATE_KEY = 'submission_state';
     let submissionData = [];
     let sampleField = 'sample_id';
     let batchField = 'batch';
 
     function goBack() {
       window.history.back();
+    }
+
+    function saveSubmissionState() {
+      const state = {
+        submissionData,
+        sourceFile: document.getElementById('csv-filename').textContent,
+        sampleField,
+        batchField
+      };
+      localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    }
+
+    function loadSubmissionState() {
+      const raw = localStorage.getItem(STATE_KEY);
+      if (!raw) return;
+      try {
+        const state = JSON.parse(raw);
+        if (Array.isArray(state.submissionData) && state.submissionData.length) {
+          submissionData = state.submissionData;
+          sampleField = state.sampleField || sampleField;
+          batchField = state.batchField || batchField;
+          document.getElementById('csv-filename').textContent = state.sourceFile || '-';
+        }
+      } catch (e) {
+        console.warn('Gagal memuat state submission:', e);
+      }
+    }
+
+    function clearSubmissionState() {
+      localStorage.removeItem(STATE_KEY);
     }
 
     function importCSV(input) {
@@ -301,6 +332,7 @@
           showToast('Tidak ada No. Waybill valid dalam file.');
         }
         renderSubmissionTable();
+        saveSubmissionState();
       };
       reader.readAsText(file, 'UTF-8');
     }
@@ -451,6 +483,7 @@
       }
       target.status = 'checked';
       renderSubmissionTable();
+      saveSubmissionState();
       showToast(`No. Waybill ${code} berhasil diverifikasi.`);
     }
 
@@ -458,6 +491,7 @@
       submissionData = [];
       document.getElementById('csv-input').value = '';
       document.getElementById('csv-filename').textContent = '-';
+      clearSubmissionState();
       renderSubmissionTable();
       showToast('Daftar submission dikosongkan.');
     }
@@ -516,6 +550,7 @@
       document.body.removeChild(link);
     }
 
+    loadSubmissionState();
     renderSubmissionTable();
     renderSavedCard(getLatestSavedSubmission());
   </script>
