@@ -256,7 +256,7 @@
         const headers = Object.keys(rows[0]);
         const sampleKey = findSampleKey(headers);
         if (!sampleKey) {
-          showToast('Kolom No. Waybill tidak ditemukan. Pastikan header berisi sample_id, id, atau sampleid.');
+          showToast('Kolom tidak ditemukan. Header CSV: ' + headers.join(', '), 'error');
           return;
         }
         const batchKey = findBatchKey(headers);
@@ -270,6 +270,13 @@
         })).filter(item => item.id);
         if (!submissionData.length) {
           showToast('Tidak ada No. Waybill valid dalam file.');
+        } else {
+          showToast(submissionData.length + ' data berhasil diimport dari ' + file.name);
+          // Tampilkan submission number jika ada kolom submission_no
+          const subNoKey = Object.keys(rows[0]).find(k => /submission|sub_no|no_sub/i.test(k));
+          if (subNoKey && rows[0][subNoKey]) {
+            document.getElementById('submission-number').textContent = rows[0][subNoKey];
+          }
         }
         renderSubmissionTable();
         saveSubmissionState();
@@ -321,15 +328,20 @@
     }
 
     function findSampleKey(keys) {
-      const normalized = keys.map(k => k.toLowerCase());
-      const candidates = ['sample_id', 'sampleid', 'id', 'sample'];
-      return candidates.find(key => normalized.includes(key));
+      const normalized = keys.map(k => k.toLowerCase().replace(/[\s_-]/g, ''));
+      const candidates = ['sampleid', 'sample', 'id', 'waybill', 'nowaybill', 'no', 'barcode', 'code'];
+      const found = candidates.find(key => normalized.includes(key));
+      if (found) return keys[normalized.indexOf(found)];
+      // Fallback: ambil kolom pertama
+      return keys[0] || null;
     }
 
     function findBatchKey(keys) {
-      const normalized = keys.map(k => k.toLowerCase());
-      const candidates = ['batch', 'batch_no', 'lot', 'package', 'pack'];
-      return candidates.find(key => normalized.includes(key));
+      const normalized = keys.map(k => k.toLowerCase().replace(/[\s_-]/g, ''));
+      const candidates = ['batch', 'batchno', 'lot', 'package', 'pack', 'grup', 'group'];
+      const found = candidates.find(key => normalized.includes(key));
+      if (found) return keys[normalized.indexOf(found)];
+      return null;
     }
 
     function formatInfo(row, sampleKey) {
