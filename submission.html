@@ -78,6 +78,62 @@
       border: 1px solid #e5e7eb;
       border-radius: 12px;
     }
+    .saved-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+    }
+    .saved-card-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .saved-card-header h3 {
+      margin: 0;
+      font-size: 16px;
+      color: var(--primary);
+    }
+    .saved-card-note {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: #555;
+    }
+    .saved-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 13px;
+      color: #333;
+    }
+    .saved-card-meta span strong {
+      color: #111;
+    }
+    .saved-entries {
+      margin-top: 14px;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .saved-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+      font-size: 13px;
+    }
+    .saved-row-more {
+      justify-content: center;
+      background: #f3f4f6;
+      color: #555;
+    }
     table.submission-table {
       width: 100%;
       border-collapse: collapse;
@@ -155,8 +211,8 @@
       </div>
 
       <div class="scan-panel">
-        <label>Scan Barcode Sample ID</label>
-        <input id="scan-input" type="text" placeholder="Scan atau ketik Sample ID lalu tekan Enter" onkeydown="handleScanKey(event)">
+        <label>Scan Barcode No. Waybill</label>
+        <input id="scan-input" type="text" placeholder="Scan atau ketik No. Waybill lalu tekan Enter" onkeydown="handleScanKey(event)">
         <div class="scan-actions">
           <div class="status-summary">
             <div class="status-chip">Total: <span id="summary-total">0</span></div>
@@ -177,7 +233,7 @@
             <tr>
               <th>No</th>
               <th>Batch</th>
-              <th>Sample ID</th>
+              <th>No. Waybill</th>
               <th>Cek</th>
             </tr>
           </thead>
@@ -185,8 +241,20 @@
             <tr><td colspan="4"><div class="empty-state">Belum ada data. Silakan impor file .csv.</div></td></tr>
           </tbody>
         </table>
-      </div>
-    </div>
+      </div>      <div class="saved-card" id="saved-card" style="display:none;">
+        <div class="saved-card-header">
+          <div>
+            <h3>Data Tersimpan</h3>
+            <p class="saved-card-note">No. Waybill adalah identitas data yang di cek.</p>
+          </div>
+          <div class="saved-card-meta">
+            <span>File sumber: <strong id="saved-file">-</strong></span>
+            <span>Jumlah entri: <strong id="saved-count">0</strong></span>
+            <span>Disimpan: <strong id="saved-created">-</strong></span>
+          </div>
+        </div>
+        <div class="saved-entries" id="saved-entries"></div>
+      </div>    </div>
   </div>
 
   <script src="https://apis.google.com/js/api.js" async defer></script>
@@ -217,7 +285,7 @@
         const headers = Object.keys(rows[0]);
         const sampleKey = findSampleKey(headers);
         if (!sampleKey) {
-          showToast('Kolom Sample ID tidak ditemukan. Pastikan header berisi sample_id, id, atau sampleid.');
+          showToast('Kolom No. Waybill tidak ditemukan. Pastikan header berisi sample_id, id, atau sampleid.');
           return;
         }
         const batchKey = findBatchKey(headers);
@@ -230,7 +298,7 @@
           status: 'pending'
         })).filter(item => item.id);
         if (!submissionData.length) {
-          showToast('Tidak ada Sample ID valid dalam file.');
+          showToast('Tidak ada No. Waybill valid dalam file.');
         }
         renderSubmissionTable();
       };
@@ -320,6 +388,35 @@
       updateCounts();
     }
 
+    function renderSavedCard(record) {
+      const card = document.getElementById('saved-card');
+      if (!card) return;
+      if (!record) {
+        card.style.display = 'none';
+        return;
+      }
+      const createdAt = new Date(record.createdAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+      document.getElementById('saved-file').textContent = record.sourceFile || '-';
+      document.getElementById('saved-count').textContent = record.entries.length;
+      document.getElementById('saved-created').textContent = createdAt;
+      const entries = document.getElementById('saved-entries');
+      entries.innerHTML = record.entries.slice(0, 5).map((item, idx) => `
+        <div class="saved-row">
+          <span>${idx + 1}. ${item.id}</span>
+          <span>${item.status === 'checked' ? 'Checked' : 'Pending'}</span>
+        </div>
+      `).join('');
+      if (record.entries.length > 5) {
+        entries.innerHTML += `<div class="saved-row saved-row-more">...dan ${record.entries.length - 5} lainnya</div>`;
+      }
+      card.style.display = 'block';
+    }
+
+    function getLatestSavedSubmission() {
+      const all = DB.getAll('submission');
+      return all.length ? all[all.length - 1] : null;
+    }
+
     function updateCounts() {
       const total = submissionData.length;
       const checked = submissionData.filter(item => item.status === 'checked').length;
@@ -345,16 +442,16 @@
       const normalized = code.toString().trim().toLowerCase();
       const target = submissionData.find(item => item.id.toLowerCase() === normalized);
       if (!target) {
-        showToast(`Sample ID ${code} tidak ditemukan.`);
+        showToast(`No. Waybill ${code} tidak ditemukan.`);
         return;
       }
       if (target.status === 'checked') {
-        showToast(`Sample ID ${code} sudah discan.`);
+        showToast(`No. Waybill ${code} sudah discan.`);
         return;
       }
       target.status = 'checked';
       renderSubmissionTable();
-      showToast(`Sample ID ${code} berhasil diverifikasi.`);
+      showToast(`No. Waybill ${code} berhasil diverifikasi.`);
     }
 
     function clearSubmission() {
@@ -376,6 +473,7 @@
         entries: submissionData
       };
       DB.save('submission', record);
+      renderSavedCard(record);
       showToast('Data submission tersimpan.');
     }
 
@@ -391,7 +489,7 @@
 
     function convertToExcel(data) {
       if (!data.length) return '';
-      const headers = ['No', 'Batch', 'Sample ID', 'Status'];
+      const headers = ['No', 'Batch', 'No. Waybill', 'Status'];
       const rows = data.map((item, idx) => [
         idx + 1,
         item.batch || '-',
@@ -419,6 +517,7 @@
     }
 
     renderSubmissionTable();
+    renderSavedCard(getLatestSavedSubmission());
   </script>
 </body>
 </html>
