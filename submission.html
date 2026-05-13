@@ -95,11 +95,12 @@
       border-radius: 12px;
     }
     table.submission-table {
-      width: 100%;
+      width: auto;
+      min-width: 400px;
+      max-width: 700px;
+      margin: 0 auto;
       border-collapse: collapse;
-      min-width: 300px;
-      font-size: 11px;
-      table-layout: fixed;
+      font-size: 12px;
     }
     table.submission-table thead th {
       position: sticky;
@@ -108,21 +109,19 @@
     }
     table.submission-table th,
     table.submission-table td {
-      padding: 5px 6px;
+      padding: 5px 10px;
       text-align: center;
       border-bottom: 1px solid #e5e7eb;
-      overflow: hidden;
-      text-overflow: ellipsis;
       white-space: nowrap;
     }
     table.submission-table th:nth-child(1),
-    table.submission-table td:nth-child(1) { width: 40px; }
+    table.submission-table td:nth-child(1) { width: 50px; }
     table.submission-table th:nth-child(2),
-    table.submission-table td:nth-child(2) { width: 80px; }
+    table.submission-table td:nth-child(2) { width: 100px; }
     table.submission-table th:nth-child(3),
-    table.submission-table td:nth-child(3) { width: auto; }
+    table.submission-table td:nth-child(3) { width: 200px; }
     table.submission-table th:nth-child(4),
-    table.submission-table td:nth-child(4) { width: 60px; }
+    table.submission-table td:nth-child(4) { width: 70px; }
     table.submission-table th {
       background: #10b981;
       color: white;
@@ -181,10 +180,10 @@
             <div class="status-chip">Checked: <span id="summary-checked">0</span></div>
             <div class="status-chip">Pending: <span id="summary-pending">0</span></div>
           </div>
-          <div class="action-row">
-            <button class="btn btn-clear" onclick="clearSubmission()">DELETE</button>
-            <button class="btn btn-save" onclick="saveSubmission()">SAVE</button>
-            <button class="btn btn-upload" onclick="submitSubmission()">SUBMIT</button>
+          <div class="action-row" style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;">
+            <button class="btn btn-clear" onclick="clearSubmission()" style="min-width:70px;padding:7px 12px;font-size:12px;">DELETE</button>
+            <button class="btn btn-save" onclick="saveSubmission()" style="min-width:70px;padding:7px 12px;font-size:12px;">SAVE</button>
+            <button class="btn btn-upload" onclick="submitSubmission()" style="min-width:70px;padding:7px 12px;font-size:12px;">SUBMIT</button>
           </div>
         </div>
       </div>
