@@ -41,6 +41,13 @@
       gap: 10px;
       margin-top: 12px;
     }
+    .scan-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
     #scan-input {
       width: 100%;
       padding: 12px 14px;
@@ -65,13 +72,26 @@
     }
     .table-wrap {
       overflow-x: auto;
-      margin-top: 12px;
+      margin: 12px auto 0;
+      max-width: 920px;
     }
     table.submission-table {
       width: 100%;
       border-collapse: collapse;
       min-width: 500px;
       font-size: 12px;
+    }
+    .action-row {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 0;
+    }
+    .action-row .btn {
+      flex: 0 0 auto;
+      min-width: 100px;
+      padding: 10px 14px;
     }
     table.submission-table th,
     table.submission-table td {
@@ -92,15 +112,6 @@
     }
     table.submission-table tr.missing td {
       background: #fef2f2;
-    }
-    .action-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .action-row .btn {
-      flex: 1 1 auto;
     }
     .empty-state {
       padding: 18px;
@@ -138,10 +149,17 @@
       <div class="scan-panel">
         <label>Scan Barcode Sample ID</label>
         <input id="scan-input" type="text" placeholder="Scan atau ketik Sample ID lalu tekan Enter" onkeydown="handleScanKey(event)">
-        <div class="status-summary">
-          <div class="status-chip">Total: <span id="summary-total">0</span></div>
-          <div class="status-chip">Checked: <span id="summary-checked">0</span></div>
-          <div class="status-chip">Pending: <span id="summary-pending">0</span></div>
+        <div class="scan-actions">
+          <div class="status-summary">
+            <div class="status-chip">Total: <span id="summary-total">0</span></div>
+            <div class="status-chip">Checked: <span id="summary-checked">0</span></div>
+            <div class="status-chip">Pending: <span id="summary-pending">0</span></div>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-clear" onclick="clearSubmission()">DELETE</button>
+            <button class="btn btn-save" onclick="saveSubmission()">SAVE</button>
+            <button class="btn btn-upload" onclick="submitSubmission()">SUBMIT</button>
+          </div>
         </div>
       </div>
 
@@ -159,12 +177,6 @@
             <tr><td colspan="4"><div class="empty-state">Belum ada data. Silakan impor file .csv.</div></td></tr>
           </tbody>
         </table>
-      </div>
-
-      <div class="action-row">
-        <button class="btn btn-clear" onclick="clearSubmission()">✕ Hapus Daftar</button>
-        <button class="btn btn-save" onclick="saveSubmission()">💾 Simpan</button>
-        <button class="btn btn-upload" onclick="submitSubmission()">✅ Submit</button>
       </div>
     </div>
   </div>
