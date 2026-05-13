@@ -97,32 +97,32 @@
     table.submission-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 500px;
-      font-size: 12px;
+      min-width: 300px;
+      font-size: 11px;
+      table-layout: fixed;
     }
     table.submission-table thead th {
       position: sticky;
       top: 0;
       z-index: 2;
     }
-    .action-row {
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 0;
-    }
-    .action-row .btn {
-      flex: 0 0 auto;
-      min-width: 100px;
-      padding: 10px 14px;
-    }
     table.submission-table th,
     table.submission-table td {
-      padding: 8px 10px;
+      padding: 5px 6px;
       text-align: center;
       border-bottom: 1px solid #e5e7eb;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
+    table.submission-table th:nth-child(1),
+    table.submission-table td:nth-child(1) { width: 40px; }
+    table.submission-table th:nth-child(2),
+    table.submission-table td:nth-child(2) { width: 80px; }
+    table.submission-table th:nth-child(3),
+    table.submission-table td:nth-child(3) { width: auto; }
+    table.submission-table th:nth-child(4),
+    table.submission-table td:nth-child(4) { width: 60px; }
     table.submission-table th {
       background: #10b981;
       color: white;
@@ -164,7 +164,6 @@
         </label>
         <div class="import-meta">
           <div class="import-file-meta">
-            <span>Nama file: <strong id="csv-filename">-</strong></span>
             <span>No. Submission: <strong id="submission-number">-</strong></span>
           </div>
           <span>Total data: <strong id="total-count">0</strong></span>
@@ -255,7 +254,9 @@
     function importCSV(input) {
       if (!input.files.length) return;
       const file = input.files[0];
-      document.getElementById('csv-filename').textContent = file.name;
+      // No Submission = nama file (tanpa ekstensi)
+      const fileBaseName = file.name.replace(/\.[^/.]+$/, '');
+      document.getElementById('submission-number').textContent = fileBaseName;
       const reader = new FileReader();
       reader.onload = (event) => {
         const text = event.target.result;
