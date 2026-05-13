@@ -223,7 +223,7 @@
     function saveSubmissionState() {
       const state = {
         submissionData,
-        sourceFile: document.getElementById('csv-filename').textContent,
+        sourceFile: document.getElementById('submission-number').textContent,
         sampleField,
         batchField
       };
@@ -239,7 +239,7 @@
           submissionData = state.submissionData;
           sampleField = state.sampleField || sampleField;
           batchField = state.batchField || batchField;
-          document.getElementById('csv-filename').textContent = state.sourceFile || '-';
+          document.getElementById('submission-number').textContent = state.sourceFile || '-';
         }
       } catch (e) {
         console.warn('Gagal memuat state submission:', e);
@@ -278,12 +278,7 @@
         sampleField = sampleKey;
         batchField = batchKey || 'batch';
 
-        // Ambil No Submission dari baris pertama
-        if (subNoKey && rows[0][subNoKey]) {
-          document.getElementById('submission-number').textContent = rows[0][subNoKey];
-        } else {
-          document.getElementById('submission-number').textContent = '-';
-        }
+        // Ambil No Submission dari nama file (sudah diset sebelumnya, tidak perlu override dari CSV)
 
         submissionData = rows.map((row) => ({
           batch: (batchKey ? row[batchKey] : '').toString().trim(),
@@ -292,14 +287,10 @@
           status: 'pending'
         })).filter(item => item.id);
         if (!submissionData.length) {
-          showToast('Tidak ada No. Waybill valid dalam file.');
+          showToast('Tidak ada Sample ID valid dalam file.');
         } else {
           showToast(submissionData.length + ' data berhasil diimport dari ' + file.name);
-          // Tampilkan submission number jika ada kolom submission_no
-          const subNoKey = Object.keys(rows[0]).find(k => /submission|sub_no|no_sub/i.test(k));
-          if (subNoKey && rows[0][subNoKey]) {
-            document.getElementById('submission-number').textContent = rows[0][subNoKey];
-          }
+          // No Submission sudah diset dari nama file di atas, tidak perlu override
         }
         renderSubmissionTable();
         saveSubmissionState();
@@ -456,7 +447,7 @@
     function clearSubmission() {
       submissionData = [];
       document.getElementById('csv-input').value = '';
-      document.getElementById('csv-filename').textContent = '-';
+      document.getElementById('submission-number').textContent = '-';
       clearSubmissionState();
       renderSubmissionTable();
       showToast('Daftar submission dikosongkan.');
@@ -469,7 +460,7 @@
       }
       const record = {
         createdAt: new Date().toISOString(),
-        sourceFile: document.getElementById('csv-filename').textContent,
+        sourceFile: document.getElementById('submission-number').textContent,
         entries: submissionData
       };
       DB.save('submission', record);
