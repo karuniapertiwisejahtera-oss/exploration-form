@@ -185,7 +185,35 @@
 
       const HOLE_ID_KEYS = ['preparation', 'actual_run', 'core_loss', 'logging'];
 
-      if (key === 'daily_sheet') {
+      if (key === 'submission') {
+        // Submission: tampilkan Tanggal dan No Submission saja
+        const sortedSub = [...records].sort((a, b) => b.id - a.id);
+        sortedSub.forEach((rec, idx) => {
+          const ts     = new Date(rec.timestamp || rec.createdAt).toLocaleString('id-ID');
+          const subNo  = rec.sourceFile || rec.submission_no || '—';
+          const total  = Array.isArray(rec.entries) ? rec.entries.length : 0;
+          const checked = Array.isArray(rec.entries) ? rec.entries.filter(e => e.status === 'checked').length : 0;
+          html += `<div class="dv-record">
+            <div class="dv-record-header">
+              <span>Record #${sortedSub.length - idx}</span>
+              <span style="opacity:0.8;font-weight:400;">${ts}</span>
+            </div>
+            <div class="dv-record-body" style="padding:10px 12px;">
+              <div class="dv-field">
+                <span class="dv-field-label">No. Submission</span>
+                <span class="dv-field-value" style="font-size:13px;font-weight:700;">${subNo}</span>
+              </div>
+              <div class="dv-field">
+                <span class="dv-field-label">Total / Checked</span>
+                <span class="dv-field-value">${total} / ${checked}</span>
+              </div>
+            </div>
+            <div class="dv-actions">
+              <button class="btn-del" onclick="deleteRecord('${key}',${rec.id},'${label}')">🗑 Hapus</button>
+            </div>
+          </div>`;
+        });
+      } else if (key === 'daily_sheet') {
         // Daily Sheet: tampilkan Hole ID dan Nomor Mesin saja
         records.forEach((rec, idx) => {
           const ts    = new Date(rec.timestamp).toLocaleString('id-ID');
