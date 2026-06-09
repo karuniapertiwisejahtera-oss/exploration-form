@@ -1022,7 +1022,7 @@
         <td class="td-cum"><input type="number" name="from_cum_${n}" id="from_cum_${n}" value="${v.from_cum != null ? v.from_cum : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td class="td-cum"><input type="number" name="to_cum_${n}"   id="to_cum_${n}"   value="${v.to_cum   != null ? v.to_cum   : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td style="text-align:center;"><button class="btn-merge" onclick="startMerge(${n}, this)" title="Gabungkan">🔗</button><input type="checkbox" class="merge-check" id="merge-check-${n}" style="display:none;margin-left:4px;" onchange="toggleMergeRow(${n}, this)"></td>
-        <td><button class="btn-del-row" onclick="deleteRow(${n})" title="Hapus baris" style="background:transparent;color:#ef5350;border:none;border-radius:3px;padding:1px 3px;font-size:14px;cursor:pointer;line-height:1;">✕</button></td>
+        <td><button class="btn-del-row" onclick="clearRowSampleData(${n})" title="Hapus data sample" style="background:transparent;color:#ef5350;border:none;border-radius:3px;padding:1px 3px;font-size:14px;cursor:pointer;line-height:1;">✕</button></td>
         <td><input type="text" name="samp_no_${n}" id="samp_no_${n}" value="${v.samp_no || ''}" style="cursor:pointer;text-align:center;width:100%;border:none;outline:none;font-size:11px;background:transparent;text-transform:uppercase;" onclick="openFracModal(${n})" readonly title="Klik untuk isi fraksi"></td>
         <td>${num('dry_wt', v.dry_wt)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
@@ -1093,6 +1093,29 @@
       highlightDuplicates();
       updateTotalSample();
       showToast('Baris dihapus');
+    }
+
+    // ===== HAPUS DATA KOLOM SAMPLE (bukan hapus baris) =====
+    function clearRowSampleData(rowNum) {
+      const CLEAR_FIELDS = [
+        'samp_no','dry_wt','send_cum','sample_id','m06_orig_sid',
+        'a10_tot','a10_rec','a10_sid',
+        'a2_tot','a2_rec','a2_sid',
+        'a06_tot','a06_rec','a06_sid',
+        'm06_tot','m06_rec','m06_sid',
+        'p03_tot','p03_rec','p03_sid',
+        'qaqc_sid','qaqc_wt','jenis','remarks'
+      ];
+      CLEAR_FIELDS.forEach(field => {
+        const el = document.querySelector(`[name="${field}_${rowNum}"]`);
+        if (el) { el.value = ''; el.dataset.auto = 'false'; }
+      });
+      // Reset samp_no auto flag
+      const snEl = document.querySelector(`[name="samp_no_${rowNum}"]`);
+      if (snEl) snEl.dataset.auto = 'false';
+      highlightDuplicates();
+      if (typeof renderCardView === 'function') setTimeout(renderCardView, 50);
+      showToast('Data sample baris ' + rowNum + ' dihapus');
     }
 
     // ===== TAMBAH BARIS QAQC (interval blank) =====
@@ -2366,6 +2389,8 @@
           restoreMergeVisibility(); recalcSamplingNo(); highlightDuplicates();
           input.value = '';
           showToast('✓ Form berhasil diimport!');
+          if (typeof renderCardView === 'function') setTimeout(renderCardView, 100);
+          if (typeof fitCardView === 'function') setTimeout(fitCardView, 150);
         } catch(e) { showToast('Error: ' + e.message, 'error'); }
       };
       reader.readAsText(file, 'UTF-8');
@@ -2477,6 +2502,9 @@
             input.value = '';
             showToast('Lepas ' + imported + ' baris diimport dari CSV');
             highlightDuplicates();
+            // Refresh card view setelah import
+            if (typeof renderCardView === 'function') setTimeout(renderCardView, 100);
+            if (typeof fitCardView === 'function') setTimeout(fitCardView, 150);
           } catch(err) {
             console.error('[importCSV] parse error:', err);
             showToast('Error parsing CSV: ' + err.message, 'error');
@@ -2542,14 +2570,22 @@
 
     // ===== CLEAR =====
     function clearData() {
-      document.querySelectorAll('.info-row input').forEach(el => el.value = '');
+      // Bersihkan header info
+      ['h-holeid','h-sampler','h-sheet','h-date-start','h-deposit','h-date-finish','h-depth'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.querySelectorAll('.info-row input, .header-field input:not([readonly])').forEach(el => el.value = '');
       document.getElementById('prep-tbody').innerHTML = '';
-      document.getElementById('csv-filename').textContent = 'Pilih file .csv dari HP';
-      document.getElementById('csv-input').value = '';
+      const csvFn = document.getElementById('csv-filename');
+      if (csvFn) csvFn.textContent = 'Pilih file .csv dari HP';
+      const csvIn = document.getElementById('csv-input');
+      if (csvIn) csvIn.value = '';
       rowCount = 0; window._editRecordId = null;
       localStorage.removeItem('prep_draft');
       cancelMerge();
       addRow();
+      if (typeof renderCardView === 'function') setTimeout(renderCardView, 50);
       showToast('Form dikosongkan');
     }
 
