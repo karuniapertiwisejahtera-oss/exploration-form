@@ -1177,6 +1177,67 @@
       m06El.dataset.autoM06 = 'true';
     }
 
+    // ===== RECALC SEMUA ORIGINAL SID LINTAS BARIS =====
+    // Dipanggil saat sample_id baris manapun berubah
+    // Hanya update baris-baris yang sample_id-nya auto (dataset.autoOrig === 'true')
+    function recalcAllOriginalSIDs() {
+      // Kumpulkan baris S yang punya sample_id (urutan DOM)
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+
+      // Cari S1: baris pertama yang punya samp_no S1 dan sample_id terisi manual
+      let baseSID = '';
+      let basePrefix = '', basePadLen = 3, baseNum = 0;
+      for (const tr of domRows) {
+        const rn = tr.dataset.row;
+        const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
+        const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
+        if (snEl && snEl.value.trim().toUpperCase() === 'S1' && sidEl && sidEl.value.trim()) {
+          baseSID = sidEl.value.trim().toUpperCase();
+          const m = baseSID.match(/^([A-Za-z]+)(\d+)$/);
+          if (m) { basePrefix = m[1]; basePadLen = m[2].length; baseNum = parseInt(m[2]); }
+          break;
+        }
+      }
+      if (!baseSID || !basePrefix) return; // S1 belum punya sample_id
+
+      // Loop semua baris S (urutan DOM), hitung offset dan update
+      let sCounter = 0;
+      const seen = new Set(); // untuk skip baris non-first dalam merge group
+      domRows.forEach(tr => {
+        const rn = tr.dataset.row;
+        const mg = tr.dataset.mergeGroup;
+        // Skip baris non-first dalam grup
+        if (mg) {
+          if (seen.has(mg)) return;
+          seen.add(mg);
+        }
+        const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
+        if (!snEl || !/^S\d+$/i.test(snEl.value.trim())) return;
+
+        const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
+        const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
+        if (!sidEl) return;
+
+        // Hitung GS untuk baris S ini
+        const gsCur = basePrefix + String(baseNum + sCounter).padStart(basePadLen, '0');
+        const gsNext = basePrefix + String(baseNum + sCounter + 1).padStart(basePadLen, '0');
+
+        // Update sample_id jika masih auto (bukan S1 yang jadi base, dan dataset.autoOrig === 'true')
+        if (snEl.value.trim().toUpperCase() !== 'S1' && sidEl.dataset.autoOrig === 'true') {
+          sidEl.value = gsCur;
+          autoUpdateM06Orig(rn); // update m06_orig_sid = gsCur + 1
+        } else if (snEl.value.trim().toUpperCase() === 'S1') {
+          // S1: update m06_orig_sid saja
+          if (m06El && m06El.dataset.autoM06 !== 'false') {
+            m06El.value = gsNext;
+            m06El.dataset.autoM06 = 'true';
+          }
+        }
+        sCounter++;
+      });
+      highlightDuplicates();
+    }
+
     function attachRowListeners(n) {
       const fcEl = document.getElementById('from_cum_' + n);
       if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
@@ -1197,8 +1258,19 @@
       if (jenisEl_r) jenisEl_r.addEventListener('change', function() { autoFillQAQC(n); });
       const sidEl_r = document.querySelector('[name="sample_id_' + n + '"]');
       if (sidEl_r) {
-        sidEl_r.addEventListener('change', function() { autoFillQAQC(n); highlightDuplicates(); autoUpdateM06Orig(n); });
-        sidEl_r.addEventListener('input',  function() { autoUpdateM06Orig(n); });
+        sidEl_r.addEventListener('change', function() {
+          autoFillQAQC(n);
+          highlightDuplicates();
+          autoUpdateM06Orig(n);
+          // Debounce recalc lintas baris agar tidak terlalu sering
+          clearTimeout(sidEl_r._recalcTimer);
+          sidEl_r._recalcTimer = setTimeout(recalcAllOriginalSIDs, 400);
+        });
+        sidEl_r.addEventListener('input', function() {
+          autoUpdateM06Orig(n);
+          clearTimeout(sidEl_r._recalcTimer);
+          sidEl_r._recalcTimer = setTimeout(recalcAllOriginalSIDs, 600);
+        });
       }
       SID_ORDER.forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
