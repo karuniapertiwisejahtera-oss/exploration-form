@@ -331,73 +331,6 @@
     }
     .btn-add { background: #4db6ac; color: white; }
   
-    /* ===== CARD VIEW ===== */
-    .prep-card {
-      background: white; border-radius: 12px; padding: 10px 12px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.08); border: 1.5px solid #e0f0e8;
-      cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
-      user-select: none;
-    }
-    @media (max-width: 600px) {
-      #card-list { grid-template-columns: 1fr !important; }
-    }
-    @media (min-width: 601px) and (max-width: 900px) {
-      #card-list { grid-template-columns: repeat(2,1fr) !important; }
-    }
-    .prep-card:hover { border-color: #4caf50; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
-    .prep-card.card-cly { border-left: 4px solid #bdbdbd; opacity: 0.75; }
-    .prep-card.card-qaqc { border-left: 4px solid #9c27b0; }
-    .prep-card.card-s { border-left: 4px solid #1a6b4a; }
-    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
-    .card-sampno { font-size:14px; font-weight:800; color:#1a6b4a; }
-    .card-sampno.qaqc { color:#9c27b0; }
-    .card-range { font-size:12px; color:#555; }
-    .card-grain-badge {
-      font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px;
-      background:#e8f5e9; color:#1a6b4a;
-    }
-    .card-ids { font-size:11px; color:#1a3a8f; margin:2px 0; font-weight:600; }
-    .card-meta { display:flex; gap:12px; font-size:11px; color:#666; margin-top:2px; }
-    .card-frac-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
-    .card-frac-chip {
-      font-size:10px; padding:2px 6px; border-radius:6px;
-      background:#f0f9f4; border:1px solid #b2dfdb; color:#004d40;
-      white-space:nowrap;
-    }
-    .card-frac-chip.empty { background:#f5f5f5; border-color:#e0e0e0; color:#bbb; }
-    /* Detail modal */
-    #card-detail-overlay {
-      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5);
-      z-index:8000; align-items:flex-end; justify-content:center;
-    }
-    #card-detail-overlay.show { display:flex; }
-    #card-detail-box {
-      background:white; border-radius:18px 18px 0 0; width:100%; max-width:600px;
-      max-height:88vh; overflow-y:auto; padding:16px 16px 24px;
-      box-shadow:0 -4px 24px rgba(0,0,0,0.2);
-      animation: slideUp 0.25s ease;
-    }
-    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-    .detail-section { margin-bottom:12px; }
-    .detail-section-title { font-size:11px; font-weight:700; color:#1a6b4a; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; border-bottom:1.5px solid #e8f5e9; padding-bottom:3px; }
-    .detail-field { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-    .detail-field label { font-size:11px; color:#888; min-width:90px; flex-shrink:0; }
-    .detail-field input, .detail-field select {
-      flex:1; border:1.5px solid #d0ece4; border-radius:8px; padding:7px 8px;
-      font-size:13px; outline:none; text-transform:uppercase; min-width:0;
-    }
-    .detail-field input:focus, .detail-field select:focus { border-color:#1a6b4a; }
-    .detail-field input[readonly] { background:#f5f5f5; color:#888; }
-    .frac-detail-row { background:#f8fffe; border-radius:10px; padding:8px 10px; margin-bottom:6px; border:1px solid #e0f0e8; }
-    .frac-detail-row .frac-label { font-size:11px; font-weight:700; color:#1a6b4a; margin-bottom:4px; }
-    .frac-detail-fields { display:grid; grid-template-columns:1fr 1fr 2fr; gap:6px; }
-    .frac-detail-fields input {
-      border:1.5px solid #d0ece4; border-radius:6px; padding:6px 6px;
-      font-size:12px; outline:none; text-align:center; text-transform:uppercase; width:100%;
-    }
-    .frac-detail-fields input:focus { border-color:#1a6b4a; }
-    .frac-detail-fields input[readonly] { background:#f5f5f5; color:#888; }
-
     /* ===== PRINT / PDF ===== */
     @media print {
       body * { visibility: hidden; }
@@ -481,19 +414,11 @@
           <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="saveData()">Save Data</button>
           <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="clearData()">Clear</button>
           <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="submitData()">Submit</button>
-          <div style="width:1px;height:20px;background:#ccc;"></div>
-          <button id="btn-toggle-view" onclick="toggleView()" title="Beralih tampilan" style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">☰ Tabel</button>
         </div>
       </div>
 
-      <!-- Card View (tampilan utama) -->
-      <div id="card-view" style="flex:1;overflow-y:auto;padding:4px 0 8px;">
-        <div id="card-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;"></div>
-        <button onclick="addRow()" style="margin-top:8px;width:100%;background:#e8f5e9;border:2px dashed #4caf50;color:#1a6b4a;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Tambah Baris</button>
-      </div>
-
-      <!-- Tabel (preview, hidden by default) -->
-      <div class="prep-wrap" id="prep-wrap-container" style="display:none;">
+      <!-- Tabel -->
+      <div class="prep-wrap">
         <table class="prep-table" id="prep-table">
           <thead>
             <!-- ROW 1: Group headers -->
@@ -591,216 +516,10 @@
       const tabH = tabBar ? tabBar.getBoundingClientRect().height : 0;
       container.style.height = (window.innerHeight - headerH - tabH) + 'px';
     }
-    function fitCardView() {
-      const cv = document.getElementById('card-view');
-      const container = document.querySelector('.form-container');
-      if (!cv || !container || cv.style.display === 'none') return;
-      let usedH = 0;
-      Array.from(container.children).forEach(el => {
-        if (el === cv) return;
-        usedH += el.getBoundingClientRect().height;
-      });
-      const containerH = container.getBoundingClientRect().height;
-      cv.style.height = Math.max(100, containerH - usedH - 2) + 'px';
-    }
-    function resizeAll() { fitContainer(); if (_viewMode === 'table') fitPrepWrap(); else fitCardView(); }
+    function resizeAll() { fitContainer(); fitPrepWrap(); }
     window.addEventListener('resize', resizeAll);
     setTimeout(resizeAll, 100);
     setTimeout(resizeAll, 500);
-    // Init card view setelah semua baris di-load
-    setTimeout(() => { renderCardView(); fitCardView(); }, 700);
-
-    // Init card view setelah semua baris di-load
-    setTimeout(() => { renderCardView(); fitCardView(); }, 700);
-
-    // ===== CARD VIEW =====
-    let _viewMode = 'card';
-
-    function toggleView() {
-      _viewMode = _viewMode === 'card' ? 'table' : 'card';
-      const cardView = document.getElementById('card-view');
-      const tableWrap = document.getElementById('prep-wrap-container');
-      const btn = document.getElementById('btn-toggle-view');
-      if (_viewMode === 'table') {
-        cardView.style.display = 'none';
-        tableWrap.style.display = '';
-        btn.textContent = '☰ Card';
-        setTimeout(() => { fitContainer(); fitPrepWrap(); }, 50);
-      } else {
-        cardView.style.display = '';
-        tableWrap.style.display = 'none';
-        btn.textContent = '☰ Tabel';
-        renderCardView();
-        setTimeout(fitCardView, 50);
-      }
-    }
-
-    const FRAC_DEFS_CV = [
-      { key: 'a10',  label: '+10 mm' },
-      { key: 'a2',   label: '+2-10 mm' },
-      { key: 'a06',  label: '+0.6-2 mm' },
-      { key: 'm06',  label: '+0.3-0.6 mm' },
-      { key: 'p03',  label: '-0.3 mm' },
-    ];
-
-    function getRowData(n) {
-      const g = (name) => {
-        const el = document.querySelector(`[name="${name}_${n}"]`);
-        return el ? el.value : '';
-      };
-      return {
-        n, from: g('from'), to: g('to'), len: g('len'), rec: g('rec'),
-        grain: g('grain'), core_wt: g('core_wt'),
-        from_cum: g('from_cum'), to_cum: g('to_cum'),
-        samp_no: g('samp_no'), dry_wt: g('dry_wt'), send_cum: g('send_cum'),
-        sample_id: g('sample_id'), m06_orig_sid: g('m06_orig_sid'),
-        a10_tot: g('a10_tot'), a10_rec: g('a10_rec'), a10_sid: g('a10_sid'),
-        a2_tot: g('a2_tot'), a2_rec: g('a2_rec'), a2_sid: g('a2_sid'),
-        a06_tot: g('a06_tot'), a06_rec: g('a06_rec'), a06_sid: g('a06_sid'),
-        m06_tot: g('m06_tot'), m06_rec: g('m06_rec'), m06_sid: g('m06_sid'),
-        p03_tot: g('p03_tot'), p03_rec: g('p03_rec'), p03_sid: g('p03_sid'),
-        remarks: g('remarks')
-      };
-    }
-
-    function renderCardView() {
-      if (_viewMode !== 'card') return;
-      const list = document.getElementById('card-list');
-      if (!list) return;
-      list.innerHTML = '';
-      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
-      const seen = new Set();
-      domRows.forEach(tr => {
-        const n = parseInt(tr.dataset.row);
-        const mg = tr.dataset.mergeGroup;
-        if (mg && seen.has(mg)) return;
-        if (mg) seen.add(mg);
-        const d = getRowData(n);
-        const isS = /^S\d+$/i.test(d.samp_no);
-        const isQ = /^Q\d+$/i.test(d.samp_no);
-        const isCLY = d.grain.toUpperCase() === 'CLY' && !isS && !isQ;
-        const card = document.createElement('div');
-        card.className = 'prep-card' + (isCLY ? ' card-cly' : isQ ? ' card-qaqc' : isS ? ' card-s' : '');
-        card.dataset.rowNum = n;
-        let fracHtml = '';
-        FRAC_DEFS_CV.forEach(f => {
-          const sid = d[f.key + '_sid'];
-          const tot = d[f.key + '_tot'];
-          if (sid || tot) {
-            fracHtml += `<span class="card-frac-chip">${f.label}: ${sid||'—'} ${tot?tot+'g':''}</span>`;
-          } else {
-            fracHtml += `<span class="card-frac-chip empty">${f.label}</span>`;
-          }
-        });
-        const origIds = [d.sample_id, d.m06_orig_sid].filter(Boolean).join(' / ');
-        card.innerHTML = `
-          <div class="card-header">
-            <span class="card-sampno${isQ?' qaqc':''}">${d.samp_no||'—'}</span>
-            <span class="card-range">${d.from||'?'} – ${d.to||'?'} m</span>
-            <span class="card-grain-badge">${d.grain||'—'}</span>
-          </div>
-          ${origIds?`<div class="card-ids">🆔 ${origIds}</div>`:''}
-          <div class="card-meta">
-            ${d.dry_wt?`<span>Dry: ${d.dry_wt}g</span>`:''}
-            ${d.send_cum?`<span>Send: ${d.send_cum}</span>`:''}
-            ${d.from_cum!==''&&d.to_cum!==''?`<span>Cum: ${d.from_cum}–${d.to_cum}</span>`:''}
-            ${d.remarks?`<span>📝 ${d.remarks}</span>`:''}
-          </div>
-          <div class="card-frac-row">${fracHtml}</div>
-        `;
-        card.addEventListener('click', () => openCardDetail(n));
-        list.appendChild(card);
-      });
-    }
-
-    let _detailRowNum = null;
-
-    function openCardDetail(rowNum) {
-      _detailRowNum = rowNum;
-      const d = getRowData(rowNum);
-      document.getElementById('card-detail-title').textContent =
-        (d.samp_no||`Baris ${rowNum}`) + '  —  ' + (d.from||'?') + ' – ' + (d.to||'?') + ' m';
-      const content = document.getElementById('card-detail-content');
-      const inp = (label, name, type, ro, val) =>
-        `<div class="detail-field"><label>${label}</label><input type="${type}" data-field="${name}" value="${val||''}" ${ro?'readonly':''} step="0.01"></div>`;
-      const selF = (label, name, opts, val) =>
-        `<div class="detail-field"><label>${label}</label><select data-field="${name}">${opts.map(o=>`<option value="${o}"${o===val?'selected':''}>${o||'—'}</option>`).join('')}</select></div>`;
-      let html = `
-        <div class="detail-section"><div class="detail-section-title">Interval</div>
-          ${inp('From (m)','from','number',false,d.from)}
-          ${inp('To (m)','to','number',false,d.to)}
-          ${inp('Length','len','number',true,d.len)}
-          ${inp('Rec Length','rec','number',false,d.rec)}
-          ${selF('Grain Size','grain',['','GVL','CS','FS','CLY'],d.grain)}
-          ${inp('Core Wt (g)','core_wt','number',false,d.core_wt)}
-          ${inp('From Cum','from_cum','number',true,d.from_cum)}
-          ${inp('To Cum','to_cum','number',true,d.to_cum)}
-        </div>
-        <div class="detail-section"><div class="detail-section-title">Sample</div>
-          ${inp('Samp No','samp_no','text',true,d.samp_no)}
-          ${inp('Dry Wt (g)','dry_wt','number',false,d.dry_wt)}
-          ${inp('Send Cum','send_cum','number',false,d.send_cum)}
-          ${inp('Original SID (GS)','sample_id','text',false,d.sample_id)}
-          ${inp('Original +0.3-0.6','m06_orig_sid','text',false,d.m06_orig_sid)}
-        </div>
-        <div class="detail-section"><div class="detail-section-title">Fraksi <span style="font-weight:400;font-size:10px;">(Total | Rec | Sample ID)</span></div>`;
-      FRAC_DEFS_CV.forEach(f => {
-        html += `<div class="frac-detail-row"><div class="frac-label">${f.label}</div>
-          <div class="frac-detail-fields">
-            <input type="number" data-field="${f.key}_tot" value="${d[f.key+'_tot']||''}" placeholder="Total" step="0.01">
-            <input type="number" data-field="${f.key}_rec" value="${d[f.key+'_rec']||''}" placeholder="Rec" readonly>
-            <input type="text" data-field="${f.key}_sid" value="${d[f.key+'_sid']||''}" placeholder="Sample ID">
-          </div></div>`;
-      });
-      html += `</div><div class="detail-section"><div class="detail-section-title">Lainnya</div>
-        ${inp('Remarks','remarks','text',false,d.remarks)}
-        </div>`;
-      content.innerHTML = html;
-      content.querySelectorAll('input[data-field]').forEach(el => {
-        el.addEventListener('change', () => syncDetailToRow(rowNum));
-        el.addEventListener('input', () => {
-          const f = el.dataset.field;
-          if (f && f.endsWith('_tot')) { syncDetailToRow(rowNum); calcRec(rowNum); }
-        });
-      });
-      content.querySelectorAll('select[data-field]').forEach(el => {
-        el.addEventListener('change', () => syncDetailToRow(rowNum));
-      });
-      document.getElementById('card-detail-overlay').classList.add('show');
-    }
-
-    function syncDetailToRow(rowNum) {
-      const content = document.getElementById('card-detail-content');
-      if (!content) return;
-      content.querySelectorAll('[data-field]').forEach(el => {
-        const field = el.dataset.field;
-        const domEl = document.querySelector(`[name="${field}_${rowNum}"]`);
-        if (domEl && !domEl.readOnly && !domEl.disabled) {
-          domEl.value = el.value;
-          domEl.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
-      content.querySelectorAll('input[readonly][data-field]').forEach(el => {
-        const field = el.dataset.field;
-        const domEl = document.querySelector(`[name="${field}_${rowNum}"]`);
-        if (domEl) el.value = domEl.value;
-      });
-    }
-
-    function saveCardDetail() {
-      if (_detailRowNum === null) return;
-      syncDetailToRow(_detailRowNum);
-      document.getElementById('card-detail-overlay').classList.remove('show');
-      _detailRowNum = null;
-      renderCardView();
-      showToast('Detail tersimpan');
-    }
-
-    function closeCardDetail(e) {
-      if (e && e.target !== document.getElementById('card-detail-overlay')) return;
-      document.getElementById('card-detail-overlay').classList.remove('show');
-      _detailRowNum = null;
-    }
 
     window.onerror = function(msg, src, line, col, err) {
       alert('JS Error: ' + msg + '\nLine: ' + line + '\n' + (err ? err.stack : ''));
@@ -1069,7 +788,6 @@
     function updateTotalSample() {
       document.getElementById('h-total-sample').value = rowCount;
       if (typeof autoSaveDraft === 'function') autoSaveDraft();
-      if (typeof renderCardView === 'function') setTimeout(renderCardView, 50);
     }
 
     // ===== HAPUS BARIS =====
@@ -1120,7 +838,6 @@
       const snEl = document.querySelector(`[name="samp_no_${rowNum}"]`);
       if (snEl) snEl.dataset.auto = 'false';
       highlightDuplicates();
-      if (typeof renderCardView === 'function') setTimeout(renderCardView, 50);
       showToast('Data sample baris ' + rowNum + ' dihapus');
     }
 
@@ -2395,8 +2112,6 @@
           restoreMergeVisibility(); recalcSamplingNo(); highlightDuplicates();
           input.value = '';
           showToast('✓ Form berhasil diimport!');
-          if (typeof renderCardView === 'function') setTimeout(renderCardView, 100);
-          if (typeof fitCardView === 'function') setTimeout(fitCardView, 150);
         } catch(e) { showToast('Error: ' + e.message, 'error'); }
       };
       reader.readAsText(file, 'UTF-8');
@@ -2508,9 +2223,6 @@
             input.value = '';
             showToast('Lepas ' + imported + ' baris diimport dari CSV');
             highlightDuplicates();
-            // Refresh card view setelah import
-            if (typeof renderCardView === 'function') setTimeout(renderCardView, 100);
-            if (typeof fitCardView === 'function') setTimeout(fitCardView, 150);
           } catch(err) {
             console.error('[importCSV] parse error:', err);
             showToast('Error parsing CSV: ' + err.message, 'error');
@@ -2591,7 +2303,6 @@
       localStorage.removeItem('prep_draft');
       cancelMerge();
       addRow();
-      if (typeof renderCardView === 'function') setTimeout(renderCardView, 50);
       showToast('Form dikosongkan');
     }
 
@@ -3634,18 +3345,6 @@
 
       <div id="frac-preview" style="display:flex;flex-direction:column;gap:5px;margin-top:4px;"></div>
       <button onclick="saveFracCount()" style="margin-top:14px;width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Terapkan</button>
-    </div>
-  </div>
-
-  <!-- CARD DETAIL MODAL -->
-  <div id="card-detail-overlay" onclick="closeCardDetail(event)">
-    <div id="card-detail-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span id="card-detail-title" style="font-weight:800;font-size:16px;color:#1a6b4a;"></span>
-        <button onclick="closeCardDetail()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#999;line-height:1;">✕</button>
-      </div>
-      <div id="card-detail-content"></div>
-      <button onclick="saveCardDetail()" style="margin-top:12px;width:100%;background:#1a6b4a;color:white;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Simpan</button>
     </div>
   </div>
 
