@@ -786,7 +786,18 @@
     }
 
     function updateTotalSample() {
-      document.getElementById('h-total-sample').value = rowCount;
+      // Hitung jumlah sample GS yang terisi (sample_id tidak kosong)
+      let gsCount = 0;
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      domRows.forEach(tr => {
+        const rn = tr.dataset.row;
+        const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
+        if (sidEl && sidEl.value.trim()) gsCount++;
+        // Hitung juga m06_orig_sid sebagai sample GS tambahan
+        const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
+        if (m06El && m06El.value.trim()) gsCount++;
+      });
+      document.getElementById('h-total-sample').value = gsCount;
       if (typeof autoSaveDraft === 'function') autoSaveDraft();
     }
 
@@ -1262,15 +1273,21 @@
           autoFillQAQC(n);
           highlightDuplicates();
           autoUpdateM06Orig(n);
-          // Debounce recalc lintas baris agar tidak terlalu sering
+          updateTotalSample();
           clearTimeout(sidEl_r._recalcTimer);
           sidEl_r._recalcTimer = setTimeout(recalcAllOriginalSIDs, 400);
         });
         sidEl_r.addEventListener('input', function() {
           autoUpdateM06Orig(n);
+          updateTotalSample();
           clearTimeout(sidEl_r._recalcTimer);
           sidEl_r._recalcTimer = setTimeout(recalcAllOriginalSIDs, 600);
         });
+      }
+      const m06OrigEl_r = document.querySelector(`[name="m06_orig_sid_${n}"]`);
+      if (m06OrigEl_r) {
+        m06OrigEl_r.addEventListener('input',  () => updateTotalSample());
+        m06OrigEl_r.addEventListener('change', () => updateTotalSample());
       }
       SID_ORDER.forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
