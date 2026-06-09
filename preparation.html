@@ -753,7 +753,7 @@
         <td>${num('send_cum', v.send_cum)}</td>
         <td style="padding:0;vertical-align:top;">
           <input type="text" name="sample_id_${n}" id="sample_id_${n}" value="${v.sample_id || ''}" style="width:100%;border:none;border-bottom:1px dashed #ccc;outline:none;font-size:11px;text-align:center;padding:3px 2px 2px;background:transparent;text-transform:uppercase;display:block;">
-          <input type="text" name="m06_orig_sid_${n}" id="m06_orig_sid_${n}" value="${v.m06_orig_sid || ''}" style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:2px 2px 3px;background:transparent;text-transform:uppercase;color:#f57f17;display:block;">
+          <input type="text" name="m06_orig_sid_${n}" id="m06_orig_sid_${n}" value="${v.m06_orig_sid || ''}" style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:2px 2px 3px;background:transparent;text-transform:uppercase;color:#f57f17;display:block;" oninput="this.dataset.autoM06='false'">
         </td>
         <td class="g10 g-start frac-cell">${num('a10_tot', v.a10_tot)}</td>
         <td class="g10 frac-cell">${numRO('a10_rec', v.a10_rec)}</td>
@@ -1161,6 +1161,22 @@
       highlightDuplicates();
     }
 
+    // ===== AUTO-UPDATE m06_orig_sid SAAT sample_id BERUBAH =====
+    function autoUpdateM06Orig(rowNum) {
+      const sidEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
+      const m06El = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
+      if (!sidEl || !m06El) return;
+      // Hanya update jika m06_orig_sid masih auto (belum diisi manual)
+      if (m06El.dataset.autoM06 === 'false') return;
+      const val = sidEl.value.trim().toUpperCase();
+      if (!val) { m06El.value = ''; return; }
+      const m = val.match(/^([A-Za-z]+)(\d+)$/);
+      if (!m) return;
+      const nextNum = parseInt(m[2]) + 1;
+      m06El.value = m[1] + String(nextNum).padStart(m[2].length, '0');
+      m06El.dataset.autoM06 = 'true';
+    }
+
     function attachRowListeners(n) {
       const fcEl = document.getElementById('from_cum_' + n);
       if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
@@ -1180,7 +1196,10 @@
       const jenisEl_r = document.querySelector('[name="jenis_' + n + '"]');
       if (jenisEl_r) jenisEl_r.addEventListener('change', function() { autoFillQAQC(n); });
       const sidEl_r = document.querySelector('[name="sample_id_' + n + '"]');
-      if (sidEl_r) sidEl_r.addEventListener('change', function() { autoFillQAQC(n); highlightDuplicates(); });
+      if (sidEl_r) {
+        sidEl_r.addEventListener('change', function() { autoFillQAQC(n); highlightDuplicates(); autoUpdateM06Orig(n); });
+        sidEl_r.addEventListener('input',  function() { autoUpdateM06Orig(n); });
+      }
       SID_ORDER.forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (!el) return;
