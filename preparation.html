@@ -3298,7 +3298,14 @@
             send_cum:    rec['send_cum_'+i],
             sample_id:   rec['sample_id_'+i],
             dry_wt:      rec['dry_wt_'+i],
-            m06_orig_sid: rec['m06_orig_sid_'+i],
+            m06_orig_sid: rec['m06_orig_sid_'+i] || (function() {
+              // Fallback: hitung dari sample_id + 1 jika belum ada
+              const sid = rec['sample_id_'+i];
+              if (!sid) return '';
+              const m = String(sid).toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
+              if (!m) return '';
+              return m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+            })(),
             a10_tot:     rec['a10_tot_'+i],
             a10_rec:     rec['a10_rec_'+i],
             a10_sid:     rec['a10_sid_'+i],
