@@ -2527,26 +2527,47 @@
       const wsTr = document.getElementById('prep-row-' + wsRowNum);
       if (!wsTr) return;
 
-      // Sisipkan setelah baris referensi
+      // Sisipkan setelah baris referensi (atau setelah baris terakhir grup jika sudah ada grup)
       const refTr = document.getElementById('prep-row-' + refRowNum);
-      if (refTr) refTr.after(wsTr);
+      // Cari baris terakhir grup referensi
+      let insertAfterTr = refTr;
+      const existingMg = refTr ? refTr.dataset.mergeGroup : null;
+      if (existingMg) {
+        const groupTrs = Array.from(document.querySelectorAll(`tr[data-merge-group="${existingMg}"]`));
+        insertAfterTr = groupTrs[groupTrs.length - 1] || refTr;
+      }
+      if (insertAfterTr) insertAfterTr.after(wsTr);
 
-      // Gabungkan baris referensi dan baris WS
-      const groupId = 'G' + Date.now();
+      // Gunakan groupId yang sudah ada, atau buat baru
+      const groupId = existingMg || ('G' + Date.now());
       const fromCum = g('from_cum'), toCum = g('to_cum');
 
-      // Baris referensi = pertama dalam grup
+      // Baris referensi = pertama dalam grup (hanya jika belum punya grup)
       const srcTr = document.getElementById('prep-row-' + refRowNum);
-      if (srcTr) {
+      if (srcTr && !existingMg) {
         srcTr.classList.add('row-merged', 'row-merged-first');
         srcTr.classList.remove('row-merged-last');
         srcTr.dataset.mergeGroup = groupId;
         const srcBtn = srcTr.querySelector('.btn-merge');
         if (srcBtn) { srcBtn.textContent = '🔒'; srcBtn.title = 'Lepas gabungan'; srcBtn.onclick = () => unmerge(groupId); }
+      } else if (srcTr && existingMg) {
+        // Update tombol jika sudah ada grup
+        const srcBtn = srcTr.querySelector('.btn-merge');
+        if (srcBtn && srcBtn.textContent !== '🔒') {
+          srcBtn.textContent = '🔒'; srcBtn.title = 'Lepas gabungan'; srcBtn.onclick = () => unmerge(groupId);
+        }
       }
 
-      // Baris WS = kedua dalam grup
+      // Hapus flag row-merged-last dari semua baris grup yang ada
+      if (existingMg) {
+        document.querySelectorAll(`tr[data-merge-group="${existingMg}"]`).forEach(tr => {
+          tr.classList.remove('row-merged-last');
+        });
+      }
+
+      // Baris WS = terakhir dalam grup
       wsTr.classList.add('row-merged', 'row-merged-last');
+      wsTr.classList.remove('row-merged-first');
       wsTr.dataset.mergeGroup = groupId;
       const wsFcEl = document.getElementById('from_cum_' + wsRowNum);
       const wsTcEl = document.getElementById('to_cum_' + wsRowNum);
