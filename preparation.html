@@ -2452,19 +2452,40 @@
     let _washSourceRow = null; // baris yang membuka modal wash
 
     function openWashSampleModal() {
-      // Simpan baris sumber dari modal fraksi
       const overlay = document.getElementById('frac-modal-overlay');
       _washSourceRow = overlay ? parseInt(overlay.dataset.targetRow) : null;
-      // Tutup modal fraksi dulu
       closeFracModal();
 
-      // Suggest Samp No dari baris sumber
       const snEl = _washSourceRow ? document.querySelector(`[name="samp_no_${_washSourceRow}"]`) : null;
       document.getElementById('wash-sampno-input').value = snEl ? snEl.value.trim().toUpperCase() : '';
-      // Auto-fill SA: lanjutkan dari SA terakhir yang terpakai
       document.getElementById('wash-sid-input').value = getNextSAID();
+
+      // Auto-fill GS dari baris referensi + auto-fill p03
+      const gsEl = _washSourceRow ? document.querySelector(`[name="sample_id_${_washSourceRow}"]`) : null;
+      const gsInp = document.getElementById('wash-gs-input');
+      const p03Inp = document.getElementById('wash-p03-input');
+      if (gsInp) {
+        const gsVal = gsEl ? gsEl.value.trim().toUpperCase() : '';
+        gsInp.value = gsVal;
+        if (p03Inp) {
+          p03Inp.dataset.manual = 'false';
+          autoFillWashGSP03(gsVal);
+        }
+      }
+
       document.getElementById('wash-modal-overlay').style.display = 'flex';
       setTimeout(() => document.getElementById('wash-sampno-input').focus(), 100);
+    }
+
+    function autoFillWashGSP03(gsVal) {
+      const p03Inp = document.getElementById('wash-p03-input');
+      if (!p03Inp || p03Inp.dataset.manual === 'true') return;
+      const gs = gsVal.trim().toUpperCase();
+      if (!gs) { p03Inp.value = ''; return; }
+      const m = gs.match(/^([A-Za-z]+)(\d+)$/);
+      if (m) {
+        p03Inp.value = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+      }
     }
 
     function closeWashSampleModal() {
@@ -2474,6 +2495,8 @@
     function saveWashSample() {
       const sampNoRef = document.getElementById('wash-sampno-input').value.trim().toUpperCase();
       const firstSA   = document.getElementById('wash-sid-input').value.trim().toUpperCase();
+      const gsVal     = (document.getElementById('wash-gs-input') || {}).value?.trim().toUpperCase() || '';
+      const p03Val    = (document.getElementById('wash-p03-input') || {}).value?.trim().toUpperCase() || '';
 
       if (!sampNoRef) { showToast('Masukkan Samp No referensi', 'error'); document.getElementById('wash-sampno-input').focus(); return; }
       if (!firstSA)   { showToast('Masukkan Sample ID SA pertama', 'error'); document.getElementById('wash-sid-input').focus(); return; }
@@ -2556,6 +2579,15 @@
       recalcSamplingNo();
       updateFracLock();
       highlightDuplicates();
+      // Simpan GS dan p03 ke baris WS
+      if (gsVal) {
+        const wsGsEl = document.querySelector(`[name="sample_id_${wsRowNum}"]`);
+        if (wsGsEl) { wsGsEl.value = gsVal; wsGsEl.dataset.autoOrig = 'false'; }
+      }
+      if (p03Val) {
+        const wsP03El = document.querySelector(`[name="m06_orig_sid_${wsRowNum}"]`);
+        if (wsP03El) { wsP03El.value = p03Val; }
+      }
       closeWashSampleModal();
       showToast('Wash Sample ditambahkan untuk ' + sampNoRef);
     }
@@ -4007,8 +4039,24 @@
         <label style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Samp No Referensi</label>
         <input type="text" id="wash-sampno-input" placeholder="Contoh: S1"
           style="width:100%;border:2px solid #0277bd;border-radius:10px;padding:11px 12px;font-size:18px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:2px;"
-          onkeydown="if(event.key==='Enter') document.getElementById('wash-sid-input').focus()">
+          onkeydown="if(event.key==='Enter') document.getElementById('wash-gs-input').focus()">
         <div style="font-size:10px;color:#888;margin-top:4px;">Data interval (From–To, Grain) akan diambil dari baris Samp No ini.</div>
+      </div>
+      <!-- Original Sample ID (GS) -->
+      <div style="margin-bottom:10px;padding:8px 10px;background:#e8f5e9;border:1.5px solid #a8d5b5;border-radius:10px;">
+        <label style="font-size:11px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID (GS)</label>
+        <input type="text" id="wash-gs-input" placeholder="Contoh: GS001"
+          style="width:100%;border:2px solid #a8d5b5;border-radius:8px;padding:9px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;background:white;"
+          oninput="autoFillWashGSP03(this.value)"
+          onkeydown="if(event.key==='Enter') document.getElementById('wash-p03-input').focus()">
+      </div>
+      <!-- Original SID +0.3-0.6 -->
+      <div style="margin-bottom:10px;padding:8px 10px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:10px;">
+        <label style="font-size:11px;font-weight:700;color:#f57f17;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID — Fraksi +0.3-0.6</label>
+        <input type="text" id="wash-p03-input" placeholder="Contoh: GS002 (opsional)"
+          style="width:100%;border:2px solid #ffe082;border-radius:8px;padding:9px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;background:white;"
+          oninput="this.dataset.manual='true'"
+          onkeydown="if(event.key==='Enter') document.getElementById('wash-sid-input').focus()">
       </div>
       <div style="margin-bottom:14px;">
         <label style="font-size:11px;font-weight:700;color:#0277bd;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Sample ID SA Pertama (fraksi)</label>
@@ -4016,7 +4064,7 @@
           style="width:100%;border:2px solid #a8d5b5;border-radius:10px;padding:11px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;"
           onkeydown="if(event.key==='Enter') saveWashSample()">
       </div>
-      <button onclick="saveWashSample()" style="width:100%;background:#0277bd;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Tambahkan Wash Sample</button>
+      <button onclick="saveWashSample()" style="width:100%;background:#0277bd;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">Tambahkan Wash Sample</button>
     </div>
   </div>
 
