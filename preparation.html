@@ -331,6 +331,21 @@
     }
     .btn-add { background: #4db6ac; color: white; }
   
+    /* ===== ROW MENU POPOVER ===== */
+    #row-menu-popover {
+      display:none; position:fixed; z-index:9000;
+      background:white; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.2);
+      border:1.5px solid #e0e0e0; padding:4px; min-width:150px;
+    }
+    #row-menu-popover button {
+      display:block; width:100%; text-align:left; padding:8px 12px;
+      border:none; background:none; font-size:13px; cursor:pointer;
+      border-radius:7px; color:#333;
+    }
+    #row-menu-popover button:hover { background:#f5f5f5; }
+    #row-menu-popover button.danger { color:#e53935; }
+    #row-menu-popover button.qaqc  { color:#1a6b4a; font-weight:600; }
+
     /* ===== PRINT / PDF ===== */
     @media print {
       body * { visibility: hidden; }
@@ -747,7 +762,7 @@
         <td class="td-cum"><input type="number" name="from_cum_${n}" id="from_cum_${n}" value="${v.from_cum != null ? v.from_cum : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td class="td-cum"><input type="number" name="to_cum_${n}"   id="to_cum_${n}"   value="${v.to_cum   != null ? v.to_cum   : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td style="text-align:center;"><button class="btn-merge" onclick="startMerge(${n}, this)" title="Gabungkan">🔗</button><input type="checkbox" class="merge-check" id="merge-check-${n}" style="display:none;margin-left:4px;" onchange="toggleMergeRow(${n}, this)"></td>
-        <td><button class="btn-del-row" onclick="clearRowSampleData(${n})" title="Hapus data sample" style="background:transparent;color:#ef5350;border:none;border-radius:3px;padding:1px 3px;font-size:14px;cursor:pointer;line-height:1;">✕</button></td>
+        <td><button class="btn-del-row" onclick="showRowMenu(event,${n})" title="Menu baris" style="background:transparent;color:#ef5350;border:none;border-radius:3px;padding:1px 3px;font-size:14px;cursor:pointer;line-height:1;">✕</button></td>
         <td><input type="text" name="samp_no_${n}" id="samp_no_${n}" value="${v.samp_no || ''}" style="cursor:pointer;text-align:center;width:100%;border:none;outline:none;font-size:11px;background:transparent;text-transform:uppercase;" onclick="openFracModal(${n})" readonly title="Klik untuk isi fraksi"></td>
         <td>${num('dry_wt', v.dry_wt)}</td>
         <td>${num('send_cum', v.send_cum)}</td>
@@ -1807,9 +1822,10 @@
         }
       }
 
-      // Tampilkan section Original SID +0.3 untuk semua Samp No
+      // Tampilkan section Original SID +0.3 — sembunyikan untuk baris QAQC
       const p03Section = document.getElementById('frac-p03-orig-section');
-      if (p03Section) p03Section.style.display = 'block';
+      const isQAQC = /^Q\d+$/i.test(sampNo);
+      if (p03Section) p03Section.style.display = isQAQC ? 'none' : 'block';
       const p03Inp = document.getElementById('frac-p03-orig-input');
       if (p03Inp) {
         // Cek m06_orig_sid baris ini dulu (sudah ada)
@@ -2128,6 +2144,99 @@
       highlightDuplicates();
       showToast('Baris WS otomatis ditambahkan');
       autoSaveDraft();
+    }
+
+    // ===== ROW MENU (klik ✕) =====
+    let _menuRowNum = null;
+
+    function showRowMenu(e, rowNum) {
+      e.stopPropagation();
+      _menuRowNum = rowNum;
+      const pop = document.getElementById('row-menu-popover');
+      pop.style.display = 'block';
+      const rect = e.target.getBoundingClientRect();
+      // Posisi di bawah tombol, pastikan tidak keluar layar
+      let top = rect.bottom + 4;
+      let left = rect.left;
+      const pw = 160, ph = 110;
+      if (left + pw > window.innerWidth) left = window.innerWidth - pw - 8;
+      if (top + ph > window.innerHeight) top = rect.top - ph - 4;
+      pop.style.top  = top + 'px';
+      pop.style.left = left + 'px';
+      // Tutup saat klik di luar
+      setTimeout(() => document.addEventListener('click', closeRowMenu, { once: true }), 0);
+    }
+
+    function closeRowMenu() {
+      const pop = document.getElementById('row-menu-popover');
+      if (pop) pop.style.display = 'none';
+    }
+
+    function rowMenuDeleteData() {
+      closeRowMenu();
+      if (_menuRowNum !== null) clearRowSampleData(_menuRowNum);
+    }
+
+    function rowMenuDeleteRow() {
+      closeRowMenu();
+      if (_menuRowNum !== null) deleteRow(_menuRowNum);
+    }
+
+    function rowMenuQAQC() {
+      closeRowMenu();
+      if (_menuRowNum === null) return;
+      // Suggest next GS: ambil dari m06_orig_sid baris ini jika ada, else GS+1
+      const m06El = document.querySelector(`[name="m06_orig_sid_${_menuRowNum}"]`);
+      const sidEl = document.querySelector(`[name="sample_id_${_menuRowNum}"]`);
+      let suggested = '';
+      if (m06El && m06El.value.trim()) {
+        suggested = m06El.value.trim().toUpperCase();
+      } else if (sidEl && sidEl.value.trim()) {
+        const mv = sidEl.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
+        if (mv) suggested = mv[1] + String(parseInt(mv[2]) + 1).padStart(mv[2].length, '0');
+      }
+      const inp = document.getElementById('qaqc-sid-input');
+      if (inp) inp.value = suggested;
+      document.getElementById('qaqc-modal-overlay').style.display = 'flex';
+      setTimeout(() => { if (inp) inp.focus(); }, 100);
+    }
+
+    function closeQAQCModal() {
+      document.getElementById('qaqc-modal-overlay').style.display = 'none';
+    }
+
+    function saveQAQCModal() {
+      const inp = document.getElementById('qaqc-sid-input');
+      const val = inp ? inp.value.trim().toUpperCase() : '';
+      if (!val) { showToast('Masukkan Sample ID QAQC', 'error'); if (inp) inp.focus(); return; }
+      if (_menuRowNum === null) return;
+
+      // Tentukan nomor Q berikutnya
+      let qNum = 0;
+      for (let i = 1; i <= rowCount; i++) {
+        const snEl = document.querySelector('[name="samp_no_' + i + '"]');
+        if (snEl && /^Q\d+$/i.test(snEl.value.trim())) {
+          const n = parseInt(snEl.value.trim().slice(1));
+          if (n > qNum) qNum = n;
+        }
+      }
+      qNum++;
+
+      // Tambah baris QAQC
+      addRow({ samp_no: 'Q' + qNum, sample_id: val, jenis: 'DS' });
+      const qTr = document.getElementById('prep-row-' + rowCount);
+      if (qTr) {
+        qTr.classList.add('row-qaqc');
+        // Sisipkan setelah baris yang dipilih
+        const refTr = document.getElementById('prep-row-' + _menuRowNum);
+        if (refTr && refTr.nextSibling) {
+          refTr.parentNode.insertBefore(qTr, refTr.nextSibling);
+        }
+      }
+      closeQAQCModal();
+      highlightDuplicates();
+      updateTotalSample();
+      showToast('QAQC Q' + qNum + ' ditambahkan: ' + val);
     }
 
     // ===== UNMERGE =====
@@ -3473,6 +3582,28 @@
 
       <div id="frac-preview" style="display:flex;flex-direction:column;gap:5px;margin-top:4px;"></div>
       <button onclick="saveFracCount()" style="margin-top:14px;width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Terapkan</button>
+    </div>
+  </div>
+
+  <!-- ROW MENU POPOVER -->
+  <div id="row-menu-popover">
+    <button class="qaqc"  onclick="rowMenuQAQC()">✚ Tambah QAQC</button>
+    <button class="danger" onclick="rowMenuDeleteData()">🗑 Delete Data</button>
+    <button class="danger" onclick="rowMenuDeleteRow()">✕ Delete Baris</button>
+  </div>
+
+  <!-- MODAL: INPUT QAQC SAMPLE ID -->
+  <div id="qaqc-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:white;border-radius:16px;width:100%;max-width:340px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-weight:700;font-size:15px;color:#1a6b4a;">✚ Sample QAQC</span>
+        <button onclick="closeQAQCModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
+      </div>
+      <p style="font-size:12px;color:#666;margin-bottom:12px;">Masukkan Sample ID untuk QAQC pada baris ini.</p>
+      <input type="text" id="qaqc-sid-input" placeholder="Contoh: GS004284"
+        style="width:100%;border:2px solid #a8d5b5;border-radius:10px;padding:11px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;"
+        onkeydown="if(event.key==='Enter') saveQAQCModal()">
+      <button onclick="saveQAQCModal()" style="margin-top:12px;width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Tambahkan QAQC</button>
     </div>
   </div>
 
