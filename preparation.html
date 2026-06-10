@@ -382,35 +382,35 @@
     .exp-row-item.open .exp-chevron { transform:rotate(180deg); }
     .exp-detail {
       display:none; border-top:1px solid #e8f5e9;
-      padding:10px 12px; background:#fafffe;
+      padding:6px 10px 8px; background:#fafffe;
     }
     .exp-row-item.open .exp-detail { display:block; }
-    .exp-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; margin-bottom:8px; }
-    .exp-detail-field { display:flex; flex-direction:column; gap:2px; }
-    .exp-detail-field label { font-size:10px; color:#888; font-weight:600; text-transform:uppercase; }
+    .exp-detail-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:4px 6px; margin-bottom:6px; }
+    .exp-detail-field { display:flex; flex-direction:column; gap:1px; }
+    .exp-detail-field label { font-size:9px; color:#888; font-weight:600; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .exp-detail-field input, .exp-detail-field select {
-      border:1.5px solid #d0ece4; border-radius:7px;
-      padding:6px 8px; font-size:12px; outline:none;
+      border:1.5px solid #d0ece4; border-radius:5px;
+      padding:4px 5px; font-size:11px; outline:none;
       text-transform:uppercase; width:100%; background:white;
     }
     .exp-detail-field input:focus, .exp-detail-field select:focus { border-color:#1a6b4a; }
     .exp-detail-field input[readonly] { background:#f5f5f5; color:#888; }
-    .exp-frac-title { font-size:10px; font-weight:700; color:#1a6b4a; text-transform:uppercase; letter-spacing:0.5px; margin:8px 0 4px; border-bottom:1.5px solid #e8f5e9; padding-bottom:3px; }
-    .exp-frac-row { display:grid; grid-template-columns:80px 1fr 1fr 2fr; gap:4px; align-items:center; margin-bottom:4px; }
-    .exp-frac-row .frac-label { font-size:10px; font-weight:700; color:#004d40; }
+    .exp-frac-title { font-size:9px; font-weight:700; color:#1a6b4a; text-transform:uppercase; letter-spacing:0.5px; margin:4px 0 3px; border-bottom:1px solid #e8f5e9; padding-bottom:2px; }
+    .exp-frac-row { display:grid; grid-template-columns:70px 1fr 50px 2fr; gap:3px; align-items:center; margin-bottom:3px; }
+    .exp-frac-row .frac-label { font-size:9px; font-weight:700; color:#004d40; }
     .exp-frac-row input {
-      border:1.5px solid #d0ece4; border-radius:6px;
-      padding:5px 5px; font-size:11px; outline:none;
+      border:1.5px solid #d0ece4; border-radius:5px;
+      padding:4px 4px; font-size:11px; outline:none;
       text-align:center; text-transform:uppercase; width:100%;
     }
     .exp-frac-row input:focus { border-color:#1a6b4a; }
     .exp-frac-row input[readonly] { background:#f5f5f5; color:#888; }
     .exp-detail-actions {
-      display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;
+      display:flex; gap:5px; margin-top:6px;
     }
     .exp-detail-actions button {
-      flex:1; padding:7px 8px; border:none; border-radius:8px;
-      font-size:11px; font-weight:600; cursor:pointer; min-width:60px;
+      flex:1; padding:6px 6px; border:none; border-radius:7px;
+      font-size:11px; font-weight:600; cursor:pointer;
     }
     .exp-btn-samp { background:#e8f5e9; color:#1a6b4a; border:1.5px solid #a8d5b5 !important; }
     .exp-btn-merge { background:#fff3e0; color:#e65100; border:1.5px solid #ffcc80 !important; }
