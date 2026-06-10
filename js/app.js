@@ -20,14 +20,47 @@ const DB = {
 };
 
 // ===== UNDO / REDO MANAGER =====
+// Berbasis full-snapshot: setiap operasi penting menyimpan state lengkap
 const UndoManager = {
-  _stack: [],   // history snapshots
-  _future: [],  // redo snapshots
-  _maxSize: 30,
+  _stack: [],
+  _future: [],
+  _maxSize: 20,
   _paused: false,
 
-  // Ambil snapshot semua input/select/textarea di halaman
+  // Ambil full snapshot dari autoSaveDraft jika ada, fallback ke input snapshot
   _snapshot() {
+    // Untuk preparation: gunakan data dari prep-tbody + header
+    const prepTbody = document.getElementById('prep-tbody');
+    if (prepTbody && typeof autoSaveDraft === 'function') {
+      // Buat snapshot yang sama dengan autoSaveDraft
+      const data = {};
+      ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
+        const el = document.querySelector('[name="' + k + '"]');
+        if (el) data[k] = el.value;
+      });
+      const FIELDS = [
+        'from','to','len','rec','grain','core_wt','from_cum','to_cum',
+        'samp_no','send_cum','sample_id','dry_wt','m06_orig_sid',
+        'a10_tot','a10_rec','a10_sid','a2_tot','a2_rec','a2_sid',
+        'a06_tot','a06_rec','a06_sid','m06_tot','m06_rec','m06_sid',
+        'p03_tot','p03_rec','p03_sid','qaqc_sid','qaqc_wt','jenis','remarks'
+      ];
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      data.row_count = domRows.length;
+      domRows.forEach((tr, idx) => {
+        const pos = idx + 1;
+        const origN = tr.dataset.row;
+        if (tr.dataset.mergeGroup) data['merge_group_' + pos] = tr.dataset.mergeGroup;
+        FIELDS.forEach(field => {
+          const el = document.querySelector('[name="' + field + '_' + origN + '"]');
+          data[field + '_' + pos] = el ? el.value : '';
+        });
+        const grainEl = document.querySelector('[name="grain_' + origN + '"]');
+        data['grain_changed_' + pos] = grainEl && grainEl.classList.contains('grain-changed') ? '1' : '';
+      });
+      return JSON.stringify(data);
+    }
+    // Fallback: input snapshot sederhana
     const state = {};
     document.querySelectorAll('input:not([type=file]), select, textarea').forEach(el => {
       const key = el.id || el.name;
@@ -36,32 +69,70 @@ const UndoManager = {
     return JSON.stringify(state);
   },
 
-  // Restore snapshot ke form
+  // Restore snapshot — hanya untuk preparation (rebuild rows)
   _restore(snap) {
+    if (this._paused) return;
     this._paused = true;
     try {
-      const state = JSON.parse(snap);
-      Object.entries(state).forEach(([key, val]) => {
-        const el = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
-        if (el && el.value !== val) {
-          el.value = val;
-          el.dispatchEvent(new Event('change', { bubbles: true }));
+      const data = JSON.parse(snap);
+      // Jika ini preparation form
+      if (document.getElementById('prep-tbody') && typeof addRow === 'function') {
+        // Restore header
+        ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
+          const el = document.querySelector('[name="' + k + '"]');
+          if (el && data[k] !== undefined) el.value = data[k];
+        });
+        // Rebuild rows
+        document.getElementById('prep-tbody').innerHTML = '';
+        if (typeof rowCount !== 'undefined') window.rowCount = 0;
+        const rc = parseInt(data.row_count) || 0;
+        const FIELDS = [
+          'from','to','len','rec','grain','core_wt','from_cum','to_cum',
+          'samp_no','send_cum','sample_id','dry_wt','m06_orig_sid',
+          'a10_tot','a10_rec','a10_sid','a2_tot','a2_rec','a2_sid',
+          'a06_tot','a06_rec','a06_sid','m06_tot','m06_rec','m06_sid',
+          'p03_tot','p03_rec','p03_sid','qaqc_sid','qaqc_wt','jenis','remarks'
+        ];
+        for (let i = 1; i <= rc; i++) {
+          const rowData = { merge_group: data['merge_group_' + i], grain_changed: data['grain_changed_' + i] === '1' };
+          FIELDS.forEach(f => { rowData[f === 'from' ? 'from' : f === 'to' ? 'to' : f === 'len' ? 'length' : f === 'rec' ? 'recovery' : f === 'grain' ? 'grain_size' : f] = data[f + '_' + i]; });
+          // Map field names correctly
+          addRow({
+            from: data['from_'+i], to: data['to_'+i], length: data['len_'+i],
+            recovery: data['rec_'+i], grain_size: data['grain_'+i], core_wt: data['core_wt_'+i],
+            from_cum: data['from_cum_'+i], to_cum: data['to_cum_'+i],
+            samp_no: data['samp_no_'+i], send_cum: data['send_cum_'+i],
+            sample_id: data['sample_id_'+i], dry_wt: data['dry_wt_'+i],
+            m06_orig_sid: data['m06_orig_sid_'+i],
+            a10_tot: data['a10_tot_'+i], a10_rec: data['a10_rec_'+i], a10_sid: data['a10_sid_'+i],
+            a2_tot: data['a2_tot_'+i], a2_rec: data['a2_rec_'+i], a2_sid: data['a2_sid_'+i],
+            a06_tot: data['a06_tot_'+i], a06_rec: data['a06_rec_'+i], a06_sid: data['a06_sid_'+i],
+            m06_tot: data['m06_tot_'+i], m06_rec: data['m06_rec_'+i], m06_sid: data['m06_sid_'+i],
+            p03_tot: data['p03_tot_'+i], p03_rec: data['p03_rec_'+i], p03_sid: data['p03_sid_'+i],
+            qaqc_sid: data['qaqc_sid_'+i], qaqc_wt: data['qaqc_wt_'+i],
+            jenis: data['jenis_'+i], remarks: data['remarks_'+i],
+            merge_group: data['merge_group_'+i], grain_changed: data['grain_changed_'+i] === '1'
+          });
         }
-      });
-    } catch(e) {}
+        if (typeof restoreMergeVisibility === 'function') restoreMergeVisibility();
+        if (typeof recalcSamplingNo === 'function') recalcSamplingNo();
+        if (typeof highlightDuplicates === 'function') highlightDuplicates();
+        if (typeof restoreQAQCClass === 'function') restoreQAQCClass();
+        if (typeof updateFracLock === 'function') updateFracLock();
+        if (typeof updateTotalSample === 'function') updateTotalSample();
+      }
+    } catch(e) { console.warn('UndoManager restore error:', e); }
     this._paused = false;
     this._updateButtons();
   },
 
-  // Simpan state saat ini ke history
   push() {
     if (this._paused) return;
     const snap = this._snapshot();
-    // Jangan push jika sama dengan state terakhir
     if (this._stack.length && this._stack[this._stack.length - 1] === snap) return;
     this._stack.push(snap);
     if (this._stack.length > this._maxSize) this._stack.shift();
-    this._future = []; // clear redo saat ada perubahan baru
+    this._future = [];
     this._updateButtons();
   },
 
@@ -88,21 +159,19 @@ const UndoManager = {
     if (redoBtn) redoBtn.disabled = this._future.length === 0;
   },
 
-  // Pasang listener pada semua input di halaman
   init() {
-    // Simpan state awal
-    setTimeout(() => { this.push(); }, 500);
-
-    // Pasang listener dengan debounce
+    setTimeout(() => { this.push(); }, 800);
+    // Pasang listener dengan debounce — hanya push saat ada perubahan real
     let timer = null;
-    const handler = () => {
+    const handler = (e) => {
       if (this._paused) return;
+      // Skip file inputs dan tombol
+      if (e.target && (e.target.type === 'file' || e.target.tagName === 'BUTTON')) return;
       clearTimeout(timer);
-      timer = setTimeout(() => this.push(), 600);
+      timer = setTimeout(() => this.push(), 800);
     };
     document.addEventListener('input',  handler);
     document.addEventListener('change', handler);
-
     // Keyboard shortcut Ctrl+Z / Ctrl+Y
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
@@ -112,43 +181,29 @@ const UndoManager = {
         e.preventDefault(); this.redo();
       }
     });
-
-    // Inject tombol undo/redo ke action-bar jika ada
+    // Inject tombol undo/redo ke toolbar preparation
     document.addEventListener('DOMContentLoaded', () => {
+      const toolbar = document.querySelector('.prep-toolbar');
+      if (toolbar) return; // tombol sudah ada di HTML
       const bar = document.querySelector('.action-bar');
       if (!bar) return;
       const undoBtn = document.createElement('button');
-      undoBtn.id = 'btn-undo';
-      undoBtn.className = 'btn';
-      undoBtn.title = 'Undo (Ctrl+Z)';
-      undoBtn.disabled = true;
+      undoBtn.id = 'btn-undo'; undoBtn.className = 'btn'; undoBtn.title = 'Undo (Ctrl+Z)'; undoBtn.disabled = true;
       undoBtn.style.cssText = 'background:#f5f5f5;color:#555;flex:0 0 auto;padding:6px 10px;font-size:16px;min-width:40px;';
-      undoBtn.innerHTML = '↩';
-      undoBtn.addEventListener('click', () => this.undo());
-
+      undoBtn.innerHTML = '↩'; undoBtn.addEventListener('click', () => this.undo());
       const redoBtn = document.createElement('button');
-      redoBtn.id = 'btn-redo';
-      redoBtn.className = 'btn';
-      redoBtn.title = 'Redo (Ctrl+Y)';
-      redoBtn.disabled = true;
+      redoBtn.id = 'btn-redo'; redoBtn.className = 'btn'; redoBtn.title = 'Redo (Ctrl+Y)'; redoBtn.disabled = true;
       redoBtn.style.cssText = 'background:#f5f5f5;color:#555;flex:0 0 auto;padding:6px 10px;font-size:16px;min-width:40px;';
-      redoBtn.innerHTML = '↪';
-      redoBtn.addEventListener('click', () => this.redo());
-
-      bar.insertBefore(redoBtn, bar.firstChild);
-      bar.insertBefore(undoBtn, bar.firstChild);
+      redoBtn.innerHTML = '↪'; redoBtn.addEventListener('click', () => this.redo());
+      bar.insertBefore(redoBtn, bar.firstChild); bar.insertBefore(undoBtn, bar.firstChild);
     });
   }
 };
 
-// Make UndoManager globally available
 window.UndoManager = UndoManager;
 
-// Auto-init UndoManager di semua halaman form
 document.addEventListener('DOMContentLoaded', () => {
-  if (document.querySelector('.action-bar, .form-container')) {
-    UndoManager.init();
-  }
+  if (document.querySelector('.action-bar, .form-container')) UndoManager.init();
 });
 
 // ===== TOAST NOTIFICATION =====
