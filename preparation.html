@@ -706,6 +706,14 @@
       container.querySelectorAll('.exp-row-item.open').forEach(el => { if (el.dataset.rowNum) openRows.add(el.dataset.rowNum); });
       container.innerHTML = '';
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      // Build map mergeGroup -> [rowNums] to detect WS rows
+      const groupRows = {};
+      domRows.forEach(tr => {
+        const mg = tr.dataset.mergeGroup || ('_single_' + tr.dataset.row);
+        if (!groupRows[mg]) groupRows[mg] = [];
+        groupRows[mg].push(tr.dataset.row);
+      });
+
       const seenMg = new Set();
       domRows.forEach(tr => {
         const n = parseInt(tr.dataset.row);
@@ -721,7 +729,17 @@
         item.className = 'exp-row-item' + (isCLY?' exp-cly':isQ?' exp-qaqc':isS?' exp-s':'');
         item.dataset.rowNum = n;
         if (openRows.has(String(n))) item.classList.add('open');
-        const origIds = [d.sample_id, d.m06_orig_sid].filter(Boolean);
+        // Collect Original/WS sample IDs across the whole merge group (if any)
+        const groupKey = mg || ('_single_' + n);
+        const gArr = groupRows[groupKey] || [String(n)];
+        const idsSet = new Set();
+        gArr.forEach(rn => {
+          ['sample_id','m06_orig_sid','m06_sid'].forEach(f => {
+            const el = document.querySelector('[name="' + f + '_' + rn + '"]');
+            if (el && el.value && el.value.trim()) idsSet.add(el.value.trim().toUpperCase());
+          });
+        });
+        const origIds = Array.from(idsSet);
         const origIdsHtml = origIds.length ? `<span class="exp-gs exp-id-group">${origIds.map(id => `<span class="exp-id-pill">${id}</span>`).join('')}</span>` : '';
         const header = document.createElement('div');
         header.className = 'exp-row-header';
