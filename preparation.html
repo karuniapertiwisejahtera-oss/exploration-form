@@ -2075,22 +2075,23 @@
       const p03Inp = document.getElementById('frac-p03-orig-input');
       if (p03Inp) {
         p03Inp.dataset.manualEdit = 'false'; // reset flag saat modal baru dibuka
-        // Cek m06_orig_sid baris ini dulu (sudah ada)
-        const existM06 = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
-        if (existM06 && existM06.value.trim()) {
-          p03Inp.value = existM06.value.trim().toUpperCase();
+        // Selalu hitung dari Original SID baris ini + 1
+        // Jangan pakai m06_orig_sid yang mungkin nilai lama/sama
+        const origEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
+        const origInpVal = (origInp && origInp.value.trim()) ? origInp.value.trim().toUpperCase()
+                         : (origEl ? origEl.value.trim().toUpperCase() : '');
+        if (origInpVal) {
+          const m = origInpVal.match(/^([A-Za-z]+)(\d+)$/);
+          if (m) {
+            p03Inp.value = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+          } else {
+            p03Inp.value = getNextGSIDFromOriginal();
+          }
         } else {
-          // Auto: ambil Original SID baris ini (sample_id) + 1
-          const origEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
-          const origVal = origEl ? origEl.value.trim().toUpperCase() : '';
-          if (origVal) {
-            const m = origVal.match(/^([A-Za-z]+)(\d+)$/);
-            if (m) {
-              const nextNum = parseInt(m[2]) + 1;
-              p03Inp.value = m[1] + String(nextNum).padStart(m[2].length, '0');
-            } else {
-              p03Inp.value = getNextGSIDFromOriginal();
-            }
+          // Fallback ke m06_orig_sid jika ada, atau GS terakhir+1
+          const existM06 = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
+          if (existM06 && existM06.value.trim()) {
+            p03Inp.value = existM06.value.trim().toUpperCase();
           } else {
             p03Inp.value = getNextGSIDFromOriginal();
           }
