@@ -401,6 +401,12 @@
       font-size:10px; font-weight:700; padding:2px 6px;
       border-radius:8px; background:#e8f5e9; color:#1a6b4a;
     }
+    .exp-ws-badge {
+      font-size:10px; font-weight:700; color:#0277bd;
+      background:#e1f5fe; padding:2px 6px; border-radius:6px;
+      white-space:nowrap;
+      margin-left:6px;
+    }
     .exp-gs { font-size:10px; color:#1a3a8f; font-weight:600; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .exp-chevron { font-size:12px; color:#aaa; margin-left:4px; transition:transform 0.2s; }
     .exp-row-item.open .exp-chevron { transform:rotate(180deg); }
@@ -721,12 +727,16 @@
         const d = getExpRowData(n);
         const isS = /^S\d+$/i.test(d.samp_no);
         const isQ = /^Q\d+$/i.test(d.samp_no);
+        const groupKey = mg || ('_single_' + n);
+        const groupArr = groupRows[groupKey] || [String(n)];
+        const rowIdxInGroup = groupArr.indexOf(String(n));
+        const isWS = mg && rowIdxInGroup > 0 && !isQ;
         const isCLY = d.grain.toUpperCase() === 'CLY' && !isS && !isQ;
-        // Untuk grup gabung, tampilkan semua QAQC row, tapi sembunyikan row tambahan non-Q lain
-        if (mg && seenMg.has(mg) && !isQ) return;
-        if (mg && !isQ) seenMg.add(mg);
+        // Untuk grup gabung, tampilkan card utama, wash sample, dan QAQC; sembunyikan baris tambahan non-Q lain
+        if (mg && seenMg.has(mg) && !isQ && !isWS) return;
+        if (mg && !isQ && !isWS) seenMg.add(mg);
         const item = document.createElement('div');
-        item.className = 'exp-row-item' + (isCLY?' exp-cly':isQ?' exp-qaqc':isS?' exp-s':'');
+        item.className = 'exp-row-item' + (isCLY?' exp-cly':isQ?' exp-qaqc':isWS?' exp-ws':isS?' exp-s':'');
         item.dataset.rowNum = n;
         if (openRows.has(String(n))) item.classList.add('open');
         // Collect Original/WS sample IDs across the whole merge group (if any)
@@ -744,8 +754,9 @@
         const header = document.createElement('div');
         header.className = 'exp-row-header';
         header.innerHTML = `
-          <span class="exp-sampno${isQ?' qaqc':''}">${d.samp_no||'—'}</span>
+          <span class="exp-sampno${isQ?' qaqc':''}${isWS?' ws':''}">${d.samp_no||'—'}</span>
           <span class="exp-range">${d.from||'?'}–${d.to||'?'} m ${d.grain?`<b>${d.grain}</b>`:''}</span>
+          ${isWS?'<span class="exp-ws-badge">WS</span>':''}
           ${origIdsHtml}
           <span class="exp-chevron">▼</span>
         `;
