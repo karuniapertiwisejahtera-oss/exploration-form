@@ -528,7 +528,7 @@
               <th class="c-std" rowspan="3">Samp No.</th>
               <th class="c-std" rowspan="3" style="min-width: 44px; width: 44px;">Dry Wt</th>
               <th class="c-send" rowspan="3">Send Cum</th>
-              <th class="c-sid" rowspan="3">Original Sample_ID</th>
+              <th class="c-sid" rowspan="3">Original Sample ID</th>
               <th class="g10" colspan="3">+10 mm</th>
               <th class="g2 g-start" colspan="3">+2-10 mm</th>
               <th class="g06 g-start" colspan="3">+0.6-2 mm</th>
@@ -730,7 +730,19 @@
             <input type="text" data-expfield="${f.key}_sid" data-exprow="${n}" value="${d[f.key+'_sid']||''}" placeholder="Sample ID">
           </div>`;
         });
-        detail.innerHTML = `
+        if (isQ) {
+          detail.innerHTML = `
+            <div class="exp-detail-grid">
+              ${inp('Send Cum','send_cum','number',false,d.send_cum)}
+              ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
+              ${inp('Remarks','remarks','text',false,d.remarks)}
+            </div>
+            <div class="exp-detail-actions">
+              <button class="exp-btn-del" onclick="showRowMenu(event,${n})">✕ Menu</button>
+            </div>
+          `;
+        } else {
+          detail.innerHTML = `
           <div class="exp-detail-grid">
             ${inp('From (m)','from','number',false,d.from)}
             ${inp('To (m)','to','number',false,d.to)}
@@ -739,7 +751,7 @@
             ${inp('Core Wt (g)','core_wt','number',false,d.core_wt)}
             ${inp('Dry Wt (g)','dry_wt','number',false,d.dry_wt)}
             ${inp('Send Cum','send_cum','number',false,d.send_cum)}
-            ${inp('Original SID','sample_id','text',false,d.sample_id)}
+            ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
             ${inp('+0.3 SID','m06_orig_sid','text',false,d.m06_orig_sid)}
             ${inp('Remarks','remarks','text',false,d.remarks)}
           </div>
@@ -750,6 +762,7 @@
             <button class="exp-btn-del" onclick="showRowMenu(event,${n})">✕ Menu</button>
           </div>
         `;
+        }
         // Listener: sync ke tabel saat input berubah
         detail.querySelectorAll('[data-expfield]').forEach(el => {
           const sync = () => {
@@ -1451,62 +1464,58 @@
 
     // ===== RECALC SEMUA ORIGINAL SID LINTAS BARIS =====
     // Dipanggil saat sample_id baris manapun berubah
-    // Hanya update baris-baris yang sample_id-nya auto (dataset.autoOrig === 'true')
-    function recalcAllOriginalSIDs() {
-      // Kumpulkan baris S yang punya sample_id (urutan DOM)
+    // Update semua baris S setelah baris yang berubah secara berurutan
+    function recalcAllOriginalSIDs(changedRowNum) {
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      const seen = new Set();
 
-      // Cari S1: baris pertama yang punya samp_no S1 dan sample_id terisi manual
-      let baseSID = '';
-      let basePrefix = '', basePadLen = 3, baseNum = 0;
-      for (const tr of domRows) {
-        const rn = tr.dataset.row;
-        const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
-        const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
-        if (snEl && snEl.value.trim().toUpperCase() === 'S1' && sidEl && sidEl.value.trim()) {
-          baseSID = sidEl.value.trim().toUpperCase();
-          const m = baseSID.match(/^([A-Za-z]+)(\d+)$/);
-          if (m) { basePrefix = m[1]; basePadLen = m[2].length; baseNum = parseInt(m[2]); }
-          break;
-        }
-      }
-      if (!baseSID || !basePrefix) return; // S1 belum punya sample_id
-
-      // Loop semua baris S (urutan DOM), hitung offset dan update
-      let sCounter = 0;
-      const seen = new Set(); // untuk skip baris non-first dalam merge group
+      // Kumpulkan semua interval S dalam urutan DOM (hanya baris pertama dari setiap grup)
+      const sIntervals = [];
       domRows.forEach(tr => {
-        const rn = tr.dataset.row;
+        const rn = parseInt(tr.dataset.row);
         const mg = tr.dataset.mergeGroup;
-        // Skip baris non-first dalam grup
-        if (mg) {
-          if (seen.has(mg)) return;
-          seen.add(mg);
-        }
+        if (mg) { if (seen.has(mg)) return; seen.add(mg); }
         const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
         if (!snEl || !/^S\d+$/i.test(snEl.value.trim())) return;
-
         const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
-        const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
-        if (!sidEl) return;
-
-        // Hitung GS untuk baris S ini
-        const gsCur = basePrefix + String(baseNum + sCounter).padStart(basePadLen, '0');
-        const gsNext = basePrefix + String(baseNum + sCounter + 1).padStart(basePadLen, '0');
-
-        // Update sample_id jika masih auto (bukan S1 yang jadi base, dan dataset.autoOrig === 'true')
-        if (snEl.value.trim().toUpperCase() !== 'S1' && sidEl.dataset.autoOrig === 'true') {
-          sidEl.value = gsCur;
-          autoUpdateM06Orig(rn); // update m06_orig_sid = gsCur + 1
-        } else if (snEl.value.trim().toUpperCase() === 'S1') {
-          // S1: update m06_orig_sid saja
-          if (m06El && m06El.dataset.autoM06 !== 'false') {
-            m06El.value = gsNext;
-            m06El.dataset.autoM06 = 'true';
-          }
-        }
-        sCounter++;
+        sIntervals.push({ rn, sn: snEl.value.trim().toUpperCase(), sidEl });
       });
+
+      if (!sIntervals.length) return;
+
+      // Cari posisi baris yang berubah dalam daftar S
+      const changedIdx = changedRowNum
+        ? sIntervals.findIndex(s => s.rn === parseInt(changedRowNum))
+        : 0;
+      if (changedIdx < 0) return;
+
+      // Ambil GS dari baris yang berubah sebagai base baru
+      const changedSid = sIntervals[changedIdx].sidEl.value.trim().toUpperCase();
+      const m = changedSid.match(/^([A-Za-z]+)(\d+)$/);
+      if (!m) return;
+      const basePrefix = m[1], basePadLen = m[2].length;
+      let nextNum = parseInt(m[2]) + 1; // mulai dari baris SETELAH yang berubah
+
+      // Update baris S setelah changedIdx
+      for (let i = changedIdx + 1; i < sIntervals.length; i++) {
+        const { rn, sidEl } = sIntervals[i];
+        const newGS = basePrefix + String(nextNum).padStart(basePadLen, '0');
+        sidEl.value = newGS;
+        sidEl.dataset.autoOrig = 'true';
+        // Update m06_orig_sid
+        const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
+        if (m06El && m06El.dataset.autoM06 !== 'false') {
+          m06El.value = basePrefix + String(nextNum + 1).padStart(basePadLen, '0');
+        }
+        nextNum++;
+      }
+
+      // Update m06_orig_sid baris yang berubah (GS+1)
+      const changedM06 = document.querySelector(`[name="m06_orig_sid_${sIntervals[changedIdx].rn}"]`);
+      if (changedM06 && changedM06.dataset.autoM06 !== 'false') {
+        changedM06.value = basePrefix + String(parseInt(m[2]) + 1).padStart(basePadLen, '0');
+      }
+
       highlightDuplicates();
     }
 
@@ -1536,13 +1545,13 @@
           autoUpdateM06Orig(n);
           updateTotalSample();
           clearTimeout(sidEl_r._recalcTimer);
-          sidEl_r._recalcTimer = setTimeout(recalcAllOriginalSIDs, 400);
+          sidEl_r._recalcTimer = setTimeout(() => recalcAllOriginalSIDs(n), 400);
         });
         sidEl_r.addEventListener('input', function() {
           autoUpdateM06Orig(n);
           updateTotalSample();
           clearTimeout(sidEl_r._recalcTimer);
-          sidEl_r._recalcTimer = setTimeout(recalcAllOriginalSIDs, 600);
+          sidEl_r._recalcTimer = setTimeout(() => recalcAllOriginalSIDs(n), 600);
         });
       }
       const m06OrigEl_r = document.querySelector(`[name="m06_orig_sid_${n}"]`);
