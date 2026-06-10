@@ -349,7 +349,18 @@
     /* ===== EXPANDABLE ROW LIST ===== */
     #exp-list-view {
       flex:1; overflow-y:auto; padding:4px 0 8px;
-      display:flex; flex-direction:column; gap:4px;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    #exp-list-container {
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap:10px;
+      width: 100%;
+    }
+    @media(max-width: 980px) {
+      #exp-list-container {
+        grid-template-columns: 1fr;
+      }
     }
     .exp-row-item {
       background:white; border-radius:10px;
@@ -357,6 +368,19 @@
       overflow:hidden;
       box-shadow:0 1px 4px rgba(0,0,0,0.06);
       transition:border-color 0.15s;
+      width: 100%;
+    }
+    .exp-id-group {
+      display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+      margin-left: auto; font-size:10px;
+    }
+    .exp-id-pill {
+      padding:2px 8px; border-radius:999px;
+      background:#e8f5e9; color:#1a3a8f; font-weight:700;
+      white-space:nowrap;
+    }
+    .exp-detail-grid.exp-clay {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .exp-row-item.exp-s { border-left:4px solid #1a6b4a; }
     .exp-row-item.exp-cly { border-left:4px solid #9e9e9e; opacity:0.8; }
@@ -686,25 +710,25 @@
       domRows.forEach(tr => {
         const n = parseInt(tr.dataset.row);
         const mg = tr.dataset.mergeGroup;
-        // Untuk grup gabung, hanya tampilkan baris pertama di list
-        if (mg && seenMg.has(mg)) return;
-        if (mg) seenMg.add(mg);
         const d = getExpRowData(n);
         const isS = /^S\d+$/i.test(d.samp_no);
         const isQ = /^Q\d+$/i.test(d.samp_no);
         const isCLY = d.grain.toUpperCase() === 'CLY' && !isS && !isQ;
+        // Untuk grup gabung, tampilkan semua QAQC row, tapi sembunyikan row tambahan non-Q lain
+        if (mg && seenMg.has(mg) && !isQ) return;
+        if (mg && !isQ) seenMg.add(mg);
         const item = document.createElement('div');
         item.className = 'exp-row-item' + (isCLY?' exp-cly':isQ?' exp-qaqc':isS?' exp-s':'');
         item.dataset.rowNum = n;
         if (openRows.has(String(n))) item.classList.add('open');
-        const origIds = [d.sample_id, d.m06_orig_sid].filter(Boolean).join(' / ');
-        // Header row
+        const origIds = [d.sample_id, d.m06_orig_sid].filter(Boolean);
+        const origIdsHtml = origIds.length ? `<span class="exp-gs exp-id-group">${origIds.map(id => `<span class="exp-id-pill">${id}</span>`).join('')}</span>` : '';
         const header = document.createElement('div');
         header.className = 'exp-row-header';
         header.innerHTML = `
           <span class="exp-sampno${isQ?' qaqc':''}">${d.samp_no||'—'}</span>
           <span class="exp-range">${d.from||'?'}–${d.to||'?'} m ${d.grain?`<b>${d.grain}</b>`:''}</span>
-          ${origIds?`<span class="exp-gs">${origIds}</span>`:''}
+          ${origIdsHtml}
           <span class="exp-chevron">▼</span>
         `;
         header.addEventListener('click', () => item.classList.toggle('open'));
@@ -734,6 +758,16 @@
           detail.innerHTML = `
             <div class="exp-detail-grid">
               ${inp('Send Cum','send_cum','number',false,d.send_cum)}
+              ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
+              ${inp('Remarks','remarks','text',false,d.remarks)}
+            </div>
+            <div class="exp-detail-actions">
+              <button class="exp-btn-del" onclick="showRowMenu(event,${n})">✕ Menu</button>
+            </div>
+          `;
+        } else if (isCLY) {
+          detail.innerHTML = `
+            <div class="exp-detail-grid exp-clay">
               ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
               ${inp('Remarks','remarks','text',false,d.remarks)}
             </div>
