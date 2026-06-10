@@ -140,16 +140,17 @@ const UndoManager = {
     if (this._stack.length < 2) { showToast('Tidak ada yang bisa di-undo', 'error'); return; }
     const current = this._stack.pop();
     this._future.push(current);
-    this._restore(this._stack[this._stack.length - 1]);
-    showToast('Undo');
+    // Allow UI to update (toast) before heavy restore to improve perceived responsiveness
+    showToast('Undo — memulihkan...');
+    setTimeout(() => { this._restore(this._stack[this._stack.length - 1]); showToast('Undo'); }, 40);
   },
 
   redo() {
     if (!this._future.length) { showToast('Tidak ada yang bisa di-redo', 'error'); return; }
     const next = this._future.pop();
     this._stack.push(next);
-    this._restore(next);
-    showToast('Redo');
+    showToast('Redo — memulihkan...');
+    setTimeout(() => { this._restore(next); showToast('Redo'); }, 40);
   },
 
   _updateButtons() {

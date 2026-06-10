@@ -1234,6 +1234,13 @@
         qaqcEl_q.addEventListener('input', syncQAQC);
         qaqcEl_q.addEventListener('change', syncQAQC);
       }
+      // Auto-update +0.3 original SID and QAQC sample if possible
+      try {
+        // fill m06_orig_sid from sample_id (sample_id -> m06_orig_sid = +1)
+        if (typeof autoUpdateM06Orig === 'function') autoUpdateM06Orig(newRow);
+        // if jenis DS/BS, auto-generate qaqc id
+        if (typeof autoFillQAQC === 'function') autoFillQAQC(newRow);
+      } catch (e) { console.warn('Auto-update QAQC/m06 error', e); }
       updateFracLock();
       highlightDuplicates();
       showToast('Baris QAQC ' + jenis + ' ditambahkan');
