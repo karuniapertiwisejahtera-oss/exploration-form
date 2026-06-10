@@ -732,6 +732,29 @@
         groupRows[mg].push(tr.dataset.row);
       });
 
+      const parseMeter = value => {
+        if (value === null || value === undefined || value === '') return null;
+        const n = parseFloat(String(value).replace(',', '.'));
+        return Number.isFinite(n) ? n : null;
+      };
+      const formatMeter = value => {
+        if (value === null || value === undefined) return '—';
+        return Number.isInteger(value) ? String(value) : String(value).replace(/\.0+$/, '');
+      };
+      const getGroupInterval = rowIds => {
+        let min = null;
+        let max = null;
+        rowIds.forEach(rn => {
+          const fromEl = document.querySelector('[name="from_' + rn + '"]');
+          const toEl = document.querySelector('[name="to_' + rn + '"]');
+          const f = fromEl ? parseMeter(fromEl.value) : null;
+          const t = toEl ? parseMeter(toEl.value) : null;
+          if (f !== null && (min === null || f < min)) min = f;
+          if (t !== null && (max === null || t > max)) max = t;
+        });
+        return { from: min, to: max };
+      };
+
       const seenMg = new Set();
       domRows.forEach(tr => {
         const n = parseInt(tr.dataset.row);
@@ -744,6 +767,8 @@
         const rowIdxInGroup = groupArr.indexOf(String(n));
         const isWS = mg && rowIdxInGroup > 0 && !isQ;
         const isCLY = d.grain.toUpperCase() === 'CLY' && !isS && !isQ;
+        const interval = (!isWS && groupArr.length > 1 && !isQ) ? getGroupInterval(groupArr) : { from: parseMeter(d.from), to: parseMeter(d.to) };
+        const intervalText = `${formatMeter(interval.from)}–${formatMeter(interval.to)} m`;
         // Untuk grup gabung, tampilkan card utama, wash sample, dan QAQC; sembunyikan baris tambahan non-Q lain
         if (mg && seenMg.has(mg) && !isQ && !isWS) return;
         if (mg && !isQ && !isWS) seenMg.add(mg);
@@ -766,7 +791,7 @@
         header.className = 'exp-row-header';
         header.innerHTML = `
           <span class="exp-sampno${isQ?' qaqc':''}${isWS?' ws':''}">${d.samp_no||'—'}</span>
-          <span class="exp-range">${d.from||'?'}–${d.to||'?'} m ${d.grain?`<b>${d.grain}</b>`:''}</span>
+          <span class="exp-range">${intervalText} ${d.grain?`<b>${d.grain}</b>`:''}</span>
           ${isWS?'<span class="exp-ws-badge">WS</span>':''}
           ${origIdsHtml}
           <span class="exp-chevron">▼</span>
