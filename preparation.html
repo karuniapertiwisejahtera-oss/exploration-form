@@ -346,6 +346,76 @@
     #row-menu-popover button.danger { color:#e53935; }
     #row-menu-popover button.qaqc  { color:#1a6b4a; font-weight:600; }
 
+    /* ===== EXPANDABLE ROW LIST ===== */
+    #exp-list-view {
+      flex:1; overflow-y:auto; padding:4px 0 8px;
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .exp-row-item {
+      background:white; border-radius:10px;
+      border:1.5px solid #e0f0e8;
+      overflow:hidden;
+      box-shadow:0 1px 4px rgba(0,0,0,0.06);
+      transition:border-color 0.15s;
+    }
+    .exp-row-item.exp-s { border-left:4px solid #1a6b4a; }
+    .exp-row-item.exp-cly { border-left:4px solid #9e9e9e; opacity:0.8; }
+    .exp-row-item.exp-qaqc { border-left:4px solid #9c27b0; }
+    .exp-row-header {
+      display:flex; align-items:center; padding:8px 10px;
+      cursor:pointer; gap:8px; user-select:none;
+      min-height:40px;
+    }
+    .exp-row-header:active { background:#f5f5f5; }
+    .exp-sampno {
+      font-size:13px; font-weight:800; color:#1a6b4a;
+      min-width:32px;
+    }
+    .exp-sampno.qaqc { color:#9c27b0; }
+    .exp-range { font-size:12px; color:#555; flex:1; }
+    .exp-grain {
+      font-size:10px; font-weight:700; padding:2px 6px;
+      border-radius:8px; background:#e8f5e9; color:#1a6b4a;
+    }
+    .exp-gs { font-size:10px; color:#1a3a8f; font-weight:600; max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .exp-chevron { font-size:12px; color:#aaa; margin-left:4px; transition:transform 0.2s; }
+    .exp-row-item.open .exp-chevron { transform:rotate(180deg); }
+    .exp-detail {
+      display:none; border-top:1px solid #e8f5e9;
+      padding:10px 12px; background:#fafffe;
+    }
+    .exp-row-item.open .exp-detail { display:block; }
+    .exp-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; margin-bottom:8px; }
+    .exp-detail-field { display:flex; flex-direction:column; gap:2px; }
+    .exp-detail-field label { font-size:10px; color:#888; font-weight:600; text-transform:uppercase; }
+    .exp-detail-field input, .exp-detail-field select {
+      border:1.5px solid #d0ece4; border-radius:7px;
+      padding:6px 8px; font-size:12px; outline:none;
+      text-transform:uppercase; width:100%; background:white;
+    }
+    .exp-detail-field input:focus, .exp-detail-field select:focus { border-color:#1a6b4a; }
+    .exp-detail-field input[readonly] { background:#f5f5f5; color:#888; }
+    .exp-frac-title { font-size:10px; font-weight:700; color:#1a6b4a; text-transform:uppercase; letter-spacing:0.5px; margin:8px 0 4px; border-bottom:1.5px solid #e8f5e9; padding-bottom:3px; }
+    .exp-frac-row { display:grid; grid-template-columns:80px 1fr 1fr 2fr; gap:4px; align-items:center; margin-bottom:4px; }
+    .exp-frac-row .frac-label { font-size:10px; font-weight:700; color:#004d40; }
+    .exp-frac-row input {
+      border:1.5px solid #d0ece4; border-radius:6px;
+      padding:5px 5px; font-size:11px; outline:none;
+      text-align:center; text-transform:uppercase; width:100%;
+    }
+    .exp-frac-row input:focus { border-color:#1a6b4a; }
+    .exp-frac-row input[readonly] { background:#f5f5f5; color:#888; }
+    .exp-detail-actions {
+      display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;
+    }
+    .exp-detail-actions button {
+      flex:1; padding:7px 8px; border:none; border-radius:8px;
+      font-size:11px; font-weight:600; cursor:pointer; min-width:60px;
+    }
+    .exp-btn-samp { background:#e8f5e9; color:#1a6b4a; border:1.5px solid #a8d5b5 !important; }
+    .exp-btn-merge { background:#fff3e0; color:#e65100; border:1.5px solid #ffcc80 !important; }
+    .exp-btn-del { background:#fdecea; color:#c62828; border:1.5px solid #ef9a9a !important; }
+
     /* ===== PRINT / PDF ===== */
     @media print {
       body * { visibility: hidden; }
@@ -428,7 +498,15 @@
           <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="saveData()">Save Data</button>
           <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="clearData()">Clear</button>
           <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="submitData()">Submit</button>
+          <div style="width:1px;height:20px;background:#ccc;"></div>
+          <button id="btn-toggle-explist" onclick="toggleExpList()" style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">☰ List</button>
         </div>
+      </div>
+
+      <!-- Expandable Row List (tampilan utama) -->
+      <div id="exp-list-view" style="display:none;">
+        <div id="exp-list-container"></div>
+        <button onclick="addRow()" style="margin-top:8px;width:100%;background:#e8f5e9;border:2px dashed #4caf50;color:#1a6b4a;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Tambah Baris</button>
       </div>
 
       <!-- Tabel -->
@@ -534,6 +612,174 @@
     window.addEventListener('resize', resizeAll);
     setTimeout(resizeAll, 100);
     setTimeout(resizeAll, 500);
+
+    // ===== EXPANDABLE ROW LIST =====
+    let _expViewMode = false; // false = tabel, true = list
+
+    function toggleExpList() {
+      _expViewMode = !_expViewMode;
+      const listView = document.getElementById('exp-list-view');
+      const tableWrap = document.querySelector('.prep-wrap');
+      const btn = document.getElementById('btn-toggle-explist');
+      if (_expViewMode) {
+        listView.style.display = 'flex';
+        tableWrap.style.display = 'none';
+        btn.textContent = '☰ Tabel';
+        renderExpList();
+        setTimeout(fitExpList, 50);
+      } else {
+        listView.style.display = 'none';
+        tableWrap.style.display = '';
+        btn.textContent = '☰ List';
+        setTimeout(resizeAll, 50);
+      }
+    }
+
+    function fitExpList() {
+      const lv = document.getElementById('exp-list-view');
+      const container = document.querySelector('.form-container');
+      if (!lv || !container) return;
+      let usedH = 0;
+      Array.from(container.children).forEach(el => {
+        if (el === lv) return;
+        usedH += el.getBoundingClientRect().height;
+      });
+      const containerH = container.getBoundingClientRect().height;
+      lv.style.height = Math.max(100, containerH - usedH - 2) + 'px';
+    }
+
+    const EXP_FRAC_DEFS = [
+      { key:'a10',  label:'+10 mm' },
+      { key:'a2',   label:'+2-10 mm' },
+      { key:'a06',  label:'+0.6-2 mm' },
+      { key:'m06',  label:'+0.3-0.6 mm' },
+      { key:'p03',  label:'-0.3 mm' },
+    ];
+
+    function getExpRowData(n) {
+      const g = (name) => { const el = document.querySelector(`[name="${name}_${n}"]`); return el ? el.value : ''; };
+      return {
+        n, from:g('from'), to:g('to'), len:g('len'), rec:g('rec'),
+        grain:g('grain'), core_wt:g('core_wt'),
+        from_cum:g('from_cum'), to_cum:g('to_cum'),
+        samp_no:g('samp_no'), dry_wt:g('dry_wt'), send_cum:g('send_cum'),
+        sample_id:g('sample_id'), m06_orig_sid:g('m06_orig_sid'),
+        a10_tot:g('a10_tot'), a10_rec:g('a10_rec'), a10_sid:g('a10_sid'),
+        a2_tot:g('a2_tot'), a2_rec:g('a2_rec'), a2_sid:g('a2_sid'),
+        a06_tot:g('a06_tot'), a06_rec:g('a06_rec'), a06_sid:g('a06_sid'),
+        m06_tot:g('m06_tot'), m06_rec:g('m06_rec'), m06_sid:g('m06_sid'),
+        p03_tot:g('p03_tot'), p03_rec:g('p03_rec'), p03_sid:g('p03_sid'),
+        remarks:g('remarks')
+      };
+    }
+
+    function renderExpList() {
+      if (!_expViewMode) return;
+      const container = document.getElementById('exp-list-container');
+      if (!container) return;
+      // Simpan state expand
+      const openRows = new Set();
+      container.querySelectorAll('.exp-row-item.open').forEach(el => { if (el.dataset.rowNum) openRows.add(el.dataset.rowNum); });
+      container.innerHTML = '';
+      const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+      const seenMg = new Set();
+      domRows.forEach(tr => {
+        const n = parseInt(tr.dataset.row);
+        const mg = tr.dataset.mergeGroup;
+        // Untuk grup gabung, hanya tampilkan baris pertama di list
+        if (mg && seenMg.has(mg)) return;
+        if (mg) seenMg.add(mg);
+        const d = getExpRowData(n);
+        const isS = /^S\d+$/i.test(d.samp_no);
+        const isQ = /^Q\d+$/i.test(d.samp_no);
+        const isCLY = d.grain.toUpperCase() === 'CLY' && !isS && !isQ;
+        const item = document.createElement('div');
+        item.className = 'exp-row-item' + (isCLY?' exp-cly':isQ?' exp-qaqc':isS?' exp-s':'');
+        item.dataset.rowNum = n;
+        if (openRows.has(String(n))) item.classList.add('open');
+        const origIds = [d.sample_id, d.m06_orig_sid].filter(Boolean).join(' / ');
+        // Header row
+        const header = document.createElement('div');
+        header.className = 'exp-row-header';
+        header.innerHTML = `
+          <span class="exp-sampno${isQ?' qaqc':''}">${d.samp_no||'—'}</span>
+          <span class="exp-range">${d.from||'?'}–${d.to||'?'} m ${d.grain?`<b>${d.grain}</b>`:''}</span>
+          ${origIds?`<span class="exp-gs">${origIds}</span>`:''}
+          <span class="exp-chevron">▼</span>
+        `;
+        header.addEventListener('click', () => item.classList.toggle('open'));
+        // Detail
+        const detail = document.createElement('div');
+        detail.className = 'exp-detail';
+        const sel = (label, field, opts, val) => `
+          <div class="exp-detail-field"><label>${label}</label>
+            <select data-expfield="${field}" data-exprow="${n}">
+              ${opts.map(o=>`<option value="${o}"${o===val?'selected':''}>${o||'—'}</option>`).join('')}
+            </select>
+          </div>`;
+        const inp = (label, field, type, ro, val) => `
+          <div class="exp-detail-field"><label>${label}</label>
+            <input type="${type}" data-expfield="${field}" data-exprow="${n}" value="${val||''}" ${ro?'readonly':''} step="0.01">
+          </div>`;
+        let fracHtml = '<div class="exp-frac-title">Fraksi (Total | Rec | Sample ID)</div>';
+        EXP_FRAC_DEFS.forEach(f => {
+          fracHtml += `<div class="exp-frac-row">
+            <span class="frac-label">${f.label}</span>
+            <input type="number" data-expfield="${f.key}_tot" data-exprow="${n}" value="${d[f.key+'_tot']||''}" placeholder="Total" step="0.01">
+            <input type="number" data-expfield="${f.key}_rec" data-exprow="${n}" value="${d[f.key+'_rec']||''}" placeholder="Rec" readonly>
+            <input type="text" data-expfield="${f.key}_sid" data-exprow="${n}" value="${d[f.key+'_sid']||''}" placeholder="Sample ID">
+          </div>`;
+        });
+        detail.innerHTML = `
+          <div class="exp-detail-grid">
+            ${inp('From (m)','from','number',false,d.from)}
+            ${inp('To (m)','to','number',false,d.to)}
+            ${inp('Rec Length','rec','number',false,d.rec)}
+            ${sel('Grain','grain',['','GVL','CS','FS','CLY'],d.grain)}
+            ${inp('Core Wt (g)','core_wt','number',false,d.core_wt)}
+            ${inp('Dry Wt (g)','dry_wt','number',false,d.dry_wt)}
+            ${inp('Send Cum','send_cum','number',false,d.send_cum)}
+            ${inp('Original SID','sample_id','text',false,d.sample_id)}
+            ${inp('+0.3 SID','m06_orig_sid','text',false,d.m06_orig_sid)}
+            ${inp('Remarks','remarks','text',false,d.remarks)}
+          </div>
+          ${fracHtml}
+          <div class="exp-detail-actions">
+            <button class="exp-btn-samp" onclick="openFracModal(${n})">🔢 Fraksi</button>
+            <button class="exp-btn-merge" onclick="startMerge(${n}, this)">🔗 Gabung</button>
+            <button class="exp-btn-del" onclick="showRowMenu(event,${n})">✕ Menu</button>
+          </div>
+        `;
+        // Listener: sync ke tabel saat input berubah
+        detail.querySelectorAll('[data-expfield]').forEach(el => {
+          const sync = () => {
+            const field = el.dataset.expfield;
+            const rowN  = el.dataset.exprow;
+            const domEl = document.querySelector(`[name="${field}_${rowN}"]`);
+            if (domEl && !domEl.readOnly && !domEl.disabled) {
+              domEl.value = el.value;
+              domEl.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            // Sync readonly fields back
+            detail.querySelectorAll('input[readonly][data-expfield]').forEach(ro => {
+              const roDom = document.querySelector(`[name="${ro.dataset.expfield}_${ro.dataset.exprow}"]`);
+              if (roDom) ro.value = roDom.value;
+            });
+          };
+          el.addEventListener('change', sync);
+          el.addEventListener('input', () => {
+            sync();
+            if (el.dataset.expfield && el.dataset.expfield.endsWith('_tot')) calcRec(parseInt(el.dataset.exprow));
+          });
+        });
+        item.appendChild(header);
+        item.appendChild(detail);
+        container.appendChild(item);
+      });
+    }
+
+    // Auto-refresh list setelah operasi data
+    const _origRenderExpList = () => { if (_expViewMode) setTimeout(renderExpList, 80); };
 
     window.onerror = function(msg, src, line, col, err) {
       alert('JS Error: ' + msg + '\nLine: ' + line + '\n' + (err ? err.stack : ''));
@@ -813,6 +1059,7 @@
       });
       document.getElementById('h-total-sample').value = gsCount;
       if (typeof autoSaveDraft === 'function') autoSaveDraft();
+      if (typeof _origRenderExpList === 'function') _origRenderExpList();
     }
 
     // ===== HAPUS BARIS =====
