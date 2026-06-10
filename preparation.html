@@ -2074,6 +2074,7 @@
       if (p03Section) p03Section.style.display = isQAQC ? 'none' : 'block';
       const p03Inp = document.getElementById('frac-p03-orig-input');
       if (p03Inp) {
+        p03Inp.dataset.manualEdit = 'false'; // reset flag saat modal baru dibuka
         // Cek m06_orig_sid baris ini dulu (sudah ada)
         const existM06 = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
         if (existM06 && existM06.value.trim()) {
@@ -2178,29 +2179,45 @@
     function closeFracModal() {
       document.getElementById('frac-modal-overlay').style.display = 'none';
     }
+    function autoFillP03FromGS(val) {
+      const p03Inp = document.getElementById('frac-p03-orig-input');
+      if (!p03Inp) return;
+      // Hanya auto-fill jika user belum edit manual
+      if (p03Inp.dataset.manualEdit === 'true') return;
+      const gs = val.trim().toUpperCase();
+      if (!gs) { p03Inp.value = ''; return; }
+      const m = gs.match(/^([A-Za-z]+)(\d+)$/);
+      if (!m) { p03Inp.value = ''; return; }
+      p03Inp.value = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+    }
     function updateFracPreview(count) {
       const n = parseInt(count) || 0;
-      const startIdx = Math.max(0, 5 - n); // mulai dari fraksi ke berapa
+      const startIdx = Math.max(0, 5 - n);
       const preview = document.getElementById('frac-preview');
       if (!preview) return;
       preview.innerHTML = '';
-      // Warning jika < 2
       if (n > 0 && n < 2) {
         const warn = document.createElement('div');
-        warn.style.cssText = 'padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;background:#fff3e0;color:#e65100;border:1.5px solid #ff9800;margin-bottom:4px;';
+        warn.style.cssText = 'padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#fff3e0;color:#e65100;border:1.5px solid #ff9800;margin-bottom:4px;';
         warn.textContent = '⚠ Minimal 2 fraksi GS per Samp No';
         preview.appendChild(warn);
       }
+      // Tampilkan fraksi sebagai chip horizontal tanpa label panjang
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:4px;flex-wrap:wrap;';
       FRAC_LABELS.forEach((lbl, idx) => {
         const active = idx >= startIdx;
-        const div = document.createElement('div');
-        div.style.cssText = `padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600;
+        const chip = document.createElement('span');
+        chip.style.cssText = `padding:3px 7px;border-radius:12px;font-size:11px;font-weight:700;
           background:${active ? '#e8f5e9' : '#f5f5f5'};
           color:${active ? '#1a6b4a' : '#bbb'};
           border:1.5px solid ${active ? '#a8d5b5' : '#e0e0e0'};`;
-        div.textContent = (active ? '✓ ' : '✗ ') + lbl;
-        preview.appendChild(div);
+        // Singkat label: +10, +2, +0.6, +0.3, -0.3
+        const short = lbl.replace(' mm','').replace('+0.3-0.6','+0.3');
+        chip.textContent = (active ? '✓' : '✗') + ' ' + short;
+        row.appendChild(chip);
       });
+      preview.appendChild(row);
     }
     function saveFracCount() {
       const overlay = document.getElementById('frac-modal-overlay');
@@ -3915,6 +3932,7 @@
         <label style="font-size:11px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID (GS)</label>
         <input type="text" id="frac-orig-sid-input" placeholder="Contoh: GS001"
           style="width:100%;border:2px solid #a8d5b5;border-radius:8px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;background:white;"
+          oninput="autoFillP03FromGS(this.value)"
           onkeydown="if(event.key==='Enter') document.getElementById('frac-sa-first-input').focus()">
         <div style="font-size:10px;color:#555;margin-top:4px;">ID yang masuk kolom Original Sample_ID.</div>
       </div>
@@ -3932,6 +3950,7 @@
         <label style="font-size:11px;font-weight:700;color:#f57f17;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID — Fraksi +0.3-0.6 mm</label>
         <input type="text" id="frac-p03-orig-input" placeholder="Contoh: GS001 (opsional)"
           style="width:100%;border:2px solid #ffe082;border-radius:8px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;background:white;"
+          oninput="this.dataset.manualEdit='true'"
           onkeydown="if(event.key==='Enter') document.getElementById('frac-count-input').focus()">
         <div style="font-size:10px;color:#888;margin-top:4px;">ID untuk kolom Sample_ID fraksi +0.3-0.6 mm. Kosongkan jika tidak ada.</div>
       </div>
@@ -3946,8 +3965,10 @@
       </div>
 
       <div id="frac-preview" style="display:flex;flex-direction:column;gap:5px;margin-top:4px;"></div>
-      <button onclick="saveFracCount()" style="margin-top:14px;width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Terapkan</button>
-      <button onclick="openWashSampleModal()" style="margin-top:8px;width:100%;background:#0277bd;color:white;border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">🔵 Wash Sample</button>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button onclick="saveFracCount()" style="flex:1;background:#1a6b4a;color:white;border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Terapkan</button>
+        <button onclick="openWashSampleModal()" style="flex:1;background:#0277bd;color:white;border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Wash Sample</button>
+      </div>
     </div>
   </div>
 
