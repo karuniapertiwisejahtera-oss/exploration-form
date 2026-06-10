@@ -2176,6 +2176,13 @@
       if (_menuRowNum !== null) clearRowSampleData(_menuRowNum);
     }
 
+    function rowMenuWashSample() {
+      closeRowMenu();
+      if (_menuRowNum === null) return;
+      // Buka modal fraksi persis seperti klik Samp No
+      openFracModal(_menuRowNum);
+    }
+
     function rowMenuDeleteRow() {
       closeRowMenu();
       if (_menuRowNum !== null) deleteRow(_menuRowNum);
@@ -3586,6 +3593,7 @@
 
   <!-- ROW MENU POPOVER -->
   <div id="row-menu-popover">
+    <button class="qaqc"  onclick="rowMenuWashSample()">🔵 Wash Sample</button>
     <button class="qaqc"  onclick="rowMenuQAQC()">✚ Tambah QAQC</button>
     <button class="danger" onclick="rowMenuDeleteData()">🗑 Delete Data</button>
     <button class="danger" onclick="rowMenuDeleteRow()">✕ Delete Baris</button>
