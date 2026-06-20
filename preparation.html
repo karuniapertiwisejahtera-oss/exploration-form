@@ -663,6 +663,22 @@
     let _expViewMode = false; // false = tabel, true = list
 
     function toggleExpList() {
+      // Cek apakah semua baris non-CLY sudah punya Samp No (semua 🔒 / merged)
+      if (!_expViewMode) {
+        const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
+        const unmerged = domRows.filter(tr => {
+          const rn = tr.dataset.row;
+          const grain = document.querySelector(`[name="grain_${rn}"]`);
+          const isCLY = grain && grain.value.trim().toUpperCase() === 'CLY';
+          if (isCLY) return false;
+          // Baris non-CLY harus punya mergeGroup (sudah gabung)
+          return !tr.dataset.mergeGroup;
+        });
+        if (unmerged.length > 0) {
+          showToast('Semua interval harus digabung dulu sebelum masuk Card View', 'error');
+          return;
+        }
+      }
       _expViewMode = !_expViewMode;
       const listView = document.getElementById('exp-list-view');
       const tableWrap = document.querySelector('.prep-wrap');
@@ -776,6 +792,8 @@
         // Untuk grup gabung, tampilkan card utama, wash sample, dan QAQC; sembunyikan baris tambahan non-Q lain
         if (mg && seenMg.has(mg) && !isQ && !isWS) return;
         if (mg && !isQ && !isWS) seenMg.add(mg);
+        // Sembunyikan CLY di card view
+        if (isCLY) return;
         const item = document.createElement('div');
         item.className = 'exp-row-item' + (isCLY?' exp-cly':isQ?' exp-qaqc':isWS?' exp-ws':isS?' exp-s':'');
         item.dataset.rowNum = n;
@@ -860,9 +878,8 @@
           </div>
           ${fracHtml}
           <div class="exp-detail-actions">
-            <button class="exp-btn-samp" onclick="openFracModal(${n})">🔢 Fraksi</button>
-            <button class="exp-btn-merge" onclick="startMerge(${n}, this)">🔗 Gabung</button>
-            <button class="exp-btn-del" onclick="showRowMenu(event,${n})">✕ Menu</button>
+            <button class="exp-btn-samp" onclick="openFracModal(${n})">Fraksi</button>
+            <button class="exp-btn-del" onclick="showRowMenu(event,${n})">Menu</button>
           </div>
         `;
         }
