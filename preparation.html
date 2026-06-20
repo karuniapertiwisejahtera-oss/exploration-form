@@ -1570,57 +1570,75 @@
 
     // ===== RECALC SEMUA ORIGINAL SID LINTAS BARIS =====
     // Dipanggil saat sample_id baris manapun berubah
-    // Update semua baris S setelah baris yang berubah secara berurutan
+    // Semua baris S, WS, QAQC diupdate berurutan dari S1 sebagai base
     function recalcAllOriginalSIDs(changedRowNum) {
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
-      const seen = new Set();
 
-      // Kumpulkan semua interval S dalam urutan DOM (hanya baris pertama dari setiap grup)
-      const sIntervals = [];
+      // Cari S1 sebagai base — baris pertama yang punya samp_no S1 dan sample_id manual
+      let basePrefix = 'GS', basePadLen = 6, baseNum = 0;
+      let foundBase = false;
+      const seenMg = new Set();
+      for (const tr of domRows) {
+        const rn = parseInt(tr.dataset.row);
+        const mg = tr.dataset.mergeGroup;
+        if (mg) { if (seenMg.has(mg)) continue; seenMg.add(mg); }
+        const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
+        if (!snEl || snEl.value.trim().toUpperCase() !== 'S1') continue;
+        const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
+        if (!sidEl || !sidEl.value.trim()) continue;
+        const base = sidEl.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
+        if (!base) continue;
+        basePrefix = base[1]; basePadLen = base[2].length; baseNum = parseInt(base[2]);
+        foundBase = true;
+        break;
+      }
+      if (!foundBase) return;
+
+      // Counter GS berurutan mulai dari S1
+      let gsCounter = baseNum;
+      const seenMg2 = new Set();
+
       domRows.forEach(tr => {
         const rn = parseInt(tr.dataset.row);
         const mg = tr.dataset.mergeGroup;
-        if (mg) { if (seen.has(mg)) return; seen.add(mg); }
+        const isNonFirst = mg && seenMg2.has(mg);
+        if (mg) seenMg2.add(mg);
+
         const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
-        if (!snEl || !/^S\d+$/i.test(snEl.value.trim())) return;
+        const sn = snEl ? snEl.value.trim().toUpperCase() : '';
         const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
-        sIntervals.push({ rn, sn: snEl.value.trim().toUpperCase(), sidEl });
-      });
-
-      if (!sIntervals.length) return;
-
-      // Cari posisi baris yang berubah dalam daftar S
-      const changedIdx = changedRowNum
-        ? sIntervals.findIndex(s => s.rn === parseInt(changedRowNum))
-        : 0;
-      if (changedIdx < 0) return;
-
-      // Ambil GS dari baris yang berubah sebagai base baru
-      const changedSid = sIntervals[changedIdx].sidEl.value.trim().toUpperCase();
-      const m = changedSid.match(/^([A-Za-z]+)(\d+)$/);
-      if (!m) return;
-      const basePrefix = m[1], basePadLen = m[2].length;
-      let nextNum = parseInt(m[2]) + 1; // mulai dari baris SETELAH yang berubah
-
-      // Update baris S setelah changedIdx
-      for (let i = changedIdx + 1; i < sIntervals.length; i++) {
-        const { rn, sidEl } = sIntervals[i];
-        const newGS = basePrefix + String(nextNum).padStart(basePadLen, '0');
-        sidEl.value = newGS;
-        sidEl.dataset.autoOrig = 'true';
-        // Update m06_orig_sid
         const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
-        if (m06El && m06El.dataset.autoM06 !== 'false') {
-          m06El.value = basePrefix + String(nextNum + 1).padStart(basePadLen, '0');
-        }
-        nextNum++;
-      }
 
-      // Update m06_orig_sid baris yang berubah (GS+1)
-      const changedM06 = document.querySelector(`[name="m06_orig_sid_${sIntervals[changedIdx].rn}"]`);
-      if (changedM06 && changedM06.dataset.autoM06 !== 'false') {
-        changedM06.value = basePrefix + String(parseInt(m[2]) + 1).padStart(basePadLen, '0');
-      }
+        const isS = /^S\d+$/i.test(sn);
+        const isQ = /^Q\d+$/i.test(sn);
+        const isWSRow = isNonFirst; // baris ke-2+ dalam grup = WS
+
+        if (isS && !isNonFirst) {
+          // Baris S utama: set GS dan m06
+          const newGS = basePrefix + String(gsCounter).padStart(basePadLen, '0');
+          if (sidEl && (sidEl.dataset.autoOrig === 'true' || sn !== 'S1')) {
+            sidEl.value = newGS;
+            sidEl.dataset.autoOrig = 'true';
+          }
+          if (m06El && m06El.dataset.autoM06 !== 'false') {
+            m06El.value = basePrefix + String(gsCounter + 1).padStart(basePadLen, '0');
+            m06El.dataset.autoM06 = 'true';
+          }
+          gsCounter += 2; // S pakai 2 slot: GS dan GS+0.3
+        } else if (isWSRow) {
+          // Baris WS: tidak tambah counter, sudah pakai slot dari baris S utama
+          // (sample_id WS diisi dari m06_orig_sid baris S)
+        } else if (isQ) {
+          // Baris QAQC: set GS berurutan
+          const newGS = basePrefix + String(gsCounter).padStart(basePadLen, '0');
+          if (sidEl && (sidEl.dataset.autoOrig === 'true' || !sidEl.value.trim())) {
+            sidEl.value = newGS;
+            sidEl.dataset.autoOrig = 'true';
+          }
+          gsCounter++; // QAQC pakai 1 slot
+        }
+        // CLY dan baris lainnya: skip
+      });
 
       highlightDuplicates();
     }
