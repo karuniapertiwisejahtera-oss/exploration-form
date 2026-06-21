@@ -2742,35 +2742,82 @@
       }
       if (!refRowNum) { showToast('Samp No ' + sampNoRef + ' tidak ditemukan', 'error'); return; }
 
-      // Ambil data interval dari baris referensi
       const g = (name) => { const el = document.querySelector(`[name="${name}_${refRowNum}"]`); return el ? el.value : ''; };
+      const refTr = document.getElementById('prep-row-' + refRowNum);
+      const existingMg = refTr ? refTr.dataset.mergeGroup : null;
 
-      // Tambah baris WS baru dengan data interval dari referensi
+      // Cari baris WS yang sudah ada dalam grup
+      let wsRowNum = null;
+      if (existingMg) {
+        const groupTrs = Array.from(document.querySelectorAll(`tr[data-merge-group="${existingMg}"]`));
+        // Baris WS = baris non-pertama dalam grup yang bukan QAQC dan bukan CLY
+        for (const gTr of groupTrs) {
+          const rn = parseInt(gTr.dataset.row);
+          if (rn === refRowNum) continue;
+          const snEl2 = document.querySelector(`[name="samp_no_${rn}"]`);
+          const grEl2 = document.querySelector(`[name="grain_${rn}"]`);
+          const isQ2 = snEl2 && /^Q\d+$/i.test(snEl2.value.trim());
+          const isCLY2 = grEl2 && grEl2.value.trim().toUpperCase() === 'CLY';
+          if (!isQ2 && !isCLY2) { wsRowNum = rn; break; }
+        }
+      }
+
+      const prefix = saMatch[1], padLen = saMatch[2].length;
+      let sidCounter = parseInt(saMatch[2]);
+      const used = new Set();
+
+      if (wsRowNum) {
+        // UPDATE baris WS yang sudah ada — tidak tambah baris baru
+        for (let i = 1; i <= rowCount; i++) {
+          if (i === wsRowNum) continue;
+          ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'].forEach(f => {
+            const el = document.querySelector(`[name="${f}_${i}"]`);
+            if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
+          });
+        }
+        FRAC_FIELDS_ORDER.forEach(field => {
+          const el = document.querySelector(`[name="${field}_${wsRowNum}"]`);
+          if (!el) return;
+          let candidate = prefix + String(sidCounter).padStart(padLen, '0');
+          while (used.has(candidate)) { sidCounter++; candidate = prefix + String(sidCounter).padStart(padLen, '0'); }
+          el.value = candidate; el.dataset.auto = 'true';
+          used.add(candidate); sidCounter++;
+        });
+        if (gsVal) {
+          const wsGsEl = document.querySelector(`[name="sample_id_${wsRowNum}"]`);
+          if (wsGsEl) { wsGsEl.value = gsVal; wsGsEl.dataset.autoOrig = 'false'; }
+        }
+        if (p03Val) {
+          const wsP03El = document.querySelector(`[name="m06_orig_sid_${wsRowNum}"]`);
+          if (wsP03El) wsP03El.value = p03Val;
+        }
+        closeWashSampleModal();
+        highlightDuplicates();
+        if (typeof _origRenderExpList === 'function') _origRenderExpList();
+        showToast('Wash Sample diperbarui untuk ' + sampNoRef);
+        return;
+      }
+
+      // Tidak ada WS — buat baris baru
       addRow({
         from: g('from'), to: g('to'), length: g('len'),
         recovery: g('rec'), grain_size: g('grain'),
         core_wt: g('core_wt'), from_cum: g('from_cum'), to_cum: g('to_cum')
       });
-      const wsRowNum = rowCount;
+      wsRowNum = rowCount;
       const wsTr = document.getElementById('prep-row-' + wsRowNum);
       if (!wsTr) return;
 
-      // Sisipkan setelah baris referensi (atau setelah baris terakhir grup jika sudah ada grup)
-      const refTr = document.getElementById('prep-row-' + refRowNum);
-      // Cari baris terakhir grup referensi
       let insertAfterTr = refTr;
-      const existingMg = refTr ? refTr.dataset.mergeGroup : null;
       if (existingMg) {
         const groupTrs = Array.from(document.querySelectorAll(`tr[data-merge-group="${existingMg}"]`));
         insertAfterTr = groupTrs[groupTrs.length - 1] || refTr;
       }
       if (insertAfterTr) insertAfterTr.after(wsTr);
 
-      // Gunakan groupId yang sudah ada, atau buat baru
       const groupId = existingMg || ('G' + Date.now());
       const fromCum = g('from_cum'), toCum = g('to_cum');
 
-      // Baris referensi = pertama dalam grup (hanya jika belum punya grup)
       const srcTr = document.getElementById('prep-row-' + refRowNum);
       if (srcTr && !existingMg) {
         srcTr.classList.add('row-merged', 'row-merged-first');
@@ -2778,22 +2825,11 @@
         srcTr.dataset.mergeGroup = groupId;
         const srcBtn = srcTr.querySelector('.btn-merge');
         if (srcBtn) { srcBtn.textContent = '🔒'; srcBtn.title = 'Lepas gabungan'; srcBtn.onclick = () => unmerge(groupId); }
-      } else if (srcTr && existingMg) {
-        // Update tombol jika sudah ada grup
-        const srcBtn = srcTr.querySelector('.btn-merge');
-        if (srcBtn && srcBtn.textContent !== '🔒') {
-          srcBtn.textContent = '🔒'; srcBtn.title = 'Lepas gabungan'; srcBtn.onclick = () => unmerge(groupId);
-        }
       }
-
-      // Hapus flag row-merged-last dari semua baris grup yang ada
       if (existingMg) {
-        document.querySelectorAll(`tr[data-merge-group="${existingMg}"]`).forEach(tr => {
-          tr.classList.remove('row-merged-last');
-        });
+        document.querySelectorAll(`tr[data-merge-group="${existingMg}"]`).forEach(tr => tr.classList.remove('row-merged-last'));
       }
 
-      // Baris WS = terakhir dalam grup
       wsTr.classList.add('row-merged', 'row-merged-last');
       wsTr.classList.remove('row-merged-first');
       wsTr.dataset.mergeGroup = groupId;
@@ -2804,11 +2840,6 @@
       if (wsTcEl) { wsTcEl.value = toCum;   wsTcEl.style.visibility = 'hidden'; }
       if (wsBtn)  wsBtn.style.visibility = 'hidden';
 
-      // Isi fraksi SA pada baris WS via modal fraksi logic
-      // Langsung isi fraksi dengan prefix/num dari firstSA
-      const prefix = saMatch[1], padLen = saMatch[2].length;
-      let sidCounter = parseInt(saMatch[2]);
-      const used = new Set();
       for (let i = 1; i <= rowCount; i++) {
         if (i === wsRowNum) continue;
         ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'].forEach(f => {
@@ -2816,7 +2847,7 @@
           if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
         });
       }
-      FRAC_FIELDS_ORDER.forEach((field, idx) => {
+      FRAC_FIELDS_ORDER.forEach(field => {
         const el = document.querySelector(`[name="${field}_${wsRowNum}"]`);
         if (!el) return;
         let candidate = prefix + String(sidCounter).padStart(padLen, '0');
@@ -2828,14 +2859,13 @@
       recalcSamplingNo();
       updateFracLock();
       highlightDuplicates();
-      // Simpan GS dan p03 ke baris WS
       if (gsVal) {
         const wsGsEl = document.querySelector(`[name="sample_id_${wsRowNum}"]`);
         if (wsGsEl) { wsGsEl.value = gsVal; wsGsEl.dataset.autoOrig = 'false'; }
       }
       if (p03Val) {
         const wsP03El = document.querySelector(`[name="m06_orig_sid_${wsRowNum}"]`);
-        if (wsP03El) { wsP03El.value = p03Val; }
+        if (wsP03El) wsP03El.value = p03Val;
       }
       closeWashSampleModal();
       showToast('Wash Sample ditambahkan untuk ' + sampNoRef);
