@@ -933,9 +933,19 @@
         el.addEventListener('input', () => { sync(); if (el.dataset.expfield?.endsWith('_tot')) calcRec(parseInt(el.dataset.exprow)); });
       });
 
-      // Setelah card S, tampilkan sub-card WS jika ada
+      // Append card S/Q ke container
+      container.appendChild(card);
+
+      // Setelah card S, tampilkan sub-card WS jika ada (hanya baris yang bukan S dan bukan CLY)
       if (!isQ && groupArr.length > 1) {
         groupArr.slice(1).forEach(wsRn => {
+          const wsTr = document.getElementById('prep-row-' + wsRn);
+          if (!wsTr) return;
+          const wsGrain = document.querySelector(`[name="grain_${wsRn}"]`);
+          const wsIsCLY = wsGrain && wsGrain.value.trim().toUpperCase() === 'CLY';
+          const wsSn = document.querySelector(`[name="samp_no_${wsRn}"]`);
+          const wsIsQ = wsSn && /^Q\d+$/i.test(wsSn.value.trim());
+          if (wsIsCLY || wsIsQ) return; // skip CLY dan QAQC
           const wd = getExpRowData(parseInt(wsRn));
           const wsCard = document.createElement('div');
           wsCard.style.cssText = 'background:#e3f2fd;border-radius:10px;border:1.5px solid #90caf9;padding:10px 12px;margin-top:6px;';
@@ -956,7 +966,6 @@
             </div>
             ${wsFracHtml}
           `;
-          // Listeners WS
           wsCard.querySelectorAll('[data-expfield]').forEach(el => {
             const sync = () => {
               const fld = el.dataset.expfield, rn2 = el.dataset.exprow;
