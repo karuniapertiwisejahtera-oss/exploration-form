@@ -549,10 +549,20 @@
         </div>
       </div>
 
-      <!-- Expandable Row List (tampilan utama) -->
-      <div id="exp-list-view" style="display:none;">
-        <div id="exp-list-container"></div>
-        <button onclick="addRow()" style="margin-top:8px;width:100%;background:#e8f5e9;border:2px dashed #4caf50;color:#1a6b4a;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Tambah Baris</button>
+      <!-- Expandable Row List (tampilan Card/Selector) -->
+      <div id="exp-list-view" style="display:none;flex-direction:column;gap:0;">
+        <!-- Selector Samp No -->
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 4px;background:#f8fffe;border-bottom:1px solid #d0ece4;flex-shrink:0;">
+          <label style="font-size:12px;font-weight:700;color:#1a6b4a;white-space:nowrap;">Pilih Samp No:</label>
+          <select id="exp-sampno-select" onchange="onExpSampNoChange(this.value)"
+            style="flex:1;border:2px solid #a8d5b5;border-radius:8px;padding:5px 8px;font-size:13px;font-weight:700;outline:none;color:#1a6b4a;background:white;">
+            <option value="">— Pilih —</option>
+          </select>
+          <button onclick="navigateExpCard(-1)" style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer;color:#1a6b4a;">◀</button>
+          <button onclick="navigateExpCard(1)" style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer;color:#1a6b4a;">▶</button>
+        </div>
+        <!-- Card container: satu card terlihat sekaligus -->
+        <div id="exp-list-container" style="flex:1;overflow-y:auto;padding:4px;"></div>
       </div>
 
       <!-- Tabel -->
@@ -735,16 +745,17 @@
       };
     }
 
+    // ===== EXP LIST: data items (S + Q, tanpa CLY) =====
+    let _expItems = []; // [{rowNum, sampNo, label}]
+    let _expCurrentIdx = -1;
+
     function renderExpList() {
       if (!_expViewMode) return;
       const container = document.getElementById('exp-list-container');
-      if (!container) return;
-      // Simpan state expand
-      const openRows = new Set();
-      container.querySelectorAll('.exp-row-item.open').forEach(el => { if (el.dataset.rowNum) openRows.add(el.dataset.rowNum); });
-      container.innerHTML = '';
+      const selEl = document.getElementById('exp-sampno-select');
+      if (!container || !selEl) return;
+
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
-      // Build map mergeGroup -> [rowNums] to detect WS rows
       const groupRows = {};
       domRows.forEach(tr => {
         const mg = tr.dataset.mergeGroup || ('_single_' + tr.dataset.row);
@@ -752,29 +763,11 @@
         groupRows[mg].push(tr.dataset.row);
       });
 
-      const parseMeter = value => {
-        if (value === null || value === undefined || value === '') return null;
-        const n = parseFloat(String(value).replace(',', '.'));
-        return Number.isFinite(n) ? n : null;
-      };
-      const formatMeter = value => {
-        if (value === null || value === undefined) return '—';
-        return Number.isInteger(value) ? String(value) : String(value).replace(/\.0+$/, '');
-      };
-      const getGroupInterval = rowIds => {
-        let min = null;
-        let max = null;
-        rowIds.forEach(rn => {
-          const fromEl = document.querySelector('[name="from_' + rn + '"]');
-          const toEl = document.querySelector('[name="to_' + rn + '"]');
-          const f = fromEl ? parseMeter(fromEl.value) : null;
-          const t = toEl ? parseMeter(toEl.value) : null;
-          if (f !== null && (min === null || f < min)) min = f;
-          if (t !== null && (max === null || t > max)) max = t;
-        });
-        return { from: min, to: max };
-      };
+      const parseMeter = v => { const n = parseFloat(String(v||'').replace(',','.')); return Number.isFinite(n) ? n : null; };
+      const fmt = v => v === null ? '—' : (Number.isInteger(v) ? String(v) : String(v).replace(/\.0+$/,''));
 
+      // Kumpulkan hanya baris S dan Q
+      _expItems = [];
       const seenMg = new Set();
       domRows.forEach(tr => {
         const n = parseInt(tr.dataset.row);
@@ -782,57 +775,106 @@
         const d = getExpRowData(n);
         const isS = /^S\d+$/i.test(d.samp_no);
         const isQ = /^Q\d+$/i.test(d.samp_no);
+        if (!isS && !isQ) return;
         const groupKey = mg || ('_single_' + n);
+        if (mg && !isQ) { if (seenMg.has(mg)) return; seenMg.add(mg); }
         const groupArr = groupRows[groupKey] || [String(n)];
-        const rowIdxInGroup = groupArr.indexOf(String(n));
-        const isWS = mg && rowIdxInGroup > 0 && !isQ;
-        const isCLY = d.grain.toUpperCase() === 'CLY' && !isS && !isQ;
-        const interval = (!isWS && groupArr.length > 1 && !isQ) ? getGroupInterval(groupArr) : { from: parseMeter(d.from), to: parseMeter(d.to) };
-        const intervalText = `${formatMeter(interval.from)}–${formatMeter(interval.to)} m`;
-        // Untuk grup gabung, tampilkan card utama, wash sample, dan QAQC; sembunyikan baris tambahan non-Q lain
-        if (mg && seenMg.has(mg) && !isQ && !isWS) return;
-        if (mg && !isQ && !isWS) seenMg.add(mg);
-        // Sembunyikan CLY di card view
-        if (isCLY) return;
-        const item = document.createElement('div');
-        item.className = 'exp-row-item' + (isCLY?' exp-cly':isQ?' exp-qaqc':isWS?' exp-ws':isS?' exp-s':'');
-        item.dataset.rowNum = n;
-        if (openRows.has(String(n))) item.classList.add('open');
-        // Collect Original/WS sample IDs across the whole merge group (if any)
-        const gArr = groupRows[groupKey] || [String(n)];
-        const idsSet = new Set();
-        gArr.forEach(rn => {
-          ['sample_id','m06_orig_sid','m06_sid'].forEach(f => {
-            const el = document.querySelector('[name="' + f + '_' + rn + '"]');
-            if (el && el.value && el.value.trim()) idsSet.add(el.value.trim().toUpperCase());
-          });
+        let minFrom = null, maxTo = null;
+        groupArr.forEach(rn => {
+          const f = parseMeter(document.querySelector(`[name="from_${rn}"]`)?.value);
+          const t = parseMeter(document.querySelector(`[name="to_${rn}"]`)?.value);
+          if (f !== null && (minFrom === null || f < minFrom)) minFrom = f;
+          if (t !== null && (maxTo === null || t > maxTo)) maxTo = t;
         });
-        const origIds = Array.from(idsSet);
-        const origIdsHtml = origIds.length ? `<span class="exp-gs exp-id-group">${origIds.map(id => `<span class="exp-id-pill">${id}</span>`).join('')}</span>` : '';
-        const header = document.createElement('div');
-        header.className = 'exp-row-header';
-        header.innerHTML = `
-          <span class="exp-sampno${isQ?' qaqc':''}${isWS?' ws':''}">${d.samp_no||'—'}</span>
-          <span class="exp-range">${intervalText} ${d.grain?`<b>${d.grain}</b>`:''}</span>
-          ${isWS?'<span class="exp-ws-badge">WS</span>':''}
-          ${origIdsHtml}
-          <span class="exp-chevron">▼</span>
-        `;
-        header.addEventListener('click', () => item.classList.toggle('open'));
-        // Detail
-        const detail = document.createElement('div');
-        detail.className = 'exp-detail';
-        const sel = (label, field, opts, val) => `
-          <div class="exp-detail-field"><label>${label}</label>
-            <select data-expfield="${field}" data-exprow="${n}">
-              ${opts.map(o=>`<option value="${o}"${o===val?'selected':''}>${o||'—'}</option>`).join('')}
-            </select>
-          </div>`;
-        const inp = (label, field, type, ro, val) => `
-          <div class="exp-detail-field"><label>${label}</label>
-            <input type="${type}" data-expfield="${field}" data-exprow="${n}" value="${val||''}" ${ro?'readonly':''} step="0.01">
-          </div>`;
-        let fracHtml = '<div class="exp-frac-title">Fraksi (Total | Rec | Sample ID)</div>';
+        const grain = d.grain || '';
+        const label = `${d.samp_no} — ${fmt(minFrom)}–${fmt(maxTo)} m ${grain}`;
+        _expItems.push({ rowNum: n, sampNo: d.samp_no, label, isQ, groupArr, d });
+      });
+
+      // Update selector
+      const prevVal = selEl.value;
+      selEl.innerHTML = '<option value="">— Pilih Samp No —</option>';
+      _expItems.forEach((item, idx) => {
+        const opt = document.createElement('option');
+        opt.value = String(idx);
+        opt.textContent = item.label;
+        if (item.isQ) opt.style.color = '#9c27b0';
+        selEl.appendChild(opt);
+      });
+
+      // Restore selection
+      const restoredIdx = _expItems.findIndex((_, i) => String(i) === prevVal);
+      if (restoredIdx >= 0) {
+        selEl.value = String(restoredIdx);
+        _expCurrentIdx = restoredIdx;
+      } else if (_expCurrentIdx >= 0 && _expCurrentIdx < _expItems.length) {
+        selEl.value = String(_expCurrentIdx);
+      } else {
+        _expCurrentIdx = -1;
+      }
+
+      renderExpCard();
+    }
+
+    function onExpSampNoChange(val) {
+      _expCurrentIdx = val === '' ? -1 : parseInt(val);
+      renderExpCard();
+    }
+
+    function navigateExpCard(dir) {
+      if (_expItems.length === 0) return;
+      _expCurrentIdx = Math.max(0, Math.min(_expItems.length - 1, _expCurrentIdx + dir));
+      document.getElementById('exp-sampno-select').value = String(_expCurrentIdx);
+      renderExpCard();
+    }
+
+    function renderExpCard() {
+      const container = document.getElementById('exp-list-container');
+      if (!container) return;
+      container.innerHTML = '';
+      if (_expCurrentIdx < 0 || _expCurrentIdx >= _expItems.length) return;
+
+      const item = _expItems[_expCurrentIdx];
+      const { rowNum: n, isQ, groupArr, d } = item;
+
+      const sel = (label, field, opts, val) =>
+        `<div class="exp-detail-field" style="grid-column:span 1;"><label>${label}</label>
+          <select data-expfield="${field}" data-exprow="${n}">
+            ${opts.map(o=>`<option value="${o}"${o===val?'selected':''}>${o||'—'}</option>`).join('')}
+          </select></div>`;
+      const inp = (label, field, type, ro, val, span) =>
+        `<div class="exp-detail-field" style="grid-column:span ${span||1};"><label>${label}</label>
+          <input type="${type}" data-expfield="${field}" data-exprow="${n}" value="${val||''}" ${ro?'readonly':''} step="0.01">
+        </div>`;
+
+      // Collect GS IDs
+      const idsSet = new Set();
+      groupArr.forEach(rn => {
+        ['sample_id','m06_orig_sid'].forEach(f => {
+          const el = document.querySelector(`[name="${f}_${rn}"]`);
+          if (el && el.value.trim()) idsSet.add(el.value.trim().toUpperCase());
+        });
+      });
+      const gsHtml = Array.from(idsSet).map(id =>
+        `<span style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#1a6b4a;">${id}</span>`
+      ).join(' ');
+
+      const card = document.createElement('div');
+      card.style.cssText = 'background:white;border-radius:12px;border:1.5px solid ' + (isQ?'#9c27b0':'#1a6b4a') + ';padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);';
+
+      // Header card
+      const hdr = document.createElement('div');
+      hdr.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;';
+      hdr.innerHTML = `
+        <span style="font-size:16px;font-weight:800;color:${isQ?'#9c27b0':'#1a6b4a'};">${d.samp_no||'—'}</span>
+        <span style="font-size:12px;color:#555;">${item.label.replace(item.sampNo+' — ','')}</span>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">${gsHtml}</div>
+      `;
+      card.appendChild(hdr);
+
+      let fracHtml = '';
+      if (!isQ) {
+        fracHtml = `<div style="font-size:10px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;border-bottom:1.5px solid #e8f5e9;padding-bottom:2px;">Fraksi (Total | Rec | Sample ID)</div>`;
         EXP_FRAC_DEFS.forEach(f => {
           fracHtml += `<div class="exp-frac-row">
             <span class="frac-label">${f.label}</span>
@@ -841,29 +883,21 @@
             <input type="text" data-expfield="${f.key}_sid" data-exprow="${n}" value="${d[f.key+'_sid']||''}" placeholder="Sample ID">
           </div>`;
         });
-        if (isQ) {
-          detail.innerHTML = `
-            <div class="exp-detail-grid">
-              ${inp('Send Cum','send_cum','number',false,d.send_cum)}
-              ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
-              ${inp('Remarks','remarks','text',false,d.remarks)}
-            </div>
-            <div class="exp-detail-actions">
-              <button class="exp-btn-del" onclick="showRowMenu(event,${n})">✕ Menu</button>
-            </div>
-          `;
-        } else if (isCLY) {
-          detail.innerHTML = `
-            <div class="exp-detail-grid exp-clay">
-              ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
-              ${inp('Remarks','remarks','text',false,d.remarks)}
-            </div>
-            <div class="exp-detail-actions">
-              <button class="exp-btn-del" onclick="showRowMenu(event,${n})">✕ Menu</button>
-            </div>
-          `;
-        } else {
-          detail.innerHTML = `
+      }
+
+      const body = document.createElement('div');
+      if (isQ) {
+        body.innerHTML = `
+          <div class="exp-detail-grid">
+            ${inp('Send Cum','send_cum','number',false,d.send_cum)}
+            ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
+            ${inp('Remarks','remarks','text',false,d.remarks)}
+          </div>
+          <div class="exp-detail-actions" style="margin-top:8px;">
+            <button class="exp-btn-del" onclick="showRowMenu(event,${n})">Menu</button>
+          </div>`;
+      } else {
+        body.innerHTML = `
           <div class="exp-detail-grid">
             ${inp('From (m)','from','number',false,d.from)}
             ${inp('To (m)','to','number',false,d.to)}
@@ -872,43 +906,34 @@
             ${inp('Core Wt (g)','core_wt','number',false,d.core_wt)}
             ${inp('Dry Wt (g)','dry_wt','number',false,d.dry_wt)}
             ${inp('Send Cum','send_cum','number',false,d.send_cum)}
-            ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
+            ${inp('Original SID','sample_id','text',false,d.sample_id)}
             ${inp('+0.3 SID','m06_orig_sid','text',false,d.m06_orig_sid)}
             ${inp('Remarks','remarks','text',false,d.remarks)}
           </div>
           ${fracHtml}
-          <div class="exp-detail-actions">
+          <div class="exp-detail-actions" style="margin-top:8px;">
             <button class="exp-btn-samp" onclick="openFracModal(${n})">Fraksi</button>
             <button class="exp-btn-del" onclick="showRowMenu(event,${n})">Menu</button>
-          </div>
-        `;
-        }
-        // Listener: sync ke tabel saat input berubah
-        detail.querySelectorAll('[data-expfield]').forEach(el => {
-          const sync = () => {
-            const field = el.dataset.expfield;
-            const rowN  = el.dataset.exprow;
-            const domEl = document.querySelector(`[name="${field}_${rowN}"]`);
-            if (domEl && !domEl.readOnly && !domEl.disabled) {
-              domEl.value = el.value;
-              domEl.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-            // Sync readonly fields back
-            detail.querySelectorAll('input[readonly][data-expfield]').forEach(ro => {
-              const roDom = document.querySelector(`[name="${ro.dataset.expfield}_${ro.dataset.exprow}"]`);
-              if (roDom) ro.value = roDom.value;
-            });
-          };
-          el.addEventListener('change', sync);
-          el.addEventListener('input', () => {
-            sync();
-            if (el.dataset.expfield && el.dataset.expfield.endsWith('_tot')) calcRec(parseInt(el.dataset.exprow));
+          </div>`;
+      }
+      card.appendChild(body);
+
+      // Listeners
+      body.querySelectorAll('[data-expfield]').forEach(el => {
+        const sync = () => {
+          const fld = el.dataset.expfield, rn = el.dataset.exprow;
+          const dom = document.querySelector(`[name="${fld}_${rn}"]`);
+          if (dom && !dom.readOnly && !dom.disabled) { dom.value = el.value; dom.dispatchEvent(new Event('change',{bubbles:true})); }
+          body.querySelectorAll('input[readonly][data-expfield]').forEach(ro => {
+            const rd = document.querySelector(`[name="${ro.dataset.expfield}_${ro.dataset.exprow}"]`);
+            if (rd) ro.value = rd.value;
           });
-        });
-        item.appendChild(header);
-        item.appendChild(detail);
-        container.appendChild(item);
+        };
+        el.addEventListener('change', sync);
+        el.addEventListener('input', () => { sync(); if (el.dataset.expfield?.endsWith('_tot')) calcRec(parseInt(el.dataset.exprow)); });
       });
+
+      container.appendChild(card);
     }
 
     // Auto-refresh list setelah operasi data
@@ -918,6 +943,7 @@
       alert('JS Error: ' + msg + '\nLine: ' + line + '\n' + (err ? err.stack : ''));
       return false;
     };
+
   </script>
   <script>
     let rowCount = 0;
