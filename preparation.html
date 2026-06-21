@@ -941,21 +941,47 @@
         const wsM06 = document.querySelector(`[name="m06_orig_sid_${n}"]`);
         if (wsM06 && wsM06.value.trim()) {
           const wsCard = document.createElement('div');
-          wsCard.style.cssText = 'background:#e3f2fd;border-radius:10px;border:1.5px solid #90caf9;padding:10px 12px;margin-top:6px;';
-          let wsFracHtml = `<div style="font-size:10px;font-weight:700;color:#0277bd;text-transform:uppercase;margin:6px 0 3px;border-bottom:1px solid #90caf9;padding-bottom:2px;">Washing Screen (+0.3-0.6 mm)</div>`;
-          wsFracHtml += `<div class="exp-frac-row">
-            <span class="frac-label" style="color:#0277bd;">+0.3-0.6 mm</span>
-            <input type="number" data-expfield="m06_tot" data-exprow="${n}" value="${d.m06_tot||''}" placeholder="Total" step="0.01">
-            <input type="number" data-expfield="m06_rec" data-exprow="${n}" value="${d.m06_rec||''}" placeholder="Rec" readonly>
-            <input type="text" data-expfield="m06_sid" data-exprow="${n}" value="${d.m06_sid||''}" placeholder="Sample ID SA">
-          </div>`;
-          wsCard.innerHTML = `
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
-              <span style="font-size:12px;font-weight:800;color:#0277bd;">🔵 Washing Screen</span>
-              <span style="background:#bbdefb;border:1px solid #90caf9;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#0277bd;">${wsM06.value.trim().toUpperCase()}</span>
-            </div>
-            ${wsFracHtml}
+          wsCard.style.cssText = 'background:white;border-radius:12px;border:2px solid #0277bd;padding:12px;box-shadow:0 2px 8px rgba(2,119,189,0.12);margin-top:8px;';
+
+          // Header WS seperti header card S
+          const wsHdr = document.createElement('div');
+          wsHdr.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;';
+          wsHdr.innerHTML = `
+            <span style="font-size:14px;font-weight:800;color:#0277bd;">🔵 Washing Screen</span>
+            <span style="background:#bbdefb;border:1px solid #90caf9;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#0277bd;">${wsM06.value.trim().toUpperCase()}</span>
+            <button onclick="clearWashSampleData(${n})" style="margin-left:auto;background:#fdecea;color:#c62828;border:1.5px solid #ef9a9a;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">✕ Hapus WS</button>
           `;
+          wsCard.appendChild(wsHdr);
+
+          // Original SID field
+          const wsOrigDiv = document.createElement('div');
+          wsOrigDiv.style.cssText = 'margin-bottom:8px;';
+          wsOrigDiv.innerHTML = `
+            <div class="exp-detail-field" style="grid-column:span 1;">
+              <label>Original SID (+0.3-0.6)</label>
+              <input type="text" data-expfield="m06_orig_sid" data-exprow="${n}" value="${d.m06_orig_sid||''}" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px 5px;font-size:11px;outline:none;text-transform:uppercase;width:100%;background:white;" oninput="this.dataset.autoM06='false'">
+            </div>
+          `;
+          wsCard.appendChild(wsOrigDiv);
+
+          // Fraksi WS — sama persis seperti fraksi S
+          const wsFracTitle = document.createElement('div');
+          wsFracTitle.style.cssText = 'font-size:10px;font-weight:700;color:#0277bd;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0 3px;border-bottom:1.5px solid #bbdefb;padding-bottom:2px;';
+          wsFracTitle.textContent = 'Fraksi Washing Screen (Total | Rec | Sample ID)';
+          wsCard.appendChild(wsFracTitle);
+
+          // Hanya fraksi +0.3-0.6 untuk WS
+          const wsBodyHtml = `<div class="exp-frac-row">
+            <span class="frac-label" style="color:#0277bd;">+0.3-0.6 mm</span>
+            <input type="number" data-expfield="m06_tot" data-exprow="${n}" value="${d.m06_tot||''}" placeholder="Total" step="0.01" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
+            <input type="number" data-expfield="m06_rec" data-exprow="${n}" value="${d.m06_rec||''}" placeholder="Rec" readonly style="border:1.5px solid #d0ece4;border-radius:5px;padding:4px;font-size:11px;text-align:center;width:100%;background:#f5f5f5;color:#888;outline:none;">
+            <input type="text" data-expfield="m06_sid" data-exprow="${n}" value="${d.m06_sid||''}" placeholder="Sample ID SA" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
+          </div>`;
+          const wsBody = document.createElement('div');
+          wsBody.innerHTML = wsBodyHtml;
+          wsCard.appendChild(wsBody);
+
+          // Listeners
           wsCard.querySelectorAll('[data-expfield]').forEach(el => {
             const sync = () => {
               const fld = el.dataset.expfield, rn2 = el.dataset.exprow;
@@ -1259,8 +1285,18 @@
       if (typeof _origRenderExpList === 'function') _origRenderExpList();
     }
 
-    // ===== HAPUS BARIS =====
-    function deleteRow(rowNum) {
+    // ===== HAPUS DATA WASHING SCREEN =====
+    function clearWashSampleData(rowNum) {
+      const CLEAR_WS = ['m06_orig_sid','m06_tot','m06_rec','m06_sid'];
+      CLEAR_WS.forEach(field => {
+        const el = document.querySelector(`[name="${field}_${rowNum}"]`);
+        if (el) { el.value = ''; el.dataset.auto = 'false'; el.dataset.autoM06 = 'false'; }
+      });
+      highlightDuplicates();
+      updateTotalSample();
+      if (typeof _origRenderExpList === 'function') _origRenderExpList();
+      showToast('Data Washing Screen dihapus');
+    }
       if (rowCount <= 1) { showToast('Minimal 1 baris harus ada', 'error'); return; }
       if (!confirm('Apakah Anda yakin ingin menghapus baris ini?')) return;
       const tr = document.getElementById('prep-row-' + rowNum);
@@ -1705,14 +1741,15 @@
             sidEl.value = newGS;
             sidEl.dataset.autoOrig = 'true';
           }
-          if (m06El && m06El.dataset.autoM06 !== 'false') {
-            m06El.value = basePrefix + String(gsCounter + 1).padStart(basePadLen, '0');
+          gsCounter++; // S pakai 1 slot untuk sample_id
+          // m06_orig_sid = GS berikutnya (jika ada WS)
+          if (m06El && m06El.dataset.autoM06 !== 'false' && m06El.value.trim()) {
+            m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
             m06El.dataset.autoM06 = 'true';
+            gsCounter++; // WS pakai 1 slot untuk m06_orig_sid
           }
-          gsCounter += 2; // S pakai 2 slot: GS dan GS+0.3
         } else if (isWSRow) {
-          // Baris WS: tidak tambah counter, sudah pakai slot dari baris S utama
-          // (sample_id WS diisi dari m06_orig_sid baris S)
+          // Baris WS fisik (baris ke-2 dalam grup): skip — sudah pakai slot dari baris S
         } else if (isQ) {
           // Baris QAQC: set GS berurutan
           const newGS = basePrefix + String(gsCounter).padStart(basePadLen, '0');
