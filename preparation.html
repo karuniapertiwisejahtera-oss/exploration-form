@@ -933,7 +933,46 @@
         el.addEventListener('input', () => { sync(); if (el.dataset.expfield?.endsWith('_tot')) calcRec(parseInt(el.dataset.exprow)); });
       });
 
-      container.appendChild(card);
+      // Setelah card S, tampilkan sub-card WS jika ada
+      if (!isQ && groupArr.length > 1) {
+        groupArr.slice(1).forEach(wsRn => {
+          const wd = getExpRowData(parseInt(wsRn));
+          const wsCard = document.createElement('div');
+          wsCard.style.cssText = 'background:#e3f2fd;border-radius:10px;border:1.5px solid #90caf9;padding:10px 12px;margin-top:6px;';
+          let wsFracHtml = `<div style="font-size:10px;font-weight:700;color:#0277bd;text-transform:uppercase;margin:6px 0 3px;border-bottom:1px solid #90caf9;padding-bottom:2px;">Washing Screen — Fraksi</div>`;
+          EXP_FRAC_DEFS.forEach(f => {
+            wsFracHtml += `<div class="exp-frac-row">
+              <span class="frac-label" style="color:#0277bd;">${f.label}</span>
+              <input type="number" data-expfield="${f.key}_tot" data-exprow="${wsRn}" value="${wd[f.key+'_tot']||''}" placeholder="Total" step="0.01">
+              <input type="number" data-expfield="${f.key}_rec" data-exprow="${wsRn}" value="${wd[f.key+'_rec']||''}" placeholder="Rec" readonly>
+              <input type="text" data-expfield="${f.key}_sid" data-exprow="${wsRn}" value="${wd[f.key+'_sid']||''}" placeholder="Sample ID">
+            </div>`;
+          });
+          wsCard.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+              <span style="font-size:12px;font-weight:800;color:#0277bd;">🔵 Washing Screen</span>
+              ${wd.sample_id ? `<span style="background:#bbdefb;border:1px solid #90caf9;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#0277bd;">${wd.sample_id.toUpperCase()}</span>` : ''}
+              ${wd.m06_orig_sid ? `<span style="background:#fff3e0;border:1px solid #ffe082;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#f57f17;">${wd.m06_orig_sid.toUpperCase()}</span>` : ''}
+            </div>
+            ${wsFracHtml}
+          `;
+          // Listeners WS
+          wsCard.querySelectorAll('[data-expfield]').forEach(el => {
+            const sync = () => {
+              const fld = el.dataset.expfield, rn2 = el.dataset.exprow;
+              const dom = document.querySelector(`[name="${fld}_${rn2}"]`);
+              if (dom && !dom.readOnly && !dom.disabled) { dom.value = el.value; dom.dispatchEvent(new Event('change',{bubbles:true})); }
+              wsCard.querySelectorAll('input[readonly][data-expfield]').forEach(ro => {
+                const rd = document.querySelector(`[name="${ro.dataset.expfield}_${ro.dataset.exprow}"]`);
+                if (rd) ro.value = rd.value;
+              });
+            };
+            el.addEventListener('change', sync);
+            el.addEventListener('input', () => { sync(); if (el.dataset.expfield?.endsWith('_tot')) calcRec(parseInt(el.dataset.exprow)); });
+          });
+          container.appendChild(wsCard);
+        });
+      }
     }
 
     // Auto-refresh list setelah operasi data
