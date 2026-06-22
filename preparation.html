@@ -837,8 +837,13 @@
         if (cwtEl && cwtEl.value) aggCoreWt += parseFloat(cwtEl.value) || 0;
         if (grEl && grEl.value.trim()) grainValues.push(grEl.value.trim().toUpperCase());
       });
-      // Grain: ambil yang paling dominan atau gabungkan
-      const aggGrain = [...new Set(grainValues)].join('/') || d.grain;
+      // Grain dominant: yang paling banyak muncul
+      let aggGrain = d.grain || '';
+      if (grainValues.length > 0) {
+        const freq = {};
+        grainValues.forEach(g => { freq[g] = (freq[g] || 0) + 1; });
+        aggGrain = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
+      }
       // Rec Length = average recovery
       const aggRecAvg = recCount > 0 ? (aggRec / recCount) : 0;
       const aggRecStr = aggRecAvg ? String(Math.round(aggRecAvg * 100) / 100) : d.rec;
@@ -906,8 +911,8 @@
       } else {
         body.innerHTML = `
           <div class="exp-detail-grid">
-            ${inp('From (m)','from','number',false,d.from)}
-            ${inp('To (m)','to','number',false,d.to)}
+            ${inp('From (m)','from_cum','number',true,d.from_cum)}
+            ${inp('To (m)','to_cum','number',true,d.to_cum)}
             ${inp('Rec Length','rec','number',true,aggRecStr)}
             <div class="exp-detail-field" style="grid-column:span 1;"><label>GRAIN</label>
               <input type="text" value="${aggGrain}" readonly style="background:#f5f5f5;color:#888;">
