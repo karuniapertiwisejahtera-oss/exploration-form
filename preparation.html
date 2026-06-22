@@ -3527,6 +3527,18 @@
       });
       if (window._editRecordId) {
         DB.delete('preparation', window._editRecordId);
+      } else {
+        // Cari record yang sudah ada dengan Hole ID sama → update, bukan buat baru
+        const holeId = data.hole_id ? data.hole_id.trim().toUpperCase() : '';
+        if (holeId) {
+          const existing = DB.getAll('preparation').find(r => 
+            r.hole_id && r.hole_id.trim().toUpperCase() === holeId
+          );
+          if (existing) {
+            DB.delete('preparation', existing.id);
+            window._editRecordId = existing.id;
+          }
+        }
       }
       const _saved = DB.save('preparation', data);
       window._editRecordId = _saved.id;
