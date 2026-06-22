@@ -1885,28 +1885,69 @@
 
         const isS = /^S\d+$/i.test(sn);
         const isQ = /^Q\d+$/i.test(sn);
-        const isWSRow = isNonFirst; // baris ke-2+ dalam grup = WS
+        const isWSRow = isNonFirst && !isS && !isQ; // baris ke-2+ dalam grup yang bukan S/Q = WS
 
         if (isS && !isNonFirst) {
-          // Baris S utama: set GS dan m06
+          // Baris S utama: set GS
           const newGS = basePrefix + String(gsCounter).padStart(basePadLen, '0');
           if (sidEl && (sidEl.dataset.autoOrig === 'true' || sn !== 'S1')) {
             sidEl.value = newGS;
             sidEl.dataset.autoOrig = 'true';
           }
           gsCounter++; // S pakai 1 slot untuk sample_id
-          // m06_orig_sid = GS berikutnya (jika ada WS)
+
+          // Cek apakah ada baris WS fisik di bawahnya dalam merge group
+          let hasWSRow = false;
+          if (mg) {
+            const nextTrs = domRows.filter(t => t.dataset.mergeGroup === mg && parseInt(t.dataset.row) !== rn);
+            for (const nt of nextTrs) {
+              const ntRn = parseInt(nt.dataset.row);
+              const ntSn = document.querySelector(`[name="samp_no_${ntRn}"]`);
+              const ntSnVal = ntSn ? ntSn.value.trim().toUpperCase() : '';
+              const ntSid = document.querySelector(`[name="sample_id_${ntRn}"]`);
+              if (!(/^S\d+$/i.test(ntSnVal) || /^Q\d+$/i.test(ntSnVal)) && ntSid && ntSid.value.trim()) {
+                hasWSRow = true; break;
+              }
+            }
+          }
+
+          // m06_orig_sid: jika ada WS row fisik, set nilainya tapi JANGAN increment counter
+          // (WS row akan increment sendiri). Jika tidak ada WS row, m06 pakai 1 slot sendiri.
+          if (m06El && m06El.value.trim()) {
+            if (hasWSRow) {
+              // Sync m06_orig_sid dengan gsCounter (yang akan diisi WS row)
+              if (m06El.dataset.autoM06 !== 'false') {
+                m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
+                m06El.dataset.autoM06 = 'true';
+              }
+              // Tidak increment — WS row yang akan increment
+            } else {
+              // Tidak ada WS row fisik, m06 pakai 1 slot sendiri
+              if (m06El.dataset.autoM06 !== 'false') {
+                m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
+                m06El.dataset.autoM06 = 'true';
+              }
+              gsCounter++;
+            }
+          }
+        } else if (isWSRow) {
+          // Baris WS fisik (baris ke-2+ dalam grup): set GS berurutan
+          if (sidEl && sidEl.value.trim()) {
+            const newGS = basePrefix + String(gsCounter).padStart(basePadLen, '0');
+            if (sidEl.dataset.autoOrig !== 'false') {
+              sidEl.value = newGS;
+              sidEl.dataset.autoOrig = 'true';
+            }
+            gsCounter++; // WS pakai 1 slot untuk sample_id
+          }
+          // m06_orig_sid WS (jika ada)
           if (m06El && m06El.value.trim()) {
             if (m06El.dataset.autoM06 !== 'false') {
               m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
               m06El.dataset.autoM06 = 'true';
             }
-            gsCounter++; // WS pakai 1 slot untuk m06_orig_sid (selalu increment jika ada nilai)
+            gsCounter++;
           }
-        } else if (isWSRow) {
-          // Baris WS fisik (baris ke-2+ dalam grup): kosongkan GS agar tidak duplikat
-          if (sidEl && sidEl.value.trim()) { sidEl.value = ''; }
-          if (m06El && m06El.value.trim()) { m06El.value = ''; }
         } else if (isQ) {
           // Baris QAQC: set GS berurutan
           const newGS = basePrefix + String(gsCounter).padStart(basePadLen, '0');
@@ -2862,32 +2903,91 @@
       const saMatch = saVal.match(/^([A-Za-z]+)(\d+)$/);
       if (!saMatch) { showToast('Format SA tidak valid. Contoh: SA001', 'error'); return; }
 
-      // Set m06_orig_sid (GS WS)
+      // Set m06_orig_sid pada baris S (GS WS)
       const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
       if (m06OrigEl) {
         m06OrigEl.value = gsVal;
         m06OrigEl.dataset.autoM06 = gsVal ? 'true' : 'false';
       }
 
-      // Isi fraksi SA WS
+      // Cari baris WS yang sudah ada dalam merge group baris S
+      const refTr = document.getElementById('prep-row-' + rowNum);
+      const existingMg = refTr ? refTr.dataset.mergeGroup : null;
+      let wsRowNum = null;
+
+      if (existingMg) {
+        const groupTrs = Array.from(document.querySelectorAll(`tr[data-merge-group="${existingMg}"]`));
+        for (const gTr of groupTrs) {
+          const rn = parseInt(gTr.dataset.row);
+          if (rn === rowNum) continue;
+          const snEl2 = document.querySelector(`[name="samp_no_${rn}"]`);
+          const isQ2 = snEl2 && /^Q\d+$/i.test(snEl2.value.trim());
+          if (!isQ2) { wsRowNum = rn; break; }
+        }
+      }
+
+      // Hitung SA IDs untuk WS
       const prefix = saMatch[1], padLen = saMatch[2].length;
       let sidCounter = parseInt(saMatch[2]);
       const used = new Set();
       for (let i = 1; i <= rowCount; i++) {
-        if (i === rowNum) continue;
         ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'].forEach(f => {
           const el = document.querySelector(`[name="${f}_${i}"]`);
           if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
         });
       }
-      FRAC_FIELDS_ORDER.forEach(field => {
-        const el = document.querySelector(`[name="${field}_${rowNum}"]`);
-        if (!el) return;
-        let candidate = prefix + String(sidCounter).padStart(padLen, '0');
-        while (used.has(candidate)) { sidCounter++; candidate = prefix + String(sidCounter).padStart(padLen, '0'); }
-        el.value = candidate; el.dataset.auto = 'true';
-        used.add(candidate); sidCounter++;
-      });
+
+      if (wsRowNum) {
+        // Update baris WS yang sudah ada
+        if (gsVal) {
+          const wsGsEl = document.querySelector(`[name="sample_id_${wsRowNum}"]`);
+          if (wsGsEl) { wsGsEl.value = gsVal; wsGsEl.dataset.autoOrig = 'true'; }
+        }
+        if (p03Val) {
+          const wsM06El = document.querySelector(`[name="m06_orig_sid_${wsRowNum}"]`);
+          if (wsM06El) { wsM06El.value = p03Val; wsM06El.dataset.autoM06 = 'true'; }
+        }
+        FRAC_FIELDS_ORDER.forEach(field => {
+          const el = document.querySelector(`[name="${field}_${wsRowNum}"]`);
+          if (!el) return;
+          let candidate = prefix + String(sidCounter).padStart(padLen, '0');
+          while (used.has(candidate)) { sidCounter++; candidate = prefix + String(sidCounter).padStart(padLen, '0'); }
+          el.value = candidate; el.dataset.auto = 'true';
+          used.add(candidate); sidCounter++;
+        });
+      } else {
+        // Tambah baris WS baru tepat di bawah baris S
+        const wsData = { sample_id: gsVal, m06_orig_sid: p03Val };
+        addRow(wsData);
+        wsRowNum = rowCount;
+        const wsTr = document.getElementById('prep-row-' + wsRowNum);
+
+        // Sisipkan tepat di bawah baris S referensi
+        if (refTr && wsTr) {
+          refTr.parentNode.insertBefore(wsTr, refTr.nextSibling);
+        }
+
+        // Masukkan ke merge group yang sama
+        let mg = existingMg;
+        if (!mg) {
+          // Buat merge group baru
+          mg = 'mg_' + Date.now();
+          refTr.dataset.mergeGroup = mg;
+          refTr.classList.add('row-merged');
+        }
+        wsTr.dataset.mergeGroup = mg;
+        wsTr.classList.add('row-merged');
+
+        // Isi fraksi SA WS
+        FRAC_FIELDS_ORDER.forEach(field => {
+          const el = document.querySelector(`[name="${field}_${wsRowNum}"]`);
+          if (!el) return;
+          let candidate = prefix + String(sidCounter).padStart(padLen, '0');
+          while (used.has(candidate)) { sidCounter++; candidate = prefix + String(sidCounter).padStart(padLen, '0'); }
+          el.value = candidate; el.dataset.auto = 'true';
+          used.add(candidate); sidCounter++;
+        });
+      }
 
       // Tutup frac modal
       closeFracModal();
@@ -2895,6 +2995,7 @@
       updateTotalSample();
       recalcAllOriginalSIDs();
       if (typeof _origRenderExpList === 'function') _origRenderExpList();
+      autoSaveDraft();
       showToast('Wash Sample ditambahkan');
     }
 
