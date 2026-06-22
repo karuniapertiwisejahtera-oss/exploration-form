@@ -1746,10 +1746,12 @@
           }
           gsCounter++; // S pakai 1 slot untuk sample_id
           // m06_orig_sid = GS berikutnya (jika ada WS)
-          if (m06El && m06El.dataset.autoM06 !== 'false' && m06El.value.trim()) {
-            m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
-            m06El.dataset.autoM06 = 'true';
-            gsCounter++; // WS pakai 1 slot untuk m06_orig_sid
+          if (m06El && m06El.value.trim()) {
+            if (m06El.dataset.autoM06 !== 'false') {
+              m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
+              m06El.dataset.autoM06 = 'true';
+            }
+            gsCounter++; // WS pakai 1 slot untuk m06_orig_sid (selalu increment jika ada nilai)
           }
         } else if (isWSRow) {
           // Baris WS fisik (baris ke-2 dalam grup): skip — sudah pakai slot dari baris S
@@ -1805,8 +1807,15 @@
       }
       const m06OrigEl_r = document.querySelector(`[name="m06_orig_sid_${n}"]`);
       if (m06OrigEl_r) {
-        m06OrigEl_r.addEventListener('input',  () => updateTotalSample());
-        m06OrigEl_r.addEventListener('change', () => updateTotalSample());
+        m06OrigEl_r.addEventListener('input', () => {
+          updateTotalSample();
+          clearTimeout(m06OrigEl_r._recalcTimer);
+          m06OrigEl_r._recalcTimer = setTimeout(() => recalcAllOriginalSIDs(n), 500);
+        });
+        m06OrigEl_r.addEventListener('change', () => {
+          updateTotalSample();
+          recalcAllOriginalSIDs(n);
+        });
       }
       SID_ORDER.forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
@@ -2835,6 +2844,9 @@
       const qTr = document.getElementById('prep-row-' + rowCount);
       if (qTr) {
         qTr.classList.add('row-qaqc');
+        // Mark sample_id sebagai auto-managed agar recalc bisa update
+        const qSidEl = document.querySelector(`[name="sample_id_${rowCount}"]`);
+        if (qSidEl) qSidEl.dataset.autoOrig = 'true';
         // Sisipkan setelah baris yang dipilih
         const refTr = document.getElementById('prep-row-' + _menuRowNum);
         if (refTr && refTr.nextSibling) {
@@ -3818,6 +3830,9 @@
         if (snEl && /^Q\d+$/i.test(snEl.value.trim())) {
           const tr = document.getElementById('prep-row-' + i);
           if (tr) tr.classList.add('row-qaqc');
+          // Mark Q rows as auto-managed untuk recalc
+          const sidEl = document.querySelector(`[name="sample_id_${i}"]`);
+          if (sidEl) sidEl.dataset.autoOrig = 'true';
         }
       }
     }
@@ -4069,6 +4084,20 @@
         // Bersihkan draft agar form benar-benar kosong
         localStorage.removeItem('prep_draft');
         window._editRecordId = null;
+        // Bersihkan header fields
+        ['h-holeid','h-sampler','h-sheet','h-date-start','h-deposit','h-date-finish','h-depth'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        document.querySelectorAll('.header-field input:not([readonly])').forEach(el => el.value = '');
+        // Bersihkan tabel
+        document.getElementById('prep-tbody').innerHTML = '';
+        rowCount = 0;
+        const csvFn = document.getElementById('csv-filename');
+        if (csvFn) csvFn.textContent = 'Pilih file .csv';
+        const csvIn = document.getElementById('csv-input');
+        if (csvIn) csvIn.value = '';
+        cancelMerge();
         addRow();
       } else if (mode === 'edit' && editId) {
         const rec = DB.getAll('preparation').find(r => String(r.id) === editId);
