@@ -824,19 +824,21 @@
       const { rowNum: n, isQ, groupArr, d } = item;
 
       // Hitung data gabungan dari semua baris dalam merge group
-      let aggRec = 0, aggCoreWt = 0;
+      let aggRec = 0, aggCoreWt = 0, recCount = 0;
       let grainValues = [];
       groupArr.forEach(rn => {
         const recEl = document.querySelector(`[name="rec_${rn}"]`);
         const cwtEl = document.querySelector(`[name="core_wt_${rn}"]`);
         const grEl = document.querySelector(`[name="grain_${rn}"]`);
-        if (recEl && recEl.value) aggRec += parseFloat(recEl.value) || 0;
+        if (recEl && recEl.value) { aggRec += parseFloat(recEl.value) || 0; recCount++; }
         if (cwtEl && cwtEl.value) aggCoreWt += parseFloat(cwtEl.value) || 0;
         if (grEl && grEl.value.trim()) grainValues.push(grEl.value.trim().toUpperCase());
       });
       // Grain: ambil yang paling dominan atau gabungkan
       const aggGrain = [...new Set(grainValues)].join('/') || d.grain;
-      const aggRecStr = aggRec ? String(Math.round(aggRec * 100) / 100) : d.rec;
+      // Rec Length = average recovery
+      const aggRecAvg = recCount > 0 ? (aggRec / recCount) : 0;
+      const aggRecStr = aggRecAvg ? String(Math.round(aggRecAvg * 100) / 100) : d.rec;
       const aggCoreWtStr = aggCoreWt ? String(Math.round(aggCoreWt * 100) / 100) : d.core_wt;
 
       const sel = (label, field, opts, val) =>
@@ -1008,9 +1010,8 @@
       }
     }
 
-    // ===== INLINE WASH FORM (di sebelah card) =====
+    // ===== INLINE WASH FORM (di bawah card S) =====
     function toggleInlineWashForm(rowNum) {
-      const container = document.getElementById('exp-list-container');
       const existingForm = document.getElementById('inline-wash-form');
       if (existingForm) {
         // Jika sudah ada dan untuk row yang sama, tutup
@@ -1063,7 +1064,22 @@
           <button onclick="saveInlineWash(${rowNum})" style="width:100%;background:#0277bd;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;">Tambahkan Wash Sample</button>
         </div>
       `;
-      container.appendChild(formDiv);
+
+      // Sisipkan tepat setelah card S (sebelum WS sub-card jika ada)
+      const container = document.getElementById('exp-list-container');
+      const cards = container.children;
+      // Card S = elemen pertama di container, WS card = elemen kedua (jika ada)
+      if (cards.length > 0) {
+        // Insert setelah card pertama (card S)
+        const firstCard = cards[0];
+        if (firstCard.nextSibling) {
+          container.insertBefore(formDiv, firstCard.nextSibling);
+        } else {
+          container.appendChild(formDiv);
+        }
+      } else {
+        container.appendChild(formDiv);
+      }
 
       // Auto-fill p03
       autoFillInlineWashP03(gsWS);
