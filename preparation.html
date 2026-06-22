@@ -1050,11 +1050,17 @@
       const sampNo = snEl ? snEl.value.trim().toUpperCase() : '';
       const gsEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
       const gsVal = gsEl ? gsEl.value.trim().toUpperCase() : '';
-      // Auto-fill GS WS = sample_id + 1
+      const m06El = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
+      const m06Val = m06El ? m06El.value.trim().toUpperCase() : '';
+      // Auto-fill GS WS = m06_orig_sid (fraksi +0.3) + 1
       let gsWS = '';
-      if (gsVal) {
-        const m = gsVal.match(/^([A-Za-z]+)(\d+)$/);
+      if (m06Val) {
+        const m = m06Val.match(/^([A-Za-z]+)(\d+)$/);
         if (m) gsWS = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+      } else if (gsVal) {
+        // Fallback: sample_id + 2 (skip m06 slot)
+        const m = gsVal.match(/^([A-Za-z]+)(\d+)$/);
+        if (m) gsWS = m[1] + String(parseInt(m[2]) + 2).padStart(m[2].length, '0');
       }
       const nextSA = getNextSAID();
 
@@ -1949,39 +1955,13 @@
           }
           gsCounter++; // S pakai 1 slot untuk sample_id
 
-          // Cek apakah ada baris WS fisik di bawahnya dalam merge group
-          let hasWSRow = false;
-          if (mg) {
-            const nextTrs = domRows.filter(t => t.dataset.mergeGroup === mg && parseInt(t.dataset.row) !== rn);
-            for (const nt of nextTrs) {
-              const ntRn = parseInt(nt.dataset.row);
-              const ntSn = document.querySelector(`[name="samp_no_${ntRn}"]`);
-              const ntSnVal = ntSn ? ntSn.value.trim().toUpperCase() : '';
-              const ntSid = document.querySelector(`[name="sample_id_${ntRn}"]`);
-              if (!(/^S\d+$/i.test(ntSnVal) || /^Q\d+$/i.test(ntSnVal)) && ntSid && ntSid.value.trim()) {
-                hasWSRow = true; break;
-              }
-            }
-          }
-
-          // m06_orig_sid: jika ada WS row fisik, set nilainya tapi JANGAN increment counter
-          // (WS row akan increment sendiri). Jika tidak ada WS row, m06 pakai 1 slot sendiri.
+          // m06_orig_sid S (fraksi +0.3): selalu pakai 1 slot sendiri jika terisi
           if (m06El && m06El.value.trim()) {
-            if (hasWSRow) {
-              // Sync m06_orig_sid dengan gsCounter (yang akan diisi WS row)
-              if (m06El.dataset.autoM06 !== 'false') {
-                m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
-                m06El.dataset.autoM06 = 'true';
-              }
-              // Tidak increment — WS row yang akan increment
-            } else {
-              // Tidak ada WS row fisik, m06 pakai 1 slot sendiri
-              if (m06El.dataset.autoM06 !== 'false') {
-                m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
-                m06El.dataset.autoM06 = 'true';
-              }
-              gsCounter++;
+            if (m06El.dataset.autoM06 !== 'false') {
+              m06El.value = basePrefix + String(gsCounter).padStart(basePadLen, '0');
+              m06El.dataset.autoM06 = 'true';
             }
+            gsCounter++; // m06 pakai 1 slot
           }
         } else if (isWSRow) {
           // Baris WS fisik (baris ke-2+ dalam grup): set GS berurutan
@@ -2908,17 +2888,29 @@
         // Auto-fill dari data frac modal
         const overlay = document.getElementById('frac-modal-overlay');
         const rowNum = overlay ? parseInt(overlay.dataset.targetRow) : null;
-        const gsEl = rowNum ? document.querySelector(`[name="sample_id_${rowNum}"]`) : null;
-        const gsVal = gsEl ? gsEl.value.trim().toUpperCase() : '';
-        // Atau dari input GS di frac modal
-        const fracGsInp = document.getElementById('frac-orig-sid-input');
-        const fracGsVal = fracGsInp ? fracGsInp.value.trim().toUpperCase() : '';
-        const baseGS = fracGsVal || gsVal;
-        // GS WS = baseGS + 1
+        // GS WS = m06_orig_sid (fraksi +0.3) + 1
+        // Ambil dari frac-p03-orig-input (Original SID fraksi +0.3-0.6)
+        const fracP03Inp = document.getElementById('frac-p03-orig-input');
+        const fracP03Val = fracP03Inp ? fracP03Inp.value.trim().toUpperCase() : '';
+        // Fallback: m06_orig_sid dari tabel
+        const m06El = rowNum ? document.querySelector(`[name="m06_orig_sid_${rowNum}"]`) : null;
+        const m06Val = m06El ? m06El.value.trim().toUpperCase() : '';
+        const baseP03 = fracP03Val || m06Val;
+        // GS WS = baseP03 + 1 (setelah fraksi +0.3 dari S)
         let gsWS = '';
-        if (baseGS) {
-          const m = baseGS.match(/^([A-Za-z]+)(\d+)$/);
+        if (baseP03) {
+          const m = baseP03.match(/^([A-Za-z]+)(\d+)$/);
           if (m) gsWS = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+        } else {
+          // Fallback: sample_id + 2 (skip 1 slot untuk m06)
+          const gsEl = rowNum ? document.querySelector(`[name="sample_id_${rowNum}"]`) : null;
+          const fracGsInp = document.getElementById('frac-orig-sid-input');
+          const fracGsVal = fracGsInp ? fracGsInp.value.trim().toUpperCase() : '';
+          const gsVal = fracGsVal || (gsEl ? gsEl.value.trim().toUpperCase() : '');
+          if (gsVal) {
+            const m = gsVal.match(/^([A-Za-z]+)(\d+)$/);
+            if (m) gsWS = m[1] + String(parseInt(m[2]) + 2).padStart(m[2].length, '0');
+          }
         }
         const gsInp = document.getElementById('frac-wash-gs-input');
         if (gsInp) gsInp.value = gsWS;
