@@ -1754,7 +1754,9 @@
             gsCounter++; // WS pakai 1 slot untuk m06_orig_sid (selalu increment jika ada nilai)
           }
         } else if (isWSRow) {
-          // Baris WS fisik (baris ke-2 dalam grup): skip — sudah pakai slot dari baris S
+          // Baris WS fisik (baris ke-2+ dalam grup): kosongkan GS agar tidak duplikat
+          if (sidEl && sidEl.value.trim()) { sidEl.value = ''; }
+          if (m06El && m06El.value.trim()) { m06El.value = ''; }
         } else if (isQ) {
           // Baris QAQC: set GS berurutan
           const newGS = basePrefix + String(gsCounter).padStart(basePadLen, '0');
@@ -1793,16 +1795,14 @@
         sidEl_r.addEventListener('change', function() {
           autoFillQAQC(n);
           highlightDuplicates();
-          autoUpdateM06Orig(n);
+          updateTotalSample();
+          // recalc langsung tanpa delay — recalc sudah handle m06_orig_sid
+          recalcAllOriginalSIDs(n);
+        });
+        sidEl_r.addEventListener('input', function() {
           updateTotalSample();
           clearTimeout(sidEl_r._recalcTimer);
           sidEl_r._recalcTimer = setTimeout(() => recalcAllOriginalSIDs(n), 400);
-        });
-        sidEl_r.addEventListener('input', function() {
-          autoUpdateM06Orig(n);
-          updateTotalSample();
-          clearTimeout(sidEl_r._recalcTimer);
-          sidEl_r._recalcTimer = setTimeout(() => recalcAllOriginalSIDs(n), 600);
         });
       }
       const m06OrigEl_r = document.querySelector(`[name="m06_orig_sid_${n}"]`);
@@ -2595,7 +2595,7 @@
 
       // Simpan ke m06_orig_sid baris sumber
       const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
-      if (m06OrigEl) { m06OrigEl.value = p03Val; m06OrigEl.dataset.auto = 'true'; }
+      if (m06OrigEl) { m06OrigEl.value = p03Val; m06OrigEl.dataset.autoM06 = 'true'; }
 
       // Jika m06_orig_sid kosong → kosongkan juga m06_sid (SA fraksi +0.3-0.6)
       if (!p03Val) {
