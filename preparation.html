@@ -675,22 +675,6 @@
     let _expViewMode = false; // false = tabel, true = list
 
     function toggleExpList() {
-      // Cek apakah semua baris non-CLY sudah punya Samp No (semua 🔒 / merged)
-      if (!_expViewMode) {
-        const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
-        const unmerged = domRows.filter(tr => {
-          const rn = tr.dataset.row;
-          const grain = document.querySelector(`[name="grain_${rn}"]`);
-          const isCLY = grain && grain.value.trim().toUpperCase() === 'CLY';
-          if (isCLY) return false;
-          // Baris non-CLY harus punya mergeGroup (sudah gabung)
-          return !tr.dataset.mergeGroup;
-        });
-        if (unmerged.length > 0) {
-          showToast('Semua interval harus digabung dulu sebelum masuk Card View', 'error');
-          return;
-        }
-      }
       _expViewMode = !_expViewMode;
       const listView = document.getElementById('exp-list-view');
       const tableWrap = document.querySelector('.prep-wrap');
