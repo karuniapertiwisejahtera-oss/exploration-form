@@ -287,6 +287,8 @@
     /* Sembunyikan m06_orig_sid untuk baris QAQC, hapus border dashed sample_id */
     .prep-table tr.row-qaqc input[name^="m06_orig_sid"] { display: none !important; }
     .prep-table tr.row-qaqc input[name^="sample_id"] { border-bottom: none !important; }
+    /* Sembunyikan tombol Gabung untuk baris QAQC */
+    .prep-table tr.row-qaqc .btn-merge { display: none !important; }
 
     /* Grain size highlight saat diubah */
     .grain-changed {
