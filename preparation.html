@@ -678,16 +678,19 @@
       _expViewMode = !_expViewMode;
       const listView = document.getElementById('exp-list-view');
       const tableWrap = document.querySelector('.prep-wrap');
+      const headerPanel = document.querySelector('.header-panel');
       const btn = document.getElementById('btn-toggle-explist');
       if (_expViewMode) {
         listView.style.display = 'flex';
         tableWrap.style.display = 'none';
+        if (headerPanel) headerPanel.style.display = 'none';
         btn.textContent = '☰ Tabel';
         renderExpList();
         setTimeout(fitExpList, 50);
       } else {
         listView.style.display = 'none';
         tableWrap.style.display = '';
+        if (headerPanel) headerPanel.style.display = '';
         btn.textContent = '☰ List';
         setTimeout(resizeAll, 50);
       }
