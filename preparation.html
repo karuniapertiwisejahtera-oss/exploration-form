@@ -1297,6 +1297,9 @@
       if (typeof _origRenderExpList === 'function') _origRenderExpList();
       showToast('Data Washing Screen dihapus');
     }
+
+    // ===== HAPUS BARIS =====
+    function deleteRow(rowNum) {
       if (rowCount <= 1) { showToast('Minimal 1 baris harus ada', 'error'); return; }
       if (!confirm('Apakah Anda yakin ingin menghapus baris ini?')) return;
       const tr = document.getElementById('prep-row-' + rowNum);
