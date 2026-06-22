@@ -917,6 +917,7 @@
           ${fracHtml}
           <div class="exp-detail-actions" style="margin-top:8px;">
             <button class="exp-btn-samp" onclick="openFracModal(${n})">Fraksi</button>
+            <button style="flex:1;background:#e1f5fe;color:#0277bd;border:1.5px solid #90caf9;border-radius:7px;padding:6px 6px;font-size:11px;font-weight:600;cursor:pointer;" onclick="toggleInlineWashForm(${n})">Wash Sample</button>
             <button class="exp-btn-del" onclick="showRowMenu(event,${n})">Menu</button>
           </div>`;
       }
@@ -1005,6 +1006,130 @@
           container.appendChild(wsCard);
         }
       }
+    }
+
+    // ===== INLINE WASH FORM (di sebelah card) =====
+    function toggleInlineWashForm(rowNum) {
+      const container = document.getElementById('exp-list-container');
+      const existingForm = document.getElementById('inline-wash-form');
+      if (existingForm) {
+        // Jika sudah ada dan untuk row yang sama, tutup
+        if (parseInt(existingForm.dataset.row) === rowNum) {
+          existingForm.remove();
+          return;
+        }
+        existingForm.remove();
+      }
+
+      const snEl = document.querySelector(`[name="samp_no_${rowNum}"]`);
+      const sampNo = snEl ? snEl.value.trim().toUpperCase() : '';
+      const gsEl = document.querySelector(`[name="sample_id_${rowNum}"]`);
+      const gsVal = gsEl ? gsEl.value.trim().toUpperCase() : '';
+      // Auto-fill GS WS = sample_id + 1
+      let gsWS = '';
+      if (gsVal) {
+        const m = gsVal.match(/^([A-Za-z]+)(\d+)$/);
+        if (m) gsWS = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+      }
+      const nextSA = getNextSAID();
+
+      const formDiv = document.createElement('div');
+      formDiv.id = 'inline-wash-form';
+      formDiv.dataset.row = rowNum;
+      formDiv.style.cssText = 'background:white;border-radius:12px;border:2px solid #0277bd;padding:14px;box-shadow:0 2px 8px rgba(2,119,189,0.12);margin-top:8px;';
+      formDiv.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-weight:700;font-size:14px;color:#0277bd;">🔵 Wash Sample — ${sampNo}</span>
+          <button onclick="document.getElementById('inline-wash-form').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#999;">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#1a6b4a;text-transform:uppercase;display:block;margin-bottom:3px;">Original Sample ID (GS)</label>
+            <input type="text" id="iw-gs-input" value="${gsWS}" placeholder="GS001"
+              style="width:100%;border:1.5px solid #a8d5b5;border-radius:8px;padding:8px 10px;font-size:14px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;"
+              oninput="autoFillInlineWashP03(this.value)">
+          </div>
+          <div style="padding:6px 8px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:8px;">
+            <label style="font-size:10px;font-weight:700;color:#f57f17;text-transform:uppercase;display:block;margin-bottom:3px;">Original SID Fraksi +0.3-0.6</label>
+            <input type="text" id="iw-p03-input" value="" placeholder="GS002 (opsional)"
+              style="width:100%;border:1.5px solid #ffe082;border-radius:8px;padding:8px 10px;font-size:14px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;"
+              oninput="this.dataset.manual='true'">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#0277bd;text-transform:uppercase;display:block;margin-bottom:3px;">Sample ID SA Pertama (Fraksi)</label>
+            <input type="text" id="iw-sa-input" value="${nextSA}" placeholder="SA001"
+              style="width:100%;border:1.5px solid #90caf9;border-radius:8px;padding:8px 10px;font-size:14px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;">
+          </div>
+          <button onclick="saveInlineWash(${rowNum})" style="width:100%;background:#0277bd;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-top:4px;">Tambahkan Wash Sample</button>
+        </div>
+      `;
+      container.appendChild(formDiv);
+
+      // Auto-fill p03
+      autoFillInlineWashP03(gsWS);
+      // Focus
+      setTimeout(() => { const gsInp = document.getElementById('iw-gs-input'); if (gsInp) gsInp.focus(); }, 100);
+    }
+
+    function autoFillInlineWashP03(gsVal) {
+      const p03Inp = document.getElementById('iw-p03-input');
+      if (!p03Inp || p03Inp.dataset.manual === 'true') return;
+      const gs = gsVal.trim().toUpperCase();
+      if (!gs) { p03Inp.value = ''; return; }
+      const m = gs.match(/^([A-Za-z]+)(\d+)$/);
+      if (!m) { p03Inp.value = ''; return; }
+      p03Inp.value = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+    }
+
+    function saveInlineWash(rowNum) {
+      const gsInp = document.getElementById('iw-gs-input');
+      const p03Inp = document.getElementById('iw-p03-input');
+      const saInp = document.getElementById('iw-sa-input');
+      const gsVal = gsInp ? gsInp.value.trim().toUpperCase() : '';
+      const p03Val = p03Inp ? p03Inp.value.trim().toUpperCase() : '';
+      const saVal = saInp ? saInp.value.trim().toUpperCase() : '';
+
+      if (!saVal) { showToast('Masukkan Sample ID SA pertama', 'error'); if (saInp) saInp.focus(); return; }
+      const saMatch = saVal.match(/^([A-Za-z]+)(\d+)$/);
+      if (!saMatch) { showToast('Format SA tidak valid. Contoh: SA001', 'error'); return; }
+
+      // Set m06_orig_sid (GS WS)
+      const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
+      if (m06OrigEl) {
+        m06OrigEl.value = gsVal;
+        m06OrigEl.dataset.autoM06 = gsVal ? 'true' : 'false';
+      }
+
+      // Set wash sample fraksi SA ke tabel (mirip saveWashSample)
+      const prefix = saMatch[1], padLen = saMatch[2].length;
+      let sidCounter = parseInt(saMatch[2]);
+      const used = new Set();
+      for (let i = 1; i <= rowCount; i++) {
+        if (i === rowNum) continue;
+        ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'].forEach(f => {
+          const el = document.querySelector(`[name="${f}_${i}"]`);
+          if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
+        });
+      }
+      const FRAC_FIELDS = ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
+      FRAC_FIELDS.forEach(field => {
+        const el = document.querySelector(`[name="${field}_${rowNum}"]`);
+        if (!el) return;
+        let candidate = prefix + String(sidCounter).padStart(padLen, '0');
+        while (used.has(candidate)) { sidCounter++; candidate = prefix + String(sidCounter).padStart(padLen, '0'); }
+        el.value = candidate; el.dataset.auto = 'true';
+        used.add(candidate); sidCounter++;
+      });
+
+      // Tutup form inline
+      const formDiv = document.getElementById('inline-wash-form');
+      if (formDiv) formDiv.remove();
+
+      highlightDuplicates();
+      updateTotalSample();
+      recalcAllOriginalSIDs();
+      if (typeof _origRenderExpList === 'function') _origRenderExpList();
+      showToast('Wash Sample ditambahkan untuk ' + (document.querySelector(`[name="samp_no_${rowNum}"]`)?.value || ''));
     }
 
     // Auto-refresh list setelah operasi data
