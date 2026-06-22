@@ -968,19 +968,22 @@
           `;
           wsCard.appendChild(wsOrigDiv);
 
-          // Fraksi WS — sama persis seperti fraksi S
+          // Fraksi WS — semua fraksi sama seperti card S
           const wsFracTitle = document.createElement('div');
           wsFracTitle.style.cssText = 'font-size:10px;font-weight:700;color:#0277bd;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0 3px;border-bottom:1.5px solid #bbdefb;padding-bottom:2px;';
           wsFracTitle.textContent = 'Fraksi Washing Screen (Total | Rec | Sample ID)';
           wsCard.appendChild(wsFracTitle);
 
-          // Hanya fraksi +0.3-0.6 untuk WS
-          const wsBodyHtml = `<div class="exp-frac-row">
-            <span class="frac-label" style="color:#0277bd;">+0.3-0.6 mm</span>
-            <input type="number" data-expfield="m06_tot" data-exprow="${n}" value="${d.m06_tot||''}" placeholder="Total" step="0.01" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
-            <input type="number" data-expfield="m06_rec" data-exprow="${n}" value="${d.m06_rec||''}" placeholder="Rec" readonly style="border:1.5px solid #d0ece4;border-radius:5px;padding:4px;font-size:11px;text-align:center;width:100%;background:#f5f5f5;color:#888;outline:none;">
-            <input type="text" data-expfield="m06_sid" data-exprow="${n}" value="${d.m06_sid||''}" placeholder="Sample ID SA" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
-          </div>`;
+          // Semua fraksi untuk WS
+          let wsBodyHtml = '';
+          EXP_FRAC_DEFS.forEach(f => {
+            wsBodyHtml += `<div class="exp-frac-row">
+              <span class="frac-label" style="color:#0277bd;">${f.label}</span>
+              <input type="number" data-expfield="${f.key}_tot" data-exprow="${n}" value="${d[f.key+'_tot']||''}" placeholder="Total" step="0.01" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
+              <input type="number" data-expfield="${f.key}_rec" data-exprow="${n}" value="${d[f.key+'_rec']||''}" placeholder="Rec" readonly style="border:1.5px solid #d0ece4;border-radius:5px;padding:4px;font-size:11px;text-align:center;width:100%;background:#f5f5f5;color:#888;outline:none;">
+              <input type="text" data-expfield="${f.key}_sid" data-exprow="${n}" value="${d[f.key+'_sid']||''}" placeholder="Sample ID" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
+            </div>`;
+          });
           const wsBody = document.createElement('div');
           wsBody.innerHTML = wsBodyHtml;
           wsCard.appendChild(wsBody);
