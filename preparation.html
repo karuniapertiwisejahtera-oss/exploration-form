@@ -823,6 +823,22 @@
       const item = _expItems[_expCurrentIdx];
       const { rowNum: n, isQ, groupArr, d } = item;
 
+      // Hitung data gabungan dari semua baris dalam merge group
+      let aggRec = 0, aggCoreWt = 0;
+      let grainValues = [];
+      groupArr.forEach(rn => {
+        const recEl = document.querySelector(`[name="rec_${rn}"]`);
+        const cwtEl = document.querySelector(`[name="core_wt_${rn}"]`);
+        const grEl = document.querySelector(`[name="grain_${rn}"]`);
+        if (recEl && recEl.value) aggRec += parseFloat(recEl.value) || 0;
+        if (cwtEl && cwtEl.value) aggCoreWt += parseFloat(cwtEl.value) || 0;
+        if (grEl && grEl.value.trim()) grainValues.push(grEl.value.trim().toUpperCase());
+      });
+      // Grain: ambil yang paling dominan atau gabungkan
+      const aggGrain = [...new Set(grainValues)].join('/') || d.grain;
+      const aggRecStr = aggRec ? String(Math.round(aggRec * 100) / 100) : d.rec;
+      const aggCoreWtStr = aggCoreWt ? String(Math.round(aggCoreWt * 100) / 100) : d.core_wt;
+
       const sel = (label, field, opts, val) =>
         `<div class="exp-detail-field" style="grid-column:span 1;"><label>${label}</label>
           <select data-expfield="${field}" data-exprow="${n}">
@@ -887,9 +903,11 @@
           <div class="exp-detail-grid">
             ${inp('From (m)','from','number',false,d.from)}
             ${inp('To (m)','to','number',false,d.to)}
-            ${inp('Rec Length','rec','number',false,d.rec)}
-            ${sel('Grain','grain',['','GVL','CS','FS','CLY'],d.grain)}
-            ${inp('Core Wt (g)','core_wt','number',false,d.core_wt)}
+            ${inp('Rec Length','rec','number',true,aggRecStr)}
+            <div class="exp-detail-field" style="grid-column:span 1;"><label>GRAIN</label>
+              <input type="text" value="${aggGrain}" readonly style="background:#f5f5f5;color:#888;">
+            </div>
+            ${inp('Core Wt (g)','core_wt','number',true,aggCoreWtStr)}
             ${inp('Dry Wt (g)','dry_wt','number',false,d.dry_wt)}
             ${inp('Send Cum','send_cum','number',false,d.send_cum)}
             ${inp('Original SID','sample_id','text',false,d.sample_id)}
