@@ -2597,6 +2597,7 @@
       highlightDuplicates();
       closeFracModal();
       showToast(`${finalCount} fraksi diisi untuk ${sampNo}`);
+      recalcAllOriginalSIDs();
       autoSaveDraft();
     }
 
@@ -2843,6 +2844,7 @@
       closeQAQCModal();
       highlightDuplicates();
       updateTotalSample();
+      recalcAllOriginalSIDs();
       showToast('QAQC Q' + qNum + ' ditambahkan: ' + val);
     }
 
@@ -4063,7 +4065,12 @@
         }
       }
 
-      if (mode === 'edit' && editId) {
+      if (mode === 'new') {
+        // Bersihkan draft agar form benar-benar kosong
+        localStorage.removeItem('prep_draft');
+        window._editRecordId = null;
+        addRow();
+      } else if (mode === 'edit' && editId) {
         const rec = DB.getAll('preparation').find(r => String(r.id) === editId);
         if (rec) {
           ['hole_id','sampler','sheet_no','date_start','date_finish','deposit','total_depth'].forEach(k => {
