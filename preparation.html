@@ -945,10 +945,27 @@
       // Append card S/Q ke container
       container.appendChild(card);
 
-      // Sub-card WS: hanya jika m06_orig_sid baris ini terisi
+      // Sub-card WS: hanya jika ada baris WS fisik dalam merge group
       if (!isQ) {
-        const wsM06 = document.querySelector(`[name="m06_orig_sid_${n}"]`);
-        if (wsM06 && wsM06.value.trim()) {
+        let wsRowNum = null;
+        const refTr = document.getElementById('prep-row-' + n);
+        const refMg = refTr ? refTr.dataset.mergeGroup : null;
+        if (refMg) {
+          const groupTrs = Array.from(document.querySelectorAll(`tr[data-merge-group="${refMg}"]`));
+          for (const gTr of groupTrs) {
+            const rn2 = parseInt(gTr.dataset.row);
+            if (rn2 === n) continue;
+            const snEl2 = document.querySelector(`[name="samp_no_${rn2}"]`);
+            const snVal2 = snEl2 ? snEl2.value.trim().toUpperCase() : '';
+            const isQ2 = /^Q\d+$/i.test(snVal2);
+            const isS2 = /^S\d+$/i.test(snVal2);
+            const sidEl2 = document.querySelector(`[name="sample_id_${rn2}"]`);
+            if (!isQ2 && !isS2 && sidEl2 && sidEl2.value.trim()) { wsRowNum = rn2; break; }
+          }
+        }
+        if (wsRowNum) {
+          const wsD = getExpRowData(wsRowNum);
+          const wsGsVal = wsD.sample_id || '';
           const wsCard = document.createElement('div');
           wsCard.style.cssText = 'background:white;border-radius:12px;border:2px solid #0277bd;padding:12px;box-shadow:0 2px 8px rgba(2,119,189,0.12);margin-top:8px;';
 
@@ -957,8 +974,8 @@
           wsHdr.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;';
           wsHdr.innerHTML = `
             <span style="font-size:14px;font-weight:800;color:#0277bd;">🔵 Washing Screen</span>
-            <span style="background:#bbdefb;border:1px solid #90caf9;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#0277bd;">${wsM06.value.trim().toUpperCase()}</span>
-            <button onclick="clearWashSampleData(${n})" style="margin-left:auto;background:#fdecea;color:#c62828;border:1.5px solid #ef9a9a;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">✕ Hapus WS</button>
+            <span style="background:#bbdefb;border:1px solid #90caf9;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#0277bd;">${wsGsVal}</span>
+            <button onclick="deleteWSRow(${wsRowNum})" style="margin-left:auto;background:#fdecea;color:#c62828;border:1.5px solid #ef9a9a;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">✕ Hapus WS</button>
           `;
           wsCard.appendChild(wsHdr);
 
@@ -968,7 +985,7 @@
           wsOrigDiv.innerHTML = `
             <div class="exp-detail-field" style="grid-column:span 1;">
               <label>Original SID (+0.3-0.6)</label>
-              <input type="text" data-expfield="m06_orig_sid" data-exprow="${n}" value="${d.m06_orig_sid||''}" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px 5px;font-size:11px;outline:none;text-transform:uppercase;width:100%;background:white;" oninput="this.dataset.autoM06='false'">
+              <input type="text" data-expfield="m06_orig_sid" data-exprow="${wsRowNum}" value="${wsD.m06_orig_sid||''}" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px 5px;font-size:11px;outline:none;text-transform:uppercase;width:100%;background:white;" oninput="this.dataset.autoM06='false'">
             </div>
           `;
           wsCard.appendChild(wsOrigDiv);
@@ -984,9 +1001,9 @@
           EXP_FRAC_DEFS.forEach(f => {
             wsBodyHtml += `<div class="exp-frac-row">
               <span class="frac-label" style="color:#0277bd;">${f.label}</span>
-              <input type="number" data-expfield="${f.key}_tot" data-exprow="${n}" value="${d[f.key+'_tot']||''}" placeholder="Total" step="0.01" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
-              <input type="number" data-expfield="${f.key}_rec" data-exprow="${n}" value="${d[f.key+'_rec']||''}" placeholder="Rec" readonly style="border:1.5px solid #d0ece4;border-radius:5px;padding:4px;font-size:11px;text-align:center;width:100%;background:#f5f5f5;color:#888;outline:none;">
-              <input type="text" data-expfield="${f.key}_sid" data-exprow="${n}" value="${d[f.key+'_sid']||''}" placeholder="Sample ID" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
+              <input type="number" data-expfield="${f.key}_tot" data-exprow="${wsRowNum}" value="${wsD[f.key+'_tot']||''}" placeholder="Total" step="0.01" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
+              <input type="number" data-expfield="${f.key}_rec" data-exprow="${wsRowNum}" value="${wsD[f.key+'_rec']||''}" placeholder="Rec" readonly style="border:1.5px solid #d0ece4;border-radius:5px;padding:4px;font-size:11px;text-align:center;width:100%;background:#f5f5f5;color:#888;outline:none;">
+              <input type="text" data-expfield="${f.key}_sid" data-exprow="${wsRowNum}" value="${wsD[f.key+'_sid']||''}" placeholder="Sample ID" style="border:1.5px solid #90caf9;border-radius:5px;padding:4px;font-size:11px;text-align:center;text-transform:uppercase;width:100%;outline:none;">
             </div>`;
           });
           const wsBody = document.createElement('div');
@@ -1446,6 +1463,37 @@
       updateTotalSample();
       if (typeof _origRenderExpList === 'function') _origRenderExpList();
       showToast('Data Washing Screen dihapus');
+    }
+
+    // ===== HAPUS BARIS WS =====
+    function deleteWSRow(wsRowNum) {
+      if (!confirm('Hapus baris Washing Screen ini?')) return;
+      const wsTr = document.getElementById('prep-row-' + wsRowNum);
+      if (!wsTr) return;
+      // Cari baris S parent (baris pertama dalam merge group)
+      const mg = wsTr.dataset.mergeGroup;
+      if (mg) {
+        const groupTrs = Array.from(document.querySelectorAll(`tr[data-merge-group="${mg}"]`));
+        // Clear m06_orig_sid di baris S parent
+        for (const gTr of groupTrs) {
+          const rn = parseInt(gTr.dataset.row);
+          if (rn === wsRowNum) continue;
+          const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
+          if (snEl && /^S\d+$/i.test(snEl.value.trim())) {
+            const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
+            if (m06El) { m06El.value = ''; m06El.dataset.autoM06 = 'false'; }
+            break;
+          }
+        }
+      }
+      // Hapus baris WS dari DOM
+      wsTr.remove();
+      highlightDuplicates();
+      updateTotalSample();
+      recalcAllOriginalSIDs();
+      if (typeof _origRenderExpList === 'function') _origRenderExpList();
+      autoSaveDraft();
+      showToast('Baris Washing Screen dihapus');
     }
 
     // ===== HAPUS BARIS =====
