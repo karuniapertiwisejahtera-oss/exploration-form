@@ -919,7 +919,6 @@
           ${fracHtml}
           <div class="exp-detail-actions" style="margin-top:8px;">
             <button class="exp-btn-samp" onclick="openFracModal(${n})">Fraksi</button>
-            <button style="flex:1;background:#e1f5fe;color:#0277bd;border:1.5px solid #90caf9;border-radius:7px;padding:6px 6px;font-size:11px;font-weight:600;cursor:pointer;" onclick="toggleInlineWashForm(${n})">Wash Sample</button>
             <button class="exp-btn-del" onclick="showRowMenu(event,${n})">Menu</button>
           </div>`;
       }
@@ -2465,6 +2464,12 @@
       overlay.style.display = 'flex';
       overlay.dataset.targetRow = rowNum;
 
+      // Reset wash section
+      const washSec = document.getElementById('frac-wash-section');
+      if (washSec) { washSec.style.display = 'none'; }
+      const washP03 = document.getElementById('frac-wash-p03-input');
+      if (washP03) washP03.dataset.manual = 'false';
+
       // Tampilkan section Original Sample ID (GS) untuk semua Samp No
       const isS1 = sampNo === 'S1';
       const origSection = document.getElementById('frac-orig-sid-section');
@@ -2796,7 +2801,101 @@
       openFracModal(_menuRowNum);
     }
 
-    // ===== WASH SAMPLE =====
+    // ===== WASH SAMPLE (INLINE DI FRAC MODAL) =====
+    function toggleFracWashSection() {
+      const section = document.getElementById('frac-wash-section');
+      if (!section) return;
+      const isHidden = section.style.display === 'none';
+      section.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        // Auto-fill dari data frac modal
+        const overlay = document.getElementById('frac-modal-overlay');
+        const rowNum = overlay ? parseInt(overlay.dataset.targetRow) : null;
+        const gsEl = rowNum ? document.querySelector(`[name="sample_id_${rowNum}"]`) : null;
+        const gsVal = gsEl ? gsEl.value.trim().toUpperCase() : '';
+        // Atau dari input GS di frac modal
+        const fracGsInp = document.getElementById('frac-orig-sid-input');
+        const fracGsVal = fracGsInp ? fracGsInp.value.trim().toUpperCase() : '';
+        const baseGS = fracGsVal || gsVal;
+        // GS WS = baseGS + 1
+        let gsWS = '';
+        if (baseGS) {
+          const m = baseGS.match(/^([A-Za-z]+)(\d+)$/);
+          if (m) gsWS = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+        }
+        const gsInp = document.getElementById('frac-wash-gs-input');
+        if (gsInp) gsInp.value = gsWS;
+        autoFillFracWashP03(gsWS);
+        // SA auto-fill
+        const saInp = document.getElementById('frac-wash-sa-input');
+        if (saInp) saInp.value = getNextSAID();
+        setTimeout(() => { if (gsInp) gsInp.focus(); }, 100);
+      }
+    }
+
+    function autoFillFracWashP03(gsVal) {
+      const p03Inp = document.getElementById('frac-wash-p03-input');
+      if (!p03Inp || p03Inp.dataset.manual === 'true') return;
+      const gs = gsVal.trim().toUpperCase();
+      if (!gs) { p03Inp.value = ''; return; }
+      const m = gs.match(/^([A-Za-z]+)(\d+)$/);
+      if (!m) { p03Inp.value = ''; return; }
+      p03Inp.value = m[1] + String(parseInt(m[2]) + 1).padStart(m[2].length, '0');
+    }
+
+    function saveFracWashSample() {
+      const overlay = document.getElementById('frac-modal-overlay');
+      const rowNum = overlay ? parseInt(overlay.dataset.targetRow) : null;
+      if (!rowNum) { showToast('Baris tidak ditemukan', 'error'); return; }
+
+      const gsInp = document.getElementById('frac-wash-gs-input');
+      const p03Inp = document.getElementById('frac-wash-p03-input');
+      const saInp = document.getElementById('frac-wash-sa-input');
+      const gsVal = gsInp ? gsInp.value.trim().toUpperCase() : '';
+      const p03Val = p03Inp ? p03Inp.value.trim().toUpperCase() : '';
+      const saVal = saInp ? saInp.value.trim().toUpperCase() : '';
+
+      if (!saVal) { showToast('Masukkan Sample ID SA pertama', 'error'); if (saInp) saInp.focus(); return; }
+      const saMatch = saVal.match(/^([A-Za-z]+)(\d+)$/);
+      if (!saMatch) { showToast('Format SA tidak valid. Contoh: SA001', 'error'); return; }
+
+      // Set m06_orig_sid (GS WS)
+      const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
+      if (m06OrigEl) {
+        m06OrigEl.value = gsVal;
+        m06OrigEl.dataset.autoM06 = gsVal ? 'true' : 'false';
+      }
+
+      // Isi fraksi SA WS
+      const prefix = saMatch[1], padLen = saMatch[2].length;
+      let sidCounter = parseInt(saMatch[2]);
+      const used = new Set();
+      for (let i = 1; i <= rowCount; i++) {
+        if (i === rowNum) continue;
+        ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'].forEach(f => {
+          const el = document.querySelector(`[name="${f}_${i}"]`);
+          if (el && el.value.trim()) used.add(el.value.trim().toUpperCase());
+        });
+      }
+      FRAC_FIELDS_ORDER.forEach(field => {
+        const el = document.querySelector(`[name="${field}_${rowNum}"]`);
+        if (!el) return;
+        let candidate = prefix + String(sidCounter).padStart(padLen, '0');
+        while (used.has(candidate)) { sidCounter++; candidate = prefix + String(sidCounter).padStart(padLen, '0'); }
+        el.value = candidate; el.dataset.auto = 'true';
+        used.add(candidate); sidCounter++;
+      });
+
+      // Tutup frac modal
+      closeFracModal();
+      highlightDuplicates();
+      updateTotalSample();
+      recalcAllOriginalSIDs();
+      if (typeof _origRenderExpList === 'function') _origRenderExpList();
+      showToast('Wash Sample ditambahkan');
+    }
+
+    // ===== WASH SAMPLE (MODAL LAMA - tetap untuk kompatibilitas) =====
     let _washSourceRow = null; // baris yang membuka modal wash
 
     function openWashSampleModal() {
@@ -4329,8 +4428,8 @@
   </script>
 
   <!-- MODAL: INPUT JUMLAH FRAKSI -->
-  <div id="frac-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
-    <div style="background:white;border-radius:16px;width:100%;max-width:360px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+  <div id="frac-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+    <div style="background:white;border-radius:16px;width:100%;max-width:360px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <span style="font-weight:700;font-size:16px;color:#1a6b4a;">🔢 Jumlah Fraksi — <span id="frac-modal-sampno"></span></span>
         <button onclick="closeFracModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
@@ -4376,7 +4475,35 @@
       <div id="frac-preview" style="display:flex;flex-direction:column;gap:5px;margin-top:4px;"></div>
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button onclick="saveFracCount()" style="flex:1;background:#1a6b4a;color:white;border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Terapkan</button>
-        <button onclick="openWashSampleModal()" style="flex:1;background:#0277bd;color:white;border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Wash Sample</button>
+        <button onclick="toggleFracWashSection()" style="flex:1;background:#0277bd;color:white;border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">Wash Sample</button>
+      </div>
+
+      <!-- Wash Sample Section (inline di bawah, awalnya hidden) -->
+      <div id="frac-wash-section" style="display:none;margin-top:12px;padding:12px;background:#e1f5fe;border:2px solid #0277bd;border-radius:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-weight:700;font-size:14px;color:#0277bd;">🔵 Wash Sample</span>
+          <button onclick="document.getElementById('frac-wash-section').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;color:#999;">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="padding:8px 10px;background:#e8f5e9;border:1.5px solid #a8d5b5;border-radius:8px;">
+            <label style="font-size:10px;font-weight:700;color:#1a6b4a;text-transform:uppercase;display:block;margin-bottom:3px;">Original Sample ID (GS)</label>
+            <input type="text" id="frac-wash-gs-input" placeholder="GS001"
+              style="width:100%;border:1.5px solid #a8d5b5;border-radius:8px;padding:8px 10px;font-size:15px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;background:white;"
+              oninput="autoFillFracWashP03(this.value)">
+          </div>
+          <div style="padding:8px 10px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:8px;">
+            <label style="font-size:10px;font-weight:700;color:#f57f17;text-transform:uppercase;display:block;margin-bottom:3px;">Original SID — Fraksi +0.3-0.6</label>
+            <input type="text" id="frac-wash-p03-input" placeholder="GS002 (opsional)"
+              style="width:100%;border:1.5px solid #ffe082;border-radius:8px;padding:8px 10px;font-size:15px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;background:white;"
+              oninput="this.dataset.manual='true'">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;color:#0277bd;text-transform:uppercase;display:block;margin-bottom:3px;">Sample ID SA Pertama (Fraksi)</label>
+            <input type="text" id="frac-wash-sa-input" placeholder="SA001"
+              style="width:100%;border:1.5px solid #90caf9;border-radius:8px;padding:8px 10px;font-size:15px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;background:white;">
+          </div>
+          <button onclick="saveFracWashSample()" style="width:100%;background:#0277bd;color:white;border:none;padding:11px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Tambahkan Wash Sample</button>
+        </div>
       </div>
     </div>
   </div>
