@@ -655,11 +655,13 @@
     <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f5f5f5;">
 
       <!-- Header Info Panel -->
-      <div id="header-panel-main" style="flex-shrink:0;background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 16px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px;position:relative;">
-        <!-- Toggle button -->
-        <button id="btn-header-toggle" onclick="toggleHeaderPanel()"
-          style="position:absolute;right:8px;top:8px;background:#f0f0f0;border:1px solid #ddd;border-radius:5px;padding:2px 8px;font-size:11px;cursor:pointer;color:#555;z-index:1;">▲</button>
-        <div id="header-fields-wrap" style="display:contents;">
+      <div id="header-panel-outer" style="flex-shrink:0;background:#fff;border-bottom:1px solid #e0e0e0;">
+        <!-- Toggle bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:3px 16px;background:#f8f8f8;border-bottom:1px solid #eee;cursor:pointer;" onclick="toggleHeaderPanel()">
+          <span style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Header Info</span>
+          <button id="btn-header-toggle" style="background:none;border:none;font-size:12px;cursor:pointer;color:#555;padding:0;">▲</button>
+        </div>
+        <div id="header-panel-main" style="padding:8px 16px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
         <div style="display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #f0f0f0;">
           <label style="font-size:11px;font-weight:700;color:#333;min-width:110px;">Hole_ID</label>
           <input type="text" id="h-holeid" name="hole_id" style="flex:1;border:none;border-bottom:1px solid #ddd;outline:none;font-size:11px;padding:2px 4px;background:transparent;">
@@ -819,7 +821,7 @@
       _expViewMode = !_expViewMode;
       const listView = document.getElementById('exp-list-view');
       const tableWrap = document.querySelector('.prep-wrap');
-      const headerPanel = document.getElementById('header-panel-main');
+      const headerPanel = document.getElementById('header-panel-outer');
       const btn = document.getElementById('btn-toggle-explist');
       if (_expViewMode) {
         listView.style.display = 'flex';
@@ -830,9 +832,7 @@
       } else {
         listView.style.display = 'none';
         tableWrap.style.display = '';
-        if (headerPanel && !headerPanel.classList.contains('header-collapsed')) {
-          headerPanel.style.display = 'grid';
-        }
+        if (headerPanel) headerPanel.style.display = '';
         if (btn) btn.innerHTML = '<span class="sb-icon">☰</span><span class="sb-label">List View</span>';
       }
     }
@@ -2099,10 +2099,19 @@
         const mg = tr.dataset.mergeGroup;
         if (mg) { if (seenMg.has(mg)) continue; seenMg.add(mg); }
         const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
-        if (!snEl || snEl.value.trim().toUpperCase() !== 'S1') continue;
+        const sn = snEl ? snEl.value.trim().toUpperCase() : '';
+        if (!/^S\d+$/i.test(sn)) continue;
+        // Cari dari sample_id dulu, fallback ke m06_orig_sid
         const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
-        if (!sidEl || !sidEl.value.trim()) continue;
-        const base = sidEl.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
+        const m06El = document.querySelector(`[name="m06_orig_sid_${rn}"]`);
+        let baseVal = (sidEl && sidEl.value.trim()) ? sidEl.value.trim().toUpperCase() : '';
+        // Jika sample_id kosong tapi m06 ada, hitung base = m06 - 1
+        if (!baseVal && m06El && m06El.value.trim()) {
+          const mv = m06El.value.trim().toUpperCase().match(/^([A-Za-z]+)(\d+)$/);
+          if (mv) baseVal = mv[1] + String(parseInt(mv[2]) - 1).padStart(mv[2].length, '0');
+        }
+        if (!baseVal) continue;
+        const base = baseVal.match(/^([A-Za-z]+)(\d+)$/);
         if (!base) continue;
         basePrefix = base[1]; basePadLen = base[2].length; baseNum = parseInt(base[2]);
         foundBase = true;
@@ -2200,18 +2209,15 @@
     // ===== HEADER PANEL TOGGLE =====
     function toggleHeaderPanel() {
       const panel = document.getElementById('header-panel-main');
-      const wrap = document.getElementById('header-fields-wrap');
       const btn = document.getElementById('btn-header-toggle');
-      if (!panel || !wrap || !btn) return;
-      const collapsed = panel.classList.toggle('header-collapsed');
-      if (collapsed) {
-        wrap.style.display = 'none';
-        panel.style.padding = '4px 16px';
-        btn.textContent = '▼';
-      } else {
-        wrap.style.display = 'contents';
-        panel.style.padding = '8px 16px';
+      if (!panel || !btn) return;
+      const isHidden = panel.style.display === 'none';
+      if (isHidden) {
+        panel.style.display = 'grid';
         btn.textContent = '▲';
+      } else {
+        panel.style.display = 'none';
+        btn.textContent = '▼';
       }
     }
 
