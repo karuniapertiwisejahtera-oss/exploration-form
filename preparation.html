@@ -2146,11 +2146,27 @@
       return n.toFixed(2);
     }
 
+    // Format ke integer (untuk Wet Total/Rec fraksi)
+    function fmtInt(v) {
+      if (v === '' || v === null || v === undefined) return '';
+      const n = parseFloat(String(v).replace(',', '.'));
+      if (!isFinite(n)) return v;
+      return String(Math.round(n));
+    }
+
     // Format semua input number di tabel ke 2 desimal saat blur
     function attachNumFormat(el) {
       if (!el || el.readOnly) return;
       el.addEventListener('blur', function() {
         if (this.value !== '') this.value = fmt2(this.value);
+      });
+    }
+
+    // Format ke integer saat blur (untuk Wet Total/Rec)
+    function attachIntFormat(el) {
+      if (!el || el.readOnly) return;
+      el.addEventListener('blur', function() {
+        if (this.value !== '') this.value = fmtInt(this.value);
       });
     }
 
@@ -2412,16 +2428,20 @@
     }
 
     function attachTotListeners(n) {
-      // Format 2 desimal untuk semua field numerik di baris
-      ['from','to','len','rec','core_wt','dry_wt','send_cum',
-       'a10_tot','a10_rec','a2_tot','a2_rec','a06_tot','a06_rec',
-       'm06_tot','m06_rec','p03_tot','p03_rec'].forEach(field => {
+      // Format 2 desimal untuk field numerik utama (bukan fraksi)
+      ['from','to','len','rec','core_wt','dry_wt','send_cum'].forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (el) attachNumFormat(el);
       });
+      // Fraksi Total dan Rec = bilangan bulat (tidak perlu desimal)
+      ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot',
+       'a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'].forEach(field => {
+        const el = document.querySelector(`[name="${field}_${n}"]`);
+        if (el) attachIntFormat(el);
+      });
+      // Listener calcRec untuk tot fields
       ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
-        if (el) attachNumFormat(el);  // format 2 desimal on blur
         if (!el) return;
         el.addEventListener('change', () => calcRec(n));
         el.addEventListener('input',  () => { calcRec(n); });
@@ -4316,15 +4336,16 @@
         const n = tr.dataset.row;
         const g = (name) => { const el = document.querySelector('[name="'+name+'_'+n+'"]'); return el ? (el.value || '') : ''; };
         const fmtN = (v) => { if (v === '' || v === null) return ''; const n2 = parseFloat(v); return isFinite(n2) ? n2.toFixed(2) : v; };
+        const fmtInt = (v) => { if (v === '' || v === null) return ''; const n2 = parseFloat(v); return isFinite(n2) ? String(Math.round(n2)) : v; };
         const vals = [
           fmtN(g('from')), fmtN(g('to')), fmtN(g('len')), fmtN(g('rec')), g('grain'), fmtN(g('core_wt')),
           fmtN(g('from_cum')), fmtN(g('to_cum')), g('samp_no'), fmtN(g('dry_wt')),
           g('sample_id') + (g('m06_orig_sid') ? '\n' + g('m06_orig_sid') : ''),
-          fmtN(g('a10_tot')), fmtN(g('a10_rec')), g('a10_sid'),
-          fmtN(g('a2_tot')),  fmtN(g('a2_rec')),  g('a2_sid'),
-          fmtN(g('a06_tot')), fmtN(g('a06_rec')), g('a06_sid'),
-          fmtN(g('m06_tot')), fmtN(g('m06_rec')), g('m06_sid'),
-          fmtN(g('p03_tot')), fmtN(g('p03_rec')), g('p03_sid'),
+          fmtInt(g('a10_tot')), fmtInt(g('a10_rec')), g('a10_sid'),
+          fmtInt(g('a2_tot')),  fmtInt(g('a2_rec')),  g('a2_sid'),
+          fmtInt(g('a06_tot')), fmtInt(g('a06_rec')), g('a06_sid'),
+          fmtInt(g('m06_tot')), fmtInt(g('m06_rec')), g('m06_sid'),
+          fmtInt(g('p03_tot')), fmtInt(g('p03_rec')), g('p03_sid'),
           g('remarks')
         ];
 
