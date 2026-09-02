@@ -644,6 +644,11 @@
       <button id="btn-toggle-explist" onclick="toggleExpList()" class="sb-btn">
         <span class="sb-icon">☰</span><span class="sb-label">List View</span>
       </button>
+
+      <div class="sb-sep"></div>
+      <button onclick="refreshAll()" class="sb-btn" style="background:#2a3a2a;border-color:#3a5a3a;color:#86efac;">
+        <span class="sb-icon">🔄</span><span class="sb-label">Refresh</span>
+      </button>
     </div>
 
     <!-- MAIN CONTENT -->
@@ -2185,6 +2190,19 @@
       highlightDuplicates();
     }
 
+    // ===== REFRESH ALL (manual trigger) =====
+    function refreshAll() {
+      recalcSamplingNo();
+      recalcAllOriginalSIDs();
+      highlightDuplicates();
+      updateTotalSample();
+      restoreQAQCClass();
+      updateFracLock();
+      if (typeof _origRenderExpList === 'function') _origRenderExpList();
+      autoSaveDraft();
+      showToast('✓ Data diperbarui');
+    }
+
     // ===== FORMAT 2 DESIMAL =====
     function fmt2(v) {
       if (v === '' || v === null || v === undefined) return '';
@@ -2241,25 +2259,20 @@
           autoFillQAQC(n);
           highlightDuplicates();
           updateTotalSample();
-          // recalc langsung tanpa delay — recalc sudah handle m06_orig_sid
-          recalcAllOriginalSIDs(n);
+          // recalc hanya via tombol Refresh
         });
         sidEl_r.addEventListener('input', function() {
           updateTotalSample();
-          clearTimeout(sidEl_r._recalcTimer);
-          sidEl_r._recalcTimer = setTimeout(() => recalcAllOriginalSIDs(n), 400);
+          // recalc hanya via tombol Refresh
         });
       }
       const m06OrigEl_r = document.querySelector(`[name="m06_orig_sid_${n}"]`);
       if (m06OrigEl_r) {
         m06OrigEl_r.addEventListener('input', () => {
           updateTotalSample();
-          clearTimeout(m06OrigEl_r._recalcTimer);
-          m06OrigEl_r._recalcTimer = setTimeout(() => recalcAllOriginalSIDs(n), 500);
         });
         m06OrigEl_r.addEventListener('change', () => {
           updateTotalSample();
-          recalcAllOriginalSIDs(n);
         });
       }
       SID_ORDER.forEach(field => {
