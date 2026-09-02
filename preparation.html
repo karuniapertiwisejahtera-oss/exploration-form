@@ -8,11 +8,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <style>
+    /* Hide tab bar on preparation page */
+    #tab-bar { display: none !important; }
+    /* Hide page header (replaced by sidebar) */
+    .page-header { display: none !important; }
+    /* Table cell background white */
+    .prep-table td { background: white !important; }
+    .prep-table td.td-cum { background: #fff8f0 !important; }
+    .prep-table td.col-freeze { background: white !important; }
+    /* Prep wrap: fill remaining space */
     .prep-wrap {
       width: 100%; overflow: auto; -webkit-overflow-scrolling: touch;
       position: relative;
-      border: 1px solid #ccc; border-radius: 6px;
-      max-height: calc(100vh - 220px);
+      border: none;
+      border-radius: 0;
+      flex: 1;
+      max-height: none !important;
     }
     /* Scrollbar prep-wrap selalu terlihat */
     .prep-wrap::-webkit-scrollbar { height: 8px; width: 8px; }
@@ -491,17 +502,75 @@
     }
   </style>
 </head>
-<body>
-  <div class="page-header">
-    <button class="btn-back" onclick="goBack()">←</button>
-    <h1>Sample Preparation Form</h1>
-  </div>
+<body style="margin:0;padding:0;overflow:hidden;">
 
-  <div class="form-container">
-    <div class="form-section">
+  <!-- ===== SIDEBAR + MAIN LAYOUT ===== -->
+  <div style="display:flex;height:100vh;overflow:hidden;">
 
-      <!-- Header Info -->
-      <div class="header-panel">
+    <!-- SIDEBAR -->
+    <div id="prep-sidebar" style="width:110px;min-width:110px;background:linear-gradient(180deg,#1a1a1a 0%,#2d2d2d 100%);display:flex;flex-direction:column;padding:8px 6px;gap:2px;overflow-y:auto;flex-shrink:0;box-shadow:2px 0 8px rgba(0,0,0,0.4);">
+      <!-- Back -->
+      <button onclick="goBack()" style="background:none;border:none;color:#aaa;font-size:18px;cursor:pointer;text-align:left;padding:4px 6px;border-radius:6px;margin-bottom:4px;" title="Kembali">←</button>
+      <!-- Title -->
+      <div style="color:#888;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 6px 2px;">Data</div>
+      <!-- Import Logging -->
+      <label for="csv-input" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:8px 4px;cursor:pointer;color:#e0e0e0;font-size:9px;font-weight:600;text-align:center;" title="Import Logging">
+        <span style="font-size:18px;">📂</span>Import<br>Logging
+      </label>
+      <input type="file" id="csv-input" accept=".csv,.txt" style="display:none;">
+      <!-- Export -->
+      <button onclick="exportFormData()" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:8px 4px;cursor:pointer;color:#e0e0e0;font-size:9px;font-weight:600;width:100%;" title="Export Data">
+        <span style="font-size:18px;">📤</span>Export
+      </button>
+      <!-- Import JSON -->
+      <label for="import-form-input" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:8px 4px;cursor:pointer;color:#e0e0e0;font-size:9px;font-weight:600;text-align:center;" title="Import JSON">
+        <span style="font-size:18px;">📥</span>Import
+      </label>
+      <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">
+
+      <div style="height:1px;background:#444;margin:4px 0;"></div>
+      <div style="color:#888;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 6px 2px;">Aksi</div>
+
+      <!-- Undo/Redo -->
+      <div style="display:flex;gap:4px;">
+        <button id="btn-undo" onclick="UndoManager.undo()" title="Undo" style="flex:1;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:7px 4px;color:#aaa;font-size:16px;cursor:pointer;" disabled>↩</button>
+        <button id="btn-redo" onclick="UndoManager.redo()" title="Redo" style="flex:1;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:7px 4px;color:#aaa;font-size:16px;cursor:pointer;" disabled>↪</button>
+      </div>
+
+      <!-- Input Weight -->
+      <button onclick="openWeightInput()" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:8px 4px;cursor:pointer;color:#e0e0e0;font-size:9px;font-weight:600;width:100%;">
+        <span style="font-size:18px;">⚖️</span>Input Weight
+      </button>
+
+      <div style="height:1px;background:#444;margin:4px 0;"></div>
+      <div style="color:#888;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 6px 2px;">Simpan</div>
+
+      <!-- Save -->
+      <button onclick="saveData()" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#1a3a4a;border:1px solid #2a6b8a;border-radius:8px;padding:8px 4px;cursor:pointer;color:#7dd3fc;font-size:9px;font-weight:700;width:100%;">
+        <span style="font-size:18px;">💾</span>Save Data
+      </button>
+      <!-- Submit -->
+      <button onclick="submitData()" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#1a3a1a;border:1px solid #2a6b2a;border-radius:8px;padding:8px 4px;cursor:pointer;color:#86efac;font-size:9px;font-weight:700;width:100%;">
+        <span style="font-size:18px;">📨</span>Submit
+      </button>
+      <!-- Clear -->
+      <button onclick="clearData()" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#3a1a1a;border:1px solid #6b2a2a;border-radius:8px;padding:8px 4px;cursor:pointer;color:#fca5a5;font-size:9px;font-weight:600;width:100%;">
+        <span style="font-size:18px;">🗑️</span>Clear
+      </button>
+
+      <div style="height:1px;background:#444;margin:4px 0;"></div>
+
+      <!-- List View -->
+      <button id="btn-toggle-explist" onclick="toggleExpList()" style="display:flex;flex-direction:column;align-items:center;gap:3px;background:#2a2a3a;border:1px solid #4a4a8a;border-radius:8px;padding:8px 4px;cursor:pointer;color:#c4b5fd;font-size:9px;font-weight:700;width:100%;">
+        <span style="font-size:18px;">☰</span>List View
+      </button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f0f2f5;">
+
+      <!-- Header Info Panel -->
+      <div class="header-panel" id="header-panel-main" style="flex-shrink:0;border-radius:0;border-left:none;border-top:none;border-right:none;">
         <div class="header-group">
           <div class="header-field"><label for="h-holeid">Hole_ID:</label><input type="text" id="h-holeid" name="hole_id"></div>
           <div class="header-field"><label for="h-sheet">Sheet/Grid No.:</label><input type="text" id="h-sheet" name="sheet_no"></div>
@@ -517,44 +586,17 @@
       </div>
 
       <!-- Merge Banner -->
-      <div class="merge-banner" id="merge-banner">
+      <div class="merge-banner" id="merge-banner" style="border-radius:0;margin:0;">
         <div style="display:flex;gap:6px;">
-          <button id="merge-apply-btn" onclick="applyMerge()" style="background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">&#10003; Terapkan</button>
-          <button onclick="cancelMerge()" style="background:white;color:#e65100;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">&#10005; Batal</button>
+          <button id="merge-apply-btn" onclick="applyMerge()" style="background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">✓ Terapkan</button>
+          <button onclick="cancelMerge()" style="background:white;color:#e65100;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">✕ Batal</button>
         </div>
-        <span style="flex:1;text-align:right;font-size:11px;">Mode Gabung aktif &mdash; ketuk baris yang ingin digabung</span>
-      </div>
-      </div>
-
-      <!-- Toolbar: Import Logging kiri, tombol lainnya kanan -->
-      <div class="prep-toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px;padding:5px 6px;background:#f8fffe;border:1px solid #d0ece4;border-radius:8px;">
-        <!-- Kiri: Import Logging -->
-        <div style="display:flex;align-items:center;gap:6px;">
-          <label style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;" for="csv-input">📂 Import Logging</label>
-          <input type="file" id="csv-input" accept=".csv,.txt">
-          <span id="csv-filename" style="font-size:11px;color:#555;min-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;">Pilih file .csv</span>
-        </div>
-        <!-- Kanan: semua tombol lainnya -->
-        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
-          <button id="btn-undo" type="button" onclick="UndoManager.undo()" title="Undo (Ctrl+Z)" style="background:#f5f5f5;color:#555;padding:5px 10px;border-radius:7px;font-size:16px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;min-width:40px;" disabled>↩</button>
-          <button id="btn-redo" type="button" onclick="UndoManager.redo()" title="Redo (Ctrl+Y)" style="background:#f5f5f5;color:#555;padding:5px 10px;border-radius:7px;font-size:16px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;min-width:40px;" disabled>↪</button>
-          <button type="button" onclick="exportFormData()" style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">📤 Export Data</button>
-          <label style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;" for="import-form-input">📥 Import</label>
-          <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">
-          <div style="width:1px;height:20px;background:#ccc;"></div>
-          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="openWeightInput()">Input Weight</button>
-          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="saveData()">Save Data</button>
-          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="clearData()">Clear</button>
-          <button style="background:#f57c00;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;" onclick="submitData()">Submit</button>
-          <div style="width:1px;height:20px;background:#ccc;"></div>
-          <button id="btn-toggle-explist" onclick="toggleExpList()" style="background:#1a6b4a;color:white;padding:5px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;white-space:nowrap;">☰ List</button>
-        </div>
+        <span style="flex:1;text-align:right;font-size:11px;">Mode Gabung aktif — ketuk baris yang ingin digabung</span>
       </div>
 
-      <!-- Expandable Row List (tampilan Card/Selector) -->
-      <div id="exp-list-view" style="display:none;flex-direction:column;gap:0;">
-        <!-- Selector Samp No -->
-        <div style="display:flex;align-items:center;gap:8px;padding:6px 4px;background:#f8fffe;border-bottom:1px solid #d0ece4;flex-shrink:0;">
+      <!-- Expandable Row List (Card View) -->
+      <div id="exp-list-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#f8fffe;border-bottom:1px solid #d0ece4;flex-shrink:0;">
           <label style="font-size:12px;font-weight:700;color:#1a6b4a;white-space:nowrap;">Pilih Samp No:</label>
           <select id="exp-sampno-select" onchange="onExpSampNoChange(this.value)"
             style="flex:1;border:2px solid #a8d5b5;border-radius:8px;padding:5px 8px;font-size:13px;font-weight:700;outline:none;color:#1a6b4a;background:white;">
@@ -563,12 +605,11 @@
           <button onclick="navigateExpCard(-1)" style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer;color:#1a6b4a;">◀</button>
           <button onclick="navigateExpCard(1)" style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer;color:#1a6b4a;">▶</button>
         </div>
-        <!-- Card container: satu card terlihat sekaligus -->
-        <div id="exp-list-container" style="flex:1;overflow-y:auto;padding:4px;"></div>
+        <div id="exp-list-container" style="flex:1;overflow-y:auto;padding:8px;"></div>
       </div>
 
       <!-- Tabel -->
-      <div class="prep-wrap">
+      <div class="prep-wrap" style="flex:1;max-height:none;border-radius:0;border-left:none;border-right:none;border-bottom:none;">
         <table class="prep-table" id="prep-table">
           <thead>
             <!-- ROW 1: Group headers -->
@@ -635,8 +676,8 @@
           <tbody id="prep-tbody"></tbody>
         </table>
       </div>
-    </div>
-  </div>
+    </div><!-- end main content -->
+  </div><!-- end sidebar+main layout -->
 
   <!-- Google API removed - offline mode -->
 
@@ -645,31 +686,14 @@
   <script>
     // Hitung tinggi prep-wrap secara dinamis
     function fitPrepWrap() {
-      const wrap = document.querySelector('.prep-wrap');
-      const container = document.querySelector('.form-container');
-      if (!wrap || !container || wrap.style.display === 'none') return;
-      let usedH = 0;
-      Array.from(container.children).forEach(el => {
-        if (el === wrap) return;
-        usedH += el.getBoundingClientRect().height;
-      });
-      const containerH = container.getBoundingClientRect().height;
-      const available = containerH - usedH - 2;
-      wrap.style.height = Math.max(100, available) + 'px';
+      // New layout: prep-wrap fills remaining space via flex, no manual height needed
     }
     function fitContainer() {
-      const container = document.querySelector('.form-container');
-      if (!container) return;
-      const pageHeader = document.querySelector('.page-header');
-      const tabBar = document.getElementById('tab-bar');
-      const headerH = pageHeader ? pageHeader.getBoundingClientRect().height : 48;
-      const tabH = tabBar ? tabBar.getBoundingClientRect().height : 0;
-      container.style.height = (window.innerHeight - headerH - tabH) + 'px';
+      // New layout: CSS flex handles sizing
     }
-    function resizeAll() { fitContainer(); fitPrepWrap(); }
+    function resizeAll() { fitPrepWrap(); }
     window.addEventListener('resize', resizeAll);
     setTimeout(resizeAll, 100);
-    setTimeout(resizeAll, 500);
 
     // ===== EXPANDABLE ROW LIST =====
     let _expViewMode = false; // false = tabel, true = list
@@ -678,21 +702,19 @@
       _expViewMode = !_expViewMode;
       const listView = document.getElementById('exp-list-view');
       const tableWrap = document.querySelector('.prep-wrap');
-      const headerPanel = document.querySelector('.header-panel');
+      const headerPanel = document.getElementById('header-panel-main');
       const btn = document.getElementById('btn-toggle-explist');
       if (_expViewMode) {
         listView.style.display = 'flex';
         tableWrap.style.display = 'none';
         if (headerPanel) headerPanel.style.display = 'none';
-        btn.textContent = '☰ Tabel';
+        btn.innerHTML = '<span style="font-size:18px;">📋</span>Tabel';
         renderExpList();
-        setTimeout(fitExpList, 50);
       } else {
         listView.style.display = 'none';
         tableWrap.style.display = '';
         if (headerPanel) headerPanel.style.display = '';
-        btn.textContent = '☰ List';
-        setTimeout(resizeAll, 50);
+        btn.innerHTML = '<span style="font-size:18px;">☰</span>List View';
       }
     }
 
