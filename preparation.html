@@ -336,6 +336,7 @@
     .prep-table tr.row-qaqc .btn-merge { display: none !important; }
     /* Sembunyikan sub-baris Send Cum m06 display untuk QAQC */
     .prep-table tr.row-qaqc input[name^="send_cum_m06_disp"] { display: none !important; }
+    .prep-table tr.row-qaqc input[name^="send_cum2"] { display: none !important; }
     /* Hapus border dashed send_cum jika sub-baris tersembunyi */
     .prep-table tr.row-qaqc input[name^="send_cum_"] { border-bottom: none !important; }
 
@@ -1580,7 +1581,7 @@
         <td>${num('dry_wt', v.dry_wt)}</td>
         <td style="padding:0;vertical-align:top;">
           <input type="number" name="send_cum_${n}" id="send_cum_${n}" value="${v.send_cum != null ? v.send_cum : ''}" step="0.01" style="width:100%;border:none;border-bottom:1px dashed #ccc;outline:none;font-size:11px;text-align:center;padding:3px 2px 2px;background:transparent;display:block;">
-          <input type="text" name="send_cum_sub_${n}" value="" readonly tabindex="-1" style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:2px 2px 3px;background:transparent;display:block;pointer-events:none;">
+          <input type="number" name="send_cum2_${n}" id="send_cum2_${n}" value="${v.send_cum2 != null ? v.send_cum2 : ''}" step="0.01" style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:2px 2px 3px;background:transparent;color:#f57f17;display:block;">
         </td>
         <td style="padding:0;vertical-align:top;">
           <input type="text" name="sample_id_${n}" id="sample_id_${n}" value="${v.sample_id || ''}" style="width:100%;border:none;border-bottom:1px dashed #ccc;outline:none;font-size:11px;text-align:center;padding:3px 2px 2px;background:transparent;text-transform:uppercase;display:block;">
@@ -3613,7 +3614,7 @@
               from: rec['from_'+i], to: rec['to_'+i], length: rec['len_'+i],
               recovery: rec['rec_'+i], grain_size: rec['grain_'+i], core_wt: rec['core_wt_'+i],
               from_cum: rec['from_cum_'+i], to_cum: rec['to_cum_'+i],
-              samp_no: rec['samp_no_'+i], send_cum: rec['send_cum_'+i],
+              samp_no: rec['samp_no_'+i], send_cum: rec['send_cum_'+i], send_cum2: rec['send_cum2_'+i],
               sample_id: rec['sample_id_'+i], dry_wt: rec['dry_wt_'+i],
               a10_tot: rec['a10_tot_'+i], a10_rec: rec['a10_rec_'+i], a10_sid: rec['a10_sid_'+i],
               a2_tot: rec['a2_tot_'+i], a2_rec: rec['a2_rec_'+i], a2_sid: rec['a2_sid_'+i],
@@ -3777,7 +3778,7 @@
       // Simpan berdasarkan urutan DOM agar baris Q tetap pada posisi yang benar
       const FIELDS = [
         'from','to','len','rec','grain','core_wt','from_cum','to_cum',
-        'samp_no','send_cum','sample_id','dry_wt','m06_orig_sid',
+        'samp_no','send_cum','send_cum2','sample_id','dry_wt','m06_orig_sid',
         'a10_tot','a10_rec','a10_sid','a2_tot','a2_rec','a2_sid',
         'a06_tot','a06_rec','a06_sid','m06_tot','m06_rec','m06_sid',
         'p03_tot','p03_rec','p03_sid','qaqc_sid','qaqc_wt','jenis','remarks'
@@ -4684,7 +4685,7 @@
         });
         const FIELDS_DRAFT = [
           'from','to','len','rec','grain','core_wt','from_cum','to_cum',
-          'samp_no','send_cum','sample_id','dry_wt','m06_orig_sid',
+          'samp_no','send_cum','send_cum2','sample_id','dry_wt','m06_orig_sid',
           'a10_tot','a10_rec','a10_sid','a2_tot','a2_rec','a2_sid',
           'a06_tot','a06_rec','a06_sid','m06_tot','m06_rec','m06_sid',
           'p03_tot','p03_rec','p03_sid','qaqc_sid','qaqc_wt','jenis','remarks'
@@ -4736,6 +4737,7 @@
             to_cum:      rec['to_cum_'+i],
             samp_no:     rec['samp_no_'+i],
             send_cum:    rec['send_cum_'+i],
+            send_cum2:   rec['send_cum2_'+i],
             sample_id:   rec['sample_id_'+i],
             dry_wt:      rec['dry_wt_'+i],
             m06_orig_sid: rec['m06_orig_sid_'+i] || (function() {
