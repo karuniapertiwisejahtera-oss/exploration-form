@@ -4796,7 +4796,11 @@
         }
       }
 
-      if (mode === 'new') {
+      if (mode === 'list') {
+        // Tampilkan Data View (daftar record tersimpan)
+        addRow();
+        setTimeout(() => showRecordList(), 300);
+      } else if (mode === 'new') {
         // Bersihkan draft agar form benar-benar kosong
         localStorage.removeItem('prep_draft');
         window._editRecordId = null;
