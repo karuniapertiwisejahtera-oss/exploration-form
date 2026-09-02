@@ -318,16 +318,38 @@
       background: #f5f5f5 !important;
     }
     .merge-banner {
-      display: none; background: #ff9800; color: white;
-      padding: 8px 14px; border-radius: 8px; margin-bottom: 8px;
-      font-size: 12px; font-weight: 600; align-items: center; gap: 10px;
+      display: none !important; /* replaced by floating popup */
     }
-    .merge-banner.show { display: flex; }
-    .merge-banner button {
-      background: white; color: #e65100; border: none;
-      border-radius: 6px; padding: 4px 10px; font-size: 11px;
-      font-weight: 700; cursor: pointer; margin-left: auto;
+    .merge-banner.show { display: none !important; }
+    /* Merge floating popup */
+    #merge-popup {
+      display: none;
+      position: fixed;
+      z-index: 9500;
+      background: #1a1a1a;
+      border: 1.5px solid #ff9800;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      padding: 8px 10px;
+      min-width: 160px;
+      pointer-events: all;
     }
+    #merge-popup.show { display: block; }
+    #merge-popup .mp-title {
+      font-size: 10px; font-weight: 700; color: #ff9800;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    #merge-popup .mp-hint {
+      font-size: 9px; color: #aaa; margin-bottom: 8px; line-height: 1.4;
+    }
+    #merge-popup .mp-btns { display: flex; gap: 5px; }
+    #merge-popup .mp-btns button {
+      flex: 1; padding: 6px 4px; border: none; border-radius: 6px;
+      font-size: 10px; font-weight: 700; cursor: pointer;
+    }
+    #merge-popup .mp-apply { background: #1a6b4a; color: white; }
+    #merge-popup .mp-cancel { background: #3a1a1a; color: #fca5a5; border: 1px solid #6b2a2a !important; }
 
     /* CSV bar */
     .csv-bar {
@@ -2409,7 +2431,24 @@
       // Centang checkbox baris sumber
       const srcCb = document.getElementById('merge-check-' + rowNum);
       if (srcCb) srcCb.checked = true;
-      document.getElementById('merge-banner').classList.add('show');
+      // Show floating popup near the checkbox
+      const popup = document.getElementById('merge-popup');
+      if (popup && btn) {
+        const rect = btn.getBoundingClientRect();
+        popup.style.top = Math.max(8, rect.top - 10) + 'px';
+        popup.style.left = (rect.right + 8) + 'px';
+        // Ensure popup stays on screen
+        setTimeout(() => {
+          const pr = popup.getBoundingClientRect();
+          if (pr.right > window.innerWidth - 8) {
+            popup.style.left = (rect.left - pr.width - 8) + 'px';
+          }
+          if (pr.bottom > window.innerHeight - 8) {
+            popup.style.top = (window.innerHeight - pr.height - 8) + 'px';
+          }
+        }, 0);
+        popup.classList.add('show');
+      }
       btn.classList.add('active');
 
       // Highlight baris sumber
@@ -2450,6 +2489,9 @@
         cb.style.display = 'none'; cb.checked = false;
       });
       document.getElementById('merge-banner').classList.remove('show');
+      // Hide merge popup
+      const popup = document.getElementById('merge-popup');
+      if (popup) popup.classList.remove('show');
       document.getElementById('prep-tbody').removeEventListener('click', onRowClick);
 
       // Hapus highlight sementara
@@ -4694,6 +4736,16 @@
   <!-- ROW MENU POPOVER -->
   <div id="row-menu-popover">
     <button class="qaqc"  onclick="rowMenuQAQC()">✚ Tambah QAQC</button>
+
+  <!-- MERGE FLOATING POPUP -->
+  <div id="merge-popup">
+    <div class="mp-title">🔗 Mode Gabung Aktif</div>
+    <div class="mp-hint">Ketuk baris yang ingin digabung</div>
+    <div class="mp-btns">
+      <button class="mp-apply" onclick="applyMerge()">✓ Terapkan</button>
+      <button class="mp-cancel" onclick="cancelMerge()">✕ Batal</button>
+    </div>
+  </div>
     <button class="danger" onclick="rowMenuDeleteData()">🗑 Delete Data</button>
     <button class="danger" onclick="rowMenuDeleteRow()">✕ Delete Baris</button>
   </div>
