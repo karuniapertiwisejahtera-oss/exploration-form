@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -241,7 +241,7 @@
     .prep-table td.gm06 { background: transparent; }
     .prep-table td.gp03 { background: transparent; }
     .prep-table td.gqaqc{ background: transparent; }
-    /* Garis tebal kiri sebagai pemisah antar grup ΓÇö berlaku di header dan data */
+    /* Garis tebal kiri sebagai pemisah antar grup G�� berlaku di header dan data */
     .prep-table th.g-start { border-left: 3px solid #888 !important; }
     .prep-table td.g-start { border-left: 3px solid #888 !important; }
     .prep-table th.g-start.g10,  .prep-table td.g-start.g10  { border-left-color: #555 !important; }
@@ -316,11 +316,11 @@
     .cell-popup.warn  { background: #e65100; }
     .cell-popup.error { background: #c62828; }
 
-    /* Baris yang tergabung ΓÇö hilangkan border bawah antar baris dalam grup */
+    /* Baris yang tergabung G�� hilangkan border bawah antar baris dalam grup */
     .prep-table tr.row-merged td {
       border-bottom: 1px dashed #ccc !important;
     }
-    /* Baris terakhir dalam grup ΓÇö border bawah solid tebal */
+    /* Baris terakhir dalam grup G�� border bawah solid tebal */
     .prep-table tr.row-merged-last td {
       border-bottom: 2px solid #888 !important;
     }
@@ -579,7 +579,7 @@
     <div style="background:#111;padding:0 10px;display:flex;align-items:center;gap:10px;height:38px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.5);">
       <button onclick="toggleSidebar()" id="btn-sidebar-toggle" title="Toggle Menu"
         style="background:none;border:none;cursor:pointer;color:#ccc;font-size:18px;padding:4px 6px;line-height:1;flex-shrink:0;">
-        ☰
+        ?
       </button>
       <div style="display:flex;flex-direction:column;justify-content:center;">
         <div style="color:#777;font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;line-height:1.2;">PT Kasmar Poleang Raya</div>
@@ -595,23 +595,23 @@
 
       <!-- Back -->
       <button onclick="goBack()" class="sb-btn" style="margin-bottom:4px;">
-        <span class="sb-icon">←</span><span class="sb-label">Kembali</span>
+        <span class="sb-icon">?</span><span class="sb-label">Kembali</span>
       </button>
 
       <!-- Section label -->
       <div class="sb-label sb-sec">Data</div>
 
       <label for="csv-input" class="sb-btn">
-        <span class="sb-icon">📂</span><span class="sb-label">Import Logging</span>
+        <span class="sb-icon">??</span><span class="sb-label">Import Logging</span>
       </label>
       <input type="file" id="csv-input" accept=".csv,.txt" style="display:none;">
 
       <button onclick="exportFormData()" class="sb-btn">
-        <span class="sb-icon">📤</span><span class="sb-label">Export</span>
+        <span class="sb-icon">??</span><span class="sb-label">Export</span>
       </button>
 
       <label for="import-form-input" class="sb-btn">
-        <span class="sb-icon">📥</span><span class="sb-label">Import JSON</span>
+        <span class="sb-icon">??</span><span class="sb-label">Import JSON</span>
       </label>
       <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">
 
@@ -619,35 +619,35 @@
       <div class="sb-label sb-sec">Aksi</div>
 
       <div style="display:flex;gap:3px;">
-        <button id="btn-undo" onclick="UndoManager.undo()" title="Undo" class="sb-btn" style="flex:1;justify-content:center;" disabled>↩</button>
-        <button id="btn-redo" onclick="UndoManager.redo()" title="Redo" class="sb-btn" style="flex:1;justify-content:center;" disabled>↪</button>
+        <button id="btn-undo" onclick="UndoManager.undo()" title="Undo" class="sb-btn" style="flex:1;justify-content:center;" disabled>?</button>
+        <button id="btn-redo" onclick="UndoManager.redo()" title="Redo" class="sb-btn" style="flex:1;justify-content:center;" disabled>?</button>
       </div>
 
       <button onclick="openWeightInput()" class="sb-btn">
-        <span class="sb-icon">⚖️</span><span class="sb-label">Input Weight</span>
+        <span class="sb-icon">??</span><span class="sb-label">Input Weight</span>
       </button>
 
       <div class="sb-sep"></div>
       <div class="sb-label sb-sec">Simpan</div>
 
       <button onclick="saveData()" class="sb-btn">
-        <span class="sb-icon">💾</span><span class="sb-label">Save Data</span>
+        <span class="sb-icon">??</span><span class="sb-label">Save Data</span>
       </button>
       <button onclick="submitData()" class="sb-btn">
-        <span class="sb-icon">📨</span><span class="sb-label">Submit</span>
+        <span class="sb-icon">??</span><span class="sb-label">Submit</span>
       </button>
       <button onclick="clearData()" class="sb-btn">
-        <span class="sb-icon">🗑️</span><span class="sb-label">Clear</span>
+        <span class="sb-icon">???</span><span class="sb-label">Clear</span>
       </button>
 
       <div class="sb-sep"></div>
       <button id="btn-toggle-explist" onclick="toggleExpList()" class="sb-btn">
-        <span class="sb-icon">☰</span><span class="sb-label">List View</span>
+        <span class="sb-icon">?</span><span class="sb-label">List View</span>
       </button>
 
       <div class="sb-sep"></div>
       <button onclick="refreshAll()" class="sb-btn" style="background:#2a3a2a;border-color:#3a5a3a;color:#86efac;">
-        <span class="sb-icon">🔄</span><span class="sb-label">Refresh</span>
+        <span class="sb-icon">??</span><span class="sb-label">Refresh</span>
       </button>
     </div>
 
@@ -659,7 +659,7 @@
         <!-- Toggle bar -->
         <div style="display:flex;align-items:center;justify-content:space-between;padding:3px 16px;background:#f8f8f8;border-bottom:1px solid #eee;cursor:pointer;" onclick="toggleHeaderPanel()">
           <span style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Header Info</span>
-          <button id="btn-header-toggle" style="background:none;border:none;font-size:12px;cursor:pointer;color:#555;padding:0;">▲</button>
+          <button id="btn-header-toggle" style="background:none;border:none;font-size:12px;cursor:pointer;color:#555;padding:0;">?</button>
         </div>
         <div id="header-panel-main" style="padding:8px 16px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
         <div style="display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #f0f0f0;">
@@ -700,10 +700,10 @@
       <!-- Merge Banner -->
       <div class="merge-banner" id="merge-banner" style="border-radius:0;margin:0;">
         <div style="display:flex;gap:6px;">
-          <button id="merge-apply-btn" onclick="applyMerge()" style="background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">✓ Terapkan</button>
-          <button onclick="cancelMerge()" style="background:white;color:#e65100;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">✕ Batal</button>
+          <button id="merge-apply-btn" onclick="applyMerge()" style="background:#1a6b4a;color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">? Terapkan</button>
+          <button onclick="cancelMerge()" style="background:white;color:#e65100;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;">? Batal</button>
         </div>
-        <span style="flex:1;text-align:right;font-size:11px;">Mode Gabung aktif — ketuk baris yang ingin digabung</span>
+        <span style="flex:1;text-align:right;font-size:11px;">Mode Gabung aktif � ketuk baris yang ingin digabung</span>
       </div>
 
       <!-- Expandable Row List (Card View) -->
@@ -712,10 +712,10 @@
           <label style="font-size:12px;font-weight:700;color:#1a6b4a;white-space:nowrap;">Pilih Samp No:</label>
           <select id="exp-sampno-select" onchange="onExpSampNoChange(this.value)"
             style="flex:1;border:2px solid #a8d5b5;border-radius:8px;padding:5px 8px;font-size:13px;font-weight:700;outline:none;color:#1a6b4a;background:white;">
-            <option value="">— Pilih —</option>
+            <option value="">� Pilih �</option>
           </select>
-          <button onclick="navigateExpCard(-1)" style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer;color:#1a6b4a;">◀</button>
-          <button onclick="navigateExpCard(1)" style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer;color:#1a6b4a;">▶</button>
+          <button onclick="navigateExpCard(-1)" style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer;color:#1a6b4a;">?</button>
+          <button onclick="navigateExpCard(1)" style="background:#e8f5e9;border:1px solid #a8d5b5;border-radius:6px;padding:5px 10px;font-size:14px;cursor:pointer;color:#1a6b4a;">?</button>
         </div>
         <div id="exp-list-container" style="flex:1;overflow-y:auto;padding:8px;"></div>
       </div>
@@ -827,13 +827,13 @@
         listView.style.display = 'flex';
         tableWrap.style.display = 'none';
         if (headerPanel) headerPanel.style.display = 'none';
-        if (btn) btn.innerHTML = '<span class="sb-icon">📋</span><span class="sb-label">Tabel</span>';
+        if (btn) btn.innerHTML = '<span class="sb-icon">??</span><span class="sb-label">Tabel</span>';
         renderExpList();
       } else {
         listView.style.display = 'none';
         tableWrap.style.display = '';
         if (headerPanel) headerPanel.style.display = '';
-        if (btn) btn.innerHTML = '<span class="sb-icon">☰</span><span class="sb-label">List View</span>';
+        if (btn) btn.innerHTML = '<span class="sb-icon">?</span><span class="sb-label">List View</span>';
       }
     }
 
@@ -894,7 +894,7 @@
       });
 
       const parseMeter = v => { const n = parseFloat(String(v||'').replace(',','.')); return Number.isFinite(n) ? n : null; };
-      const fmt = v => v === null ? '—' : (Number.isInteger(v) ? String(v) : String(v).replace(/\.0+$/,''));
+      const fmt = v => v === null ? '�' : (Number.isInteger(v) ? String(v) : String(v).replace(/\.0+$/,''));
 
       // Kumpulkan hanya baris S dan Q
       _expItems = [];
@@ -917,13 +917,13 @@
           if (t !== null && (maxTo === null || t > maxTo)) maxTo = t;
         });
         const grain = d.grain || '';
-        const label = `${d.samp_no} — ${fmt(minFrom)}–${fmt(maxTo)} m ${grain}`;
+        const label = `${d.samp_no} � ${fmt(minFrom)}�${fmt(maxTo)} m ${grain}`;
         _expItems.push({ rowNum: n, sampNo: d.samp_no, label, isQ, groupArr, d });
       });
 
       // Update selector
       const prevVal = selEl.value;
-      selEl.innerHTML = '<option value="">— Pilih Samp No —</option>';
+      selEl.innerHTML = '<option value="">� Pilih Samp No �</option>';
       _expItems.forEach((item, idx) => {
         const opt = document.createElement('option');
         opt.value = String(idx);
@@ -993,7 +993,7 @@
       const sel = (label, field, opts, val) =>
         `<div class="exp-detail-field" style="grid-column:span 1;"><label>${label}</label>
           <select data-expfield="${field}" data-exprow="${n}">
-            ${opts.map(o=>`<option value="${o}"${o===val?'selected':''}>${o||'—'}</option>`).join('')}
+            ${opts.map(o=>`<option value="${o}"${o===val?'selected':''}>${o||'�'}</option>`).join('')}
           </select></div>`;
       const inp = (label, field, type, ro, val, span) =>
         `<div class="exp-detail-field" style="grid-column:span ${span||1};"><label>${label}</label>
@@ -1019,8 +1019,8 @@
       const hdr = document.createElement('div');
       hdr.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;';
       hdr.innerHTML = `
-        <span style="font-size:16px;font-weight:800;color:${isQ?'#9c27b0':'#1a6b4a'};">${d.samp_no||'—'}</span>
-        <span style="font-size:12px;color:#555;">${item.label.replace(item.sampNo+' — ','')}</span>
+        <span style="font-size:16px;font-weight:800;color:${isQ?'#9c27b0':'#1a6b4a'};">${d.samp_no||'�'}</span>
+        <span style="font-size:12px;color:#555;">${item.label.replace(item.sampNo+' � ','')}</span>
         <div style="display:flex;gap:4px;flex-wrap:wrap;">${gsHtml}</div>
       `;
       card.appendChild(hdr);
@@ -1158,9 +1158,9 @@
           const wsHdr = document.createElement('div');
           wsHdr.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;';
           wsHdr.innerHTML = `
-            <span style="font-size:14px;font-weight:800;color:#0277bd;">🔵 Washing Screen</span>
+            <span style="font-size:14px;font-weight:800;color:#0277bd;">?? Washing Screen</span>
             <span style="background:#bbdefb;border:1px solid #90caf9;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#0277bd;">${wsGsVal}</span>
-            <button onclick="deleteWSRow(${wsRowNum})" style="margin-left:auto;background:#fdecea;color:#c62828;border:1.5px solid #ef9a9a;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">✕ Hapus WS</button>
+            <button onclick="deleteWSRow(${wsRowNum})" style="margin-left:auto;background:#fdecea;color:#c62828;border:1.5px solid #ef9a9a;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;">? Hapus WS</button>
           `;
           wsCard.appendChild(wsHdr);
 
@@ -1175,7 +1175,7 @@
           `;
           wsCard.appendChild(wsOrigDiv);
 
-          // Fraksi WS — semua fraksi sama seperti card S
+          // Fraksi WS � semua fraksi sama seperti card S
           const wsFracTitle = document.createElement('div');
           wsFracTitle.style.cssText = 'font-size:10px;font-weight:700;color:#0277bd;text-transform:uppercase;letter-spacing:0.5px;margin:4px 0 3px;border-bottom:1.5px solid #bbdefb;padding-bottom:2px;';
           wsFracTitle.textContent = 'Fraksi Washing Screen (Total | Rec | Sample ID)';
@@ -1250,8 +1250,8 @@
       formDiv.style.cssText = 'background:white;border-radius:12px;border:2px solid #0277bd;padding:14px;box-shadow:0 2px 8px rgba(2,119,189,0.12);margin-top:8px;';
       formDiv.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <span style="font-weight:700;font-size:14px;color:#0277bd;">🔵 Wash Sample — ${sampNo}</span>
-          <button onclick="document.getElementById('inline-wash-form').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#999;">✕</button>
+          <span style="font-weight:700;font-size:14px;color:#0277bd;">?? Wash Sample � ${sampNo}</span>
+          <button onclick="document.getElementById('inline-wash-form').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#999;">?</button>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div>
@@ -1353,7 +1353,6 @@
 
       highlightDuplicates();
       updateTotalSample();
-      recalcAllOriginalSIDs();
       if (typeof _origRenderExpList === 'function') _origRenderExpList();
       showToast('Wash Sample ditambahkan untuk ' + (document.querySelector(`[name="samp_no_${rowNum}"]`)?.value || ''));
     }
@@ -1436,7 +1435,7 @@
         if (isWS) {
           var wsSep = document.createElement('div');
           wsSep.style.cssText = 'padding:2px 6px;font-size:9px;font-weight:700;color:#0277bd;background:#e1f5fe;border-radius:4px;margin:2px 0;display:inline-block;';
-          wsSep.textContent = '🔵 Washing Screen';
+          wsSep.textContent = '?? Washing Screen';
           list.appendChild(wsSep);
         }
 
@@ -1504,13 +1503,13 @@
         });
         Object.keys(seen).forEach(function(sid) {
           if (seen[sid].length > 1) {
-            dupMessages.push('⚠ ' + sampNo.value + ': <b>' + sid + '</b> muncul di ' + seen[sid].join(', '));
+            dupMessages.push('? ' + sampNo.value + ': <b>' + sid + '</b> muncul di ' + seen[sid].join(', '));
           }
         });
       });
 
       if (dupMessages.length > 0) {
-        dupWarning.innerHTML = '<b>⚠ Sample ID Double dalam Interval:</b><br>' + dupMessages.join('<br>');
+        dupWarning.innerHTML = '<b>? Sample ID Double dalam Interval:</b><br>' + dupMessages.join('<br>');
         dupWarning.style.display = 'block';
       } else {
         dupWarning.style.display = 'none';
@@ -1587,8 +1586,8 @@
         <td>${num('core_wt', v.core_wt)}</td>
         <td class="td-cum"><input type="number" name="from_cum_${n}" id="from_cum_${n}" value="${v.from_cum != null ? v.from_cum : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
         <td class="td-cum"><input type="number" name="to_cum_${n}"   id="to_cum_${n}"   value="${v.to_cum   != null ? v.to_cum   : ''}" step="0.01" style="color:#e65100;font-weight:700;" readonly></td>
-        <td style="text-align:center;"><button class="btn-merge" onclick="startMerge(${n}, this)" title="Gabungkan">🔗</button><input type="checkbox" class="merge-check" id="merge-check-${n}" style="display:none;margin-left:4px;" onchange="toggleMergeRow(${n}, this)"></td>
-        <td><button class="btn-del-row" onclick="showRowMenu(event,${n})" title="Menu baris" style="background:transparent;color:#ef5350;border:none;border-radius:3px;padding:1px 3px;font-size:14px;cursor:pointer;line-height:1;">✕</button></td>
+        <td style="text-align:center;"><button class="btn-merge" onclick="startMerge(${n}, this)" title="Gabungkan">??</button><input type="checkbox" class="merge-check" id="merge-check-${n}" style="display:none;margin-left:4px;" onchange="toggleMergeRow(${n}, this)"></td>
+        <td><button class="btn-del-row" onclick="showRowMenu(event,${n})" title="Menu baris" style="background:transparent;color:#ef5350;border:none;border-radius:3px;padding:1px 3px;font-size:14px;cursor:pointer;line-height:1;">?</button></td>
         <td><input type="text" name="samp_no_${n}" id="samp_no_${n}" value="${v.samp_no || ''}" style="cursor:pointer;text-align:center;width:100%;border:none;outline:none;font-size:11px;background:transparent;text-transform:uppercase;" onclick="openFracModal(${n})" readonly title="Klik untuk isi fraksi"></td>
         <td>${num('dry_wt', v.dry_wt)}</td>
         <td style="padding:0;vertical-align:top;">
@@ -1684,7 +1683,6 @@
       wsTr.remove();
       highlightDuplicates();
       updateTotalSample();
-      recalcAllOriginalSIDs();
       if (typeof _origRenderExpList === 'function') _origRenderExpList();
       autoSaveDraft();
       showToast('Baris Washing Screen dihapus');
@@ -1708,7 +1706,7 @@
           if (fcEl) { fcEl.value = ''; fcEl.style.visibility = 'visible'; }
           if (tcEl) { tcEl.value = ''; tcEl.style.visibility = 'visible'; }
           const btnEl = r.querySelector('.btn-merge');
-          if (btnEl) { btnEl.textContent = '🔗'; btnEl.style.visibility = 'visible'; btnEl.onclick = function() { startMerge(parseInt(n), btnEl); }; }
+          if (btnEl) { btnEl.textContent = '??'; btnEl.style.visibility = 'visible'; btnEl.onclick = function() { startMerge(parseInt(n), btnEl); }; }
         });
       }
       tr.remove();
@@ -1832,7 +1830,7 @@
       for (let i = 1; i <= rowCount; i++) {
         const tr = document.getElementById('prep-row-' + i);
         if (!tr) continue;
-        // Hanya kunci input Rec (readonly) ΓÇö Total tetap bisa diisi manual
+        // Hanya kunci input Rec (readonly) G�� Total tetap bisa diisi manual
         const recFields = ['a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'];
         const recEls = recFields.map(f => document.querySelector('[name="' + f + '_' + i + '"]')).filter(Boolean);
         // Kunci jika baris ada dalam grup gabung DAN from_cum tersembunyi (bukan baris pertama)
@@ -1866,7 +1864,7 @@
     }
 
     function recalcSamplingNo() {
-      // Bangun map: mergeGroup ΓåÆ array rowNums
+      // Bangun map: mergeGroup G�� array rowNums
       const groupRows = {};
       for (let i = 1; i <= rowCount; i++) {
         const tr = document.getElementById('prep-row-' + i);
@@ -1914,7 +1912,7 @@
     // Urutan kolom Sample_ID dalam satu baris
     const SID_ORDER = ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'];
 
-    // Mapping sid ΓåÆ tot
+    // Mapping sid G�� tot
     const SID_TO_TOT = {
       'a10_sid': 'a10_tot',
       'a2_sid':  'a2_tot',
@@ -2090,7 +2088,7 @@
     function recalcAllOriginalSIDs(changedRowNum) {
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
 
-      // Cari S1 sebagai base — baris pertama yang punya samp_no S1 dan sample_id manual
+      // Cari S1 sebagai base � baris pertama yang punya samp_no S1 dan sample_id manual
       let basePrefix = 'GS', basePadLen = 6, baseNum = 0;
       let foundBase = false;
       const seenMg = new Set();
@@ -2214,10 +2212,10 @@
       const isHidden = panel.style.display === 'none';
       if (isHidden) {
         panel.style.display = 'grid';
-        btn.textContent = '▲';
+        btn.textContent = '?';
       } else {
         panel.style.display = 'none';
-        btn.textContent = '▼';
+        btn.textContent = '?';
       }
     }
 
@@ -2331,7 +2329,7 @@
           highlightDuplicates();
         });
 
-        // Barcode scan ΓåÆ isi kolom Total sebarisnya
+        // Barcode scan G�� isi kolom Total sebarisnya
         // Barcode scanner biasanya kirim karakter cepat lalu Enter/Tab
         el.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === 'Tab') {
@@ -2402,7 +2400,7 @@
         return;
       }
 
-      // Jika sum < 500 ΓåÆ ├ù250, selain itu ΓåÆ ├ù500
+      // Jika sum < 500 G�� +�250, selain itu G�� +�500
       const mult = sum3 >= 1000 ? 1000 : (sum3 >= 500 ? 500 : 250);
 
       // Hitung Rec untuk +10, +2-10, +0.6-2 saja (bukan +0.3-0.6 dan -0.3)
@@ -2506,7 +2504,7 @@
             if (dEl) setCellTooltip(dEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
             if (cEl) setCellTooltip(cEl, 'Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'cell-warn');
           });
-          showToast('⚠ Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
+          showToast('? Selisih Core Wt & Dry Wt = ' + pct.toFixed(1) + '% (>20%)', 'error');
         }
       }
       // Cek 2: Wet Total > Dry Wt
@@ -2519,7 +2517,7 @@
           const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
             if (dEl) setCellTooltip(dEl, 'Wet Total > Dry Wt', 'cell-error');
         });
-        showToast('⚠ Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
+        showToast('? Wet Total (' + totalWet.toFixed(0) + ') > Dry Wt (' + totalDryWt.toFixed(0) + ')', 'error');
       }
 
       // Cek 3: Selisih Wet Total vs Dry Wt > 500
@@ -2528,7 +2526,7 @@
           const dEl = document.querySelector('[name="dry_wt_' + i + '"]');
             if (dEl) setCellTooltip(dEl, 'Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'cell-warn');
         });
-        showToast('⚠ Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
+        showToast('? Selisih Wet Total & Dry Wt = ' + Math.abs(totalWet - totalDryWt).toFixed(0) + ' (>500)', 'error');
       }
     }
 
@@ -2551,7 +2549,7 @@
         el.addEventListener('change', () => calcRec(n));
         el.addEventListener('input',  () => { calcRec(n); });
       });
-      // Rec fields: jika diedit manual ΓåÆ hapus flag autoRec
+      // Rec fields: jika diedit manual G�� hapus flag autoRec
       ['a10_rec','a2_rec','a06_rec','m06_rec','p03_rec'].forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
         if (el) el.addEventListener('input', () => { el.dataset.autoRec = 'false'; });
@@ -2678,7 +2676,7 @@
         const cb = document.getElementById('merge-check-' + rn);
         const isMerged = !!tr.dataset.mergeGroup;
         if (isMerged) {
-          // Baris sudah tergabung: tetap tampil 🔒, sembunyikan checkbox
+          // Baris sudah tergabung: tetap tampil ??, sembunyikan checkbox
           if (btn) btn.style.display = 'inline-block';
           if (cb) { cb.style.display = 'none'; cb.checked = false; }
         } else {
@@ -2809,7 +2807,7 @@
           // Baris pertama: tampilkan From_Cum & To_Cum, tombol jadi unlock
           if (fcEl) { fcEl.value = fromCum; fcEl.style.visibility = 'visible'; }
           if (tcEl) { tcEl.value = toCum;   tcEl.style.visibility = 'visible'; }
-          if (btnEl) { btnEl.textContent = '🔒'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.classList.remove('active'); }
+          if (btnEl) { btnEl.textContent = '??'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.classList.remove('active'); }
         } else {
           // Baris lain: sembunyikan From_Cum & To_Cum
           if (fcEl) { fcEl.value = fromCum; fcEl.style.visibility = 'hidden'; }
@@ -2828,8 +2826,8 @@
           restoreQAQCClass();
       updateFracLock();
       const msg = sortedRows.length === 1
-        ? `Lepas From_Cum & To_Cum diisi: ${fromCum} ΓÇô ${toCum} m`
-        : `Lepas ${sortedRows.length} baris digabung: ${fromCum} ΓÇô ${toCum} m`;
+        ? `Lepas From_Cum & To_Cum diisi: ${fromCum} G�� ${toCum} m`
+        : `Lepas ${sortedRows.length} baris digabung: ${fromCum} G�� ${toCum} m`;
       showToast(msg);
 
       // Cek apakah ini S1 pertama (belum ada sample_id yang terisi di hole ini)
@@ -2884,7 +2882,7 @@
       if (origInp) {
         const existOrig = document.querySelector(`[name="sample_id_${rowNum}"]`);
         if (existOrig && existOrig.value.trim()) {
-          // Sudah ada nilai — tampilkan
+          // Sudah ada nilai � tampilkan
           origInp.value = existOrig.value.trim().toUpperCase();
         } else if (isS1) {
           origInp.value = '';
@@ -2894,7 +2892,7 @@
         }
       }
 
-      // Tampilkan section Original SID +0.3 — sembunyikan untuk baris QAQC
+      // Tampilkan section Original SID +0.3 � sembunyikan untuk baris QAQC
       const p03Section = document.getElementById('frac-p03-orig-section');
       const isQAQC = /^Q\d+$/i.test(sampNo);
       if (p03Section) p03Section.style.display = isQAQC ? 'none' : 'block';
@@ -2948,7 +2946,7 @@
 
       // Tampilkan preview fraksi
       updateFracPreview(curFrac || 5);
-      // Focus: S1 → Original SID dulu, lainnya → SA input
+      // Focus: S1 ? Original SID dulu, lainnya ? SA input
       setTimeout(() => {
         if (isS1) {
           const origInp = document.getElementById('frac-orig-sid-input');
@@ -3026,7 +3024,7 @@
       if (n > 0 && n < 2) {
         const warn = document.createElement('div');
         warn.style.cssText = 'padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;background:#fff3e0;color:#e65100;border:1.5px solid #ff9800;margin-bottom:4px;';
-        warn.textContent = '⚠ Minimal 2 fraksi GS per Samp No';
+        warn.textContent = '? Minimal 2 fraksi GS per Samp No';
         preview.appendChild(warn);
       }
       // Tampilkan fraksi sebagai chip horizontal tanpa label panjang
@@ -3041,7 +3039,7 @@
           border:1.5px solid ${active ? '#a8d5b5' : '#e0e0e0'};`;
         // Singkat label: +10, +2, +0.6, +0.3, -0.3
         const short = lbl.replace(' mm','').replace('+0.3-0.6','+0.3');
-        chip.textContent = (active ? '✓' : '✗') + ' ' + short;
+        chip.textContent = (active ? '?' : '?') + ' ' + short;
         row.appendChild(chip);
       });
       preview.appendChild(row);
@@ -3133,7 +3131,7 @@
           el.value = '';
           el.dataset.auto = 'false';
         } else if (field === 'm06_sid' && skipM06) {
-          // m06_orig_sid kosong → kosongkan m06_sid, jangan increment counter
+          // m06_orig_sid kosong ? kosongkan m06_sid, jangan increment counter
           el.value = '';
           el.dataset.auto = 'false';
         } else {
@@ -3156,7 +3154,7 @@
       const m06OrigEl = document.querySelector(`[name="m06_orig_sid_${rowNum}"]`);
       if (m06OrigEl) { m06OrigEl.value = p03Val; m06OrigEl.dataset.autoM06 = 'true'; }
 
-      // Jika m06_orig_sid kosong → kosongkan juga m06_sid (SA fraksi +0.3-0.6)
+      // Jika m06_orig_sid kosong ? kosongkan juga m06_sid (SA fraksi +0.3-0.6)
       if (!p03Val) {
         const m06SidEl = document.querySelector(`[name="m06_sid_${rowNum}"]`);
         if (m06SidEl) { m06SidEl.value = ''; m06SidEl.dataset.auto = 'false'; }
@@ -3165,11 +3163,10 @@
       highlightDuplicates();
       closeFracModal();
       showToast(`${finalCount} fraksi diisi untuk ${sampNo}`);
-      recalcAllOriginalSIDs();
       autoSaveDraft();
     }
 
-    // ===== ROW MENU (klik ✕) =====
+    // ===== ROW MENU (klik ?) =====
     let _menuRowNum = null;
 
     function showRowMenu(e, rowNum) {
@@ -3367,7 +3364,6 @@
       closeFracModal();
       highlightDuplicates();
       updateTotalSample();
-      recalcAllOriginalSIDs();
       if (typeof _origRenderExpList === 'function') _origRenderExpList();
       autoSaveDraft();
       showToast('Wash Sample ditambahkan');
@@ -3464,7 +3460,7 @@
       const used = new Set();
 
       if (wsRowNum) {
-        // UPDATE baris WS yang sudah ada — tidak tambah baris baru
+        // UPDATE baris WS yang sudah ada � tidak tambah baris baru
         for (let i = 1; i <= rowCount; i++) {
           if (i === wsRowNum) continue;
           ['a10_sid','a2_sid','a06_sid','m06_sid','p03_sid'].forEach(f => {
@@ -3495,7 +3491,7 @@
         return;
       }
 
-      // Tidak ada WS — simpan SA WS langsung ke baris S (tidak tambah baris baru)
+      // Tidak ada WS � simpan SA WS langsung ke baris S (tidak tambah baris baru)
       // SA WS disimpan di kolom fraksi yang sama dengan label WS di card view
       const prefix2 = saMatch[1], padLen2 = saMatch[2].length;
       let sidCounter2 = parseInt(saMatch[2]);
@@ -3581,7 +3577,6 @@
       closeQAQCModal();
       highlightDuplicates();
       updateTotalSample();
-      recalcAllOriginalSIDs();
       showToast('QAQC Q' + qNum + ' ditambahkan: ' + val);
     }
 
@@ -3601,7 +3596,7 @@
         if (snEl && snEl.dataset.auto === 'true') { snEl.value = ''; }
         const btnEl = tr.querySelector('.btn-merge');
         if (btnEl) {
-          btnEl.textContent = '🔗';
+          btnEl.textContent = '??';
           btnEl.title = 'Pilih baris untuk digabung';
           btnEl.style.visibility = 'visible';
           const rowNum = parseInt(n);
@@ -3644,7 +3639,7 @@
       a.download = 'Prep_' + hid + '_' + new Date().toISOString().slice(0,10) + '.json';
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast('✓ Form berhasil diekspor!');
+      showToast('? Form berhasil diekspor!');
     }
 
     // ===== IMPORT FORM DATA =====
@@ -3687,7 +3682,7 @@
           window._editRecordId = rec.id;
           restoreMergeVisibility(); recalcSamplingNo(); highlightDuplicates();
           input.value = '';
-          showToast('✓ Form berhasil diimport!');
+          showToast('? Form berhasil diimport!');
         } catch(e) { showToast('Error: ' + e.message, 'error'); }
       };
       reader.readAsText(file, 'UTF-8');
@@ -3857,7 +3852,7 @@
       if (window._editRecordId) {
         DB.delete('preparation', window._editRecordId);
       } else {
-        // Cari record yang sudah ada dengan Hole ID sama → update, bukan buat baru
+        // Cari record yang sudah ada dengan Hole ID sama ? update, bukan buat baru
         const holeId = data.hole_id ? data.hole_id.trim().toUpperCase() : '';
         if (holeId) {
           const existing = DB.getAll('preparation').find(r => 
@@ -3928,7 +3923,7 @@
       return rows.join('\r\n');
     }
 
-    // ===== GENERATE EXPORT CSV (format lab ΓÇö vertikal per fraksi) =====
+    // ===== GENERATE EXPORT CSV (format lab G�� vertikal per fraksi) =====
     function generateExportCSV() {
       const holeId   = (document.getElementById('h-holeid').value   || '').toUpperCase();
       const deposit  = (document.getElementById('h-deposit').value  || '').toUpperCase();
@@ -4163,7 +4158,7 @@
       const dupes = checkDuplicateSampleIDs();
       if (dupes.length > 0) {
         const list = dupes.join(', ');
-        if (!confirm('⚠ Sample_ID duplikat ditemukan:\n' + list + '\n\nLanjutkan submit?')) return;
+        if (!confirm('? Sample_ID duplikat ditemukan:\n' + list + '\n\nLanjutkan submit?')) return;
       }
       // Cek selisih Core Wt vs Dry Wt untuk semua grup
       const dryWtWarnings = [];
@@ -4189,7 +4184,7 @@
         }
       }
       if (dryWtWarnings.length > 0) {
-        if (!confirm('⚠ Selisih Core Wt & Dry Wt >20% pada:\n' + dryWtWarnings.join('\n') + '\n\nLanjutkan submit?')) return;
+        if (!confirm('? Selisih Core Wt & Dry Wt >20% pada:\n' + dryWtWarnings.join('\n') + '\n\nLanjutkan submit?')) return;
       }
       saveData();
 
@@ -4220,7 +4215,7 @@
       let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
       html += '<head><meta charset="UTF-8"><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Sheet1</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body><table>';
 
-      // Kolom yang berisi teks (Sample_ID, Samp_No, dll) — gunakan format text
+      // Kolom yang berisi teks (Sample_ID, Samp_No, dll) � gunakan format text
       // Semua kolom numerik pakai 2 desimal
       const TEXT_COLS_HEADER = ['sample_id','samp_no','grain','jenis','remarks','original','sid','id'];
       rows.forEach((row, ri) => {
@@ -4251,7 +4246,7 @@
       const a    = document.createElement('a');
       a.href = url; a.download = fileName; a.click();
       URL.revokeObjectURL(url);
-      showToast('✓ ' + fileName + ' didownload! Menyiapkan PDF...');
+      showToast('? ' + fileName + ' didownload! Menyiapkan PDF...');
       setTimeout(function() { generatePrepPDF(); }, 800);
     }
 
@@ -4263,13 +4258,13 @@
       const contentW = pageW - margin * 2;
 
       const U = s => (s || '').toString().toUpperCase();
-      const holeId   = U(document.getElementById('h-holeid').value)   || '—';
-      const sampler  = U(document.getElementById('h-sampler').value)  || '—';
-      const sheet    = U(document.getElementById('h-sheet').value)    || '—';
-      const deposit  = U(document.getElementById('h-deposit').value)  || '—';
-      const depth    = U(document.getElementById('h-depth').value)    || '—';
-      const dateStart= document.getElementById('h-date-start').value  || '—';
-      const dateEnd  = document.getElementById('h-date-finish').value || '—';
+      const holeId   = U(document.getElementById('h-holeid').value)   || '�';
+      const sampler  = U(document.getElementById('h-sampler').value)  || '�';
+      const sheet    = U(document.getElementById('h-sheet').value)    || '�';
+      const deposit  = U(document.getElementById('h-deposit').value)  || '�';
+      const depth    = U(document.getElementById('h-depth').value)    || '�';
+      const dateStart= document.getElementById('h-date-start').value  || '�';
+      const dateEnd  = document.getElementById('h-date-finish').value || '�';
 
       // Hitung total sample dari kolom Sample ID
       const domRows = Array.from(document.querySelectorAll('#prep-tbody tr[data-row]'));
@@ -4533,7 +4528,7 @@
 
       const filename = 'Prep_' + holeId.replace(/\s+/g,'_') + '.pdf';
       doc.save(filename);
-      showToast('✓ ' + filename + ' berhasil didownload!');
+      showToast('? ' + filename + ' berhasil didownload!');
     }
 
 
@@ -4562,7 +4557,7 @@
           if (idx === 0) {
             if (fcEl) fcEl.style.visibility = 'visible';
             if (tcEl) tcEl.style.visibility = 'visible';
-            if (btnEl) { btnEl.textContent = '🔒'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.style.visibility = 'visible'; }
+            if (btnEl) { btnEl.textContent = '??'; btnEl.title = 'Lepas gabungan'; btnEl.onclick = () => unmerge(groupId); btnEl.style.visibility = 'visible'; }
           } else {
             if (fcEl) fcEl.style.visibility = 'hidden';
             if (tcEl) tcEl.style.visibility = 'hidden';
@@ -4633,12 +4628,12 @@
         found.focus(); found.select();
         found.style.border = '2px solid #1a6b4a';
         _activeWeightInput = found;
-        status.textContent = '✓ Ditemukan: ' + sid;
+        status.textContent = '? Ditemukan: ' + sid;
         status.style.color = '#1a6b4a';
         // Scroll ke item
         found.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
-        status.textContent = '⚠ Sample ID tidak ditemukan: ' + sid;
+        status.textContent = '? Sample ID tidak ditemukan: ' + sid;
         status.style.color = '#e53935';
         _activeWeightInput = null;
       }
@@ -4660,11 +4655,11 @@
       try {
         _serialPort = await navigator.serial.requestPort();
         await _serialPort.open({ baudRate: 9600, dataBits: 8, stopBits: 1, parity: 'none' });
-        document.getElementById('scale-status').textContent = '✓ Terhubung';
+        document.getElementById('scale-status').textContent = '? Terhubung';
         document.getElementById('scale-status').style.color = '#1a6b4a';
         document.getElementById('btn-read-scale').disabled = false;
         document.getElementById('btn-read-scale').style.opacity = '1';
-        document.getElementById('btn-connect-scale').textContent = '🔌 Disconnect';
+        document.getElementById('btn-connect-scale').textContent = '?? Disconnect';
         document.getElementById('btn-connect-scale').onclick = disconnectScale;
         // Mulai baca stream
         readScaleStream();
@@ -4683,7 +4678,7 @@
       document.getElementById('scale-status').style.color = '#888';
       document.getElementById('btn-read-scale').disabled = true;
       document.getElementById('btn-read-scale').style.opacity = '0.5';
-      document.getElementById('btn-connect-scale').textContent = '🔌 Connect';
+      document.getElementById('btn-connect-scale').textContent = '?? Connect';
       document.getElementById('btn-connect-scale').onclick = connectScale;
       document.getElementById('scale-value').style.display = 'none';
     }
@@ -4934,11 +4929,11 @@
   <div id="frac-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
     <div style="background:white;border-radius:16px;width:100%;max-width:360px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-weight:700;font-size:16px;color:#1a6b4a;">🔢 Jumlah Fraksi — <span id="frac-modal-sampno"></span></span>
-        <button onclick="closeFracModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
+        <span style="font-weight:700;font-size:16px;color:#1a6b4a;">?? Jumlah Fraksi � <span id="frac-modal-sampno"></span></span>
+        <button onclick="closeFracModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">?</button>
       </div>
 
-      <!-- Input Original Sample ID — tampil untuk semua Samp No -->
+      <!-- Input Original Sample ID � tampil untuk semua Samp No -->
       <div id="frac-orig-sid-section" style="display:none;margin-bottom:12px;padding:10px 12px;background:#e8f5e9;border:1.5px solid #a8d5b5;border-radius:10px;">
         <label style="font-size:11px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID (GS)</label>
         <input type="text" id="frac-orig-sid-input" placeholder="Contoh: GS001"
@@ -4956,9 +4951,9 @@
           onkeydown="if(event.key==='Enter'){ document.getElementById('frac-p03-orig-input').focus(); }">
       </div>
 
-      <!-- Input Original Sample ID fraksi +0.3 — tampil untuk semua Samp No -->
+      <!-- Input Original Sample ID fraksi +0.3 � tampil untuk semua Samp No -->
       <div id="frac-p03-orig-section" style="display:none;margin-bottom:12px;padding:10px 12px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:10px;">
-        <label style="font-size:11px;font-weight:700;color:#f57f17;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID — Fraksi +0.3-0.6 mm</label>
+        <label style="font-size:11px;font-weight:700;color:#f57f17;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID � Fraksi +0.3-0.6 mm</label>
         <input type="text" id="frac-p03-orig-input" placeholder="Contoh: GS001 (opsional)"
           style="width:100%;border:2px solid #ffe082;border-radius:8px;padding:10px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;background:white;"
           oninput="this.dataset.manualEdit='true'"
@@ -4968,8 +4963,8 @@
 
       <!-- Input jumlah fraksi -->
       <div style="margin-bottom:10px;">
-        <label style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Jumlah Fraksi (1–5)</label>
-        <input type="number" id="frac-count-input" min="1" max="5" placeholder="1 – 5"
+        <label style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Jumlah Fraksi (1�5)</label>
+        <input type="number" id="frac-count-input" min="1" max="5" placeholder="1 � 5"
           style="width:100%;border:2px solid #a8d5b5;border-radius:10px;padding:10px;font-size:22px;font-weight:700;text-align:center;outline:none;"
           oninput="updateFracPreview(this.value)"
           onkeydown="if(event.key==='Enter') saveFracCount()">
@@ -4984,8 +4979,8 @@
       <!-- Wash Sample Section (inline di bawah, awalnya hidden) -->
       <div id="frac-wash-section" style="display:none;margin-top:12px;padding:12px;background:#e1f5fe;border:2px solid #0277bd;border-radius:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-weight:700;font-size:14px;color:#0277bd;">🔵 Wash Sample</span>
-          <button onclick="document.getElementById('frac-wash-section').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;color:#999;">✕</button>
+          <span style="font-weight:700;font-size:14px;color:#0277bd;">?? Wash Sample</span>
+          <button onclick="document.getElementById('frac-wash-section').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;color:#999;">?</button>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="padding:8px 10px;background:#e8f5e9;border:1.5px solid #a8d5b5;border-radius:8px;">
@@ -4995,7 +4990,7 @@
               oninput="autoFillFracWashP03(this.value)">
           </div>
           <div style="padding:8px 10px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:8px;">
-            <label style="font-size:10px;font-weight:700;color:#f57f17;text-transform:uppercase;display:block;margin-bottom:3px;">Original SID — Fraksi +0.3-0.6</label>
+            <label style="font-size:10px;font-weight:700;color:#f57f17;text-transform:uppercase;display:block;margin-bottom:3px;">Original SID � Fraksi +0.3-0.6</label>
             <input type="text" id="frac-wash-p03-input" placeholder="GS002 (opsional)"
               style="width:100%;border:1.5px solid #ffe082;border-radius:8px;padding:8px 10px;font-size:15px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;background:white;"
               oninput="this.dataset.manual='true'">
@@ -5013,18 +5008,18 @@
 
   <!-- ROW MENU POPOVER -->
   <div id="row-menu-popover">
-    <button class="qaqc"  onclick="rowMenuQAQC()">✚ Tambah QAQC</button>
-    <button class="danger" onclick="rowMenuDeleteData()">🗑 Delete Data</button>
-    <button class="danger" onclick="rowMenuDeleteRow()">✕ Delete Baris</button>
+    <button class="qaqc"  onclick="rowMenuQAQC()">? Tambah QAQC</button>
+    <button class="danger" onclick="rowMenuDeleteData()">?? Delete Data</button>
+    <button class="danger" onclick="rowMenuDeleteRow()">? Delete Baris</button>
   </div>
 
   <!-- MERGE FLOATING POPUP -->
   <div id="merge-popup">
-    <div class="mp-title">🔗 Mode Gabung Aktif</div>
+    <div class="mp-title">?? Mode Gabung Aktif</div>
     <div class="mp-hint">Ketuk baris yang ingin digabung</div>
     <div class="mp-btns">
-      <button class="mp-apply" onclick="applyMerge()">✓ Terapkan</button>
-      <button class="mp-cancel" onclick="cancelMerge()">✕ Batal</button>
+      <button class="mp-apply" onclick="applyMerge()">? Terapkan</button>
+      <button class="mp-cancel" onclick="cancelMerge()">? Batal</button>
     </div>
   </div>
 
@@ -5032,14 +5027,14 @@
   <div id="qaqc-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:20px;">
     <div style="background:white;border-radius:16px;width:100%;max-width:340px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <span style="font-weight:700;font-size:15px;color:#1a6b4a;">✚ Sample QAQC</span>
-        <button onclick="closeQAQCModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
+        <span style="font-weight:700;font-size:15px;color:#1a6b4a;">? Sample QAQC</span>
+        <button onclick="closeQAQCModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">?</button>
       </div>
       <p style="font-size:12px;color:#666;margin-bottom:12px;">Masukkan Sample ID untuk QAQC pada baris ini.</p>
       <input type="text" id="qaqc-sid-input" placeholder="Contoh: GS004284"
         style="width:100%;border:2px solid #a8d5b5;border-radius:10px;padding:11px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:1px;"
         onkeydown="if(event.key==='Enter') saveQAQCModal()">
-      <button onclick="saveQAQCModal()" style="margin-top:12px;width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">✓ Tambahkan QAQC</button>
+      <button onclick="saveQAQCModal()" style="margin-top:12px;width:100%;background:#1a6b4a;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">? Tambahkan QAQC</button>
     </div>
   </div>
 
@@ -5047,8 +5042,8 @@
   <div id="wash-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;align-items:center;justify-content:center;padding:20px;">
     <div style="background:white;border-radius:16px;width:100%;max-width:360px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <span style="font-weight:700;font-size:15px;color:#0277bd;">🔵 Wash Sample</span>
-        <button onclick="closeWashSampleModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>
+        <span style="font-weight:700;font-size:15px;color:#0277bd;">?? Wash Sample</span>
+        <button onclick="closeWashSampleModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">?</button>
       </div>
       <p style="font-size:12px;color:#666;margin-bottom:14px;">Masukkan Samp No referensi. Data wash sample akan mengikuti interval dari Samp No tersebut.</p>
       <div style="margin-bottom:12px;">
@@ -5056,7 +5051,7 @@
         <input type="text" id="wash-sampno-input" placeholder="Contoh: S1"
           style="width:100%;border:2px solid #0277bd;border-radius:10px;padding:11px 12px;font-size:18px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;letter-spacing:2px;"
           onkeydown="if(event.key==='Enter') document.getElementById('wash-gs-input').focus()">
-        <div style="font-size:10px;color:#888;margin-top:4px;">Data interval (From–To, Grain) akan diambil dari baris Samp No ini.</div>
+        <div style="font-size:10px;color:#888;margin-top:4px;">Data interval (From�To, Grain) akan diambil dari baris Samp No ini.</div>
       </div>
       <!-- Original Sample ID (GS) -->
       <div style="margin-bottom:10px;padding:8px 10px;background:#e8f5e9;border:1.5px solid #a8d5b5;border-radius:10px;">
@@ -5068,7 +5063,7 @@
       </div>
       <!-- Original SID +0.3-0.6 -->
       <div style="margin-bottom:10px;padding:8px 10px;background:#fff8e1;border:1.5px solid #ffe082;border-radius:10px;">
-        <label style="font-size:11px;font-weight:700;color:#f57f17;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID — Fraksi +0.3-0.6</label>
+        <label style="font-size:11px;font-weight:700;color:#f57f17;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Original Sample ID � Fraksi +0.3-0.6</label>
         <input type="text" id="wash-p03-input" placeholder="Contoh: GS002 (opsional)"
           style="width:100%;border:2px solid #ffe082;border-radius:8px;padding:9px 12px;font-size:16px;font-weight:700;text-align:center;outline:none;text-transform:uppercase;background:white;"
           oninput="this.dataset.manual='true'"
@@ -5093,7 +5088,7 @@
       </div>
       <!-- BARCODE SCAN + TIMBANGAN -->
       <div style="margin-bottom:10px;padding:10px;background:#f0f9f4;border:1.5px solid #a8d5b5;border-radius:10px;">
-        <div style="font-size:11px;font-weight:700;color:#1a6b4a;margin-bottom:6px;">🔍 Scan Barcode Sample ID</div>
+        <div style="font-size:11px;font-weight:700;color:#1a6b4a;margin-bottom:6px;">?? Scan Barcode Sample ID</div>
         <div style="display:flex;gap:6px;align-items:center;">
           <input type="text" id="barcode-input" placeholder="Scan atau ketik Sample ID..." autocomplete="off"
             style="flex:1;border:1.5px solid #a8d5b5;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;"
@@ -5102,13 +5097,13 @@
         </div>
         <div id="barcode-status" style="font-size:10px;color:#888;margin-top:4px;"></div>
 
-        <div style="font-size:11px;font-weight:700;color:#1a6b4a;margin:8px 0 6px 0;">⚖ Timbangan Digital (Web Serial)</div>
+        <div style="font-size:11px;font-weight:700;color:#1a6b4a;margin:8px 0 6px 0;">? Timbangan Digital (Web Serial)</div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-          <button id="btn-connect-scale" onclick="connectScale()" style="background:#1a6b4a;color:white;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;">🔌 Connect</button>
-          <button id="btn-read-scale" onclick="readScale()" disabled style="background:#2e9e6e;color:white;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;opacity:0.5;">📥 Baca Berat</button>
+          <button id="btn-connect-scale" onclick="connectScale()" style="background:#1a6b4a;color:white;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;">?? Connect</button>
+          <button id="btn-read-scale" onclick="readScale()" disabled style="background:#2e9e6e;color:white;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;opacity:0.5;">?? Baca Berat</button>
           <span id="scale-status" style="font-size:10px;color:#888;">Belum terhubung</span>
         </div>
-        <div id="scale-value" style="font-size:13px;font-weight:700;color:#1a6b4a;margin-top:4px;display:none;">Berat: — g</div>
+        <div id="scale-value" style="font-size:13px;font-weight:700;color:#1a6b4a;margin-top:4px;display:none;">Berat: � g</div>
       </div>
 
       <div id="weight-input-list" style="max-height:50vh;overflow-y:auto;"></div>
