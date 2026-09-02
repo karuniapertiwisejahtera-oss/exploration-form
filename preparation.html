@@ -655,7 +655,11 @@
     <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f5f5f5;">
 
       <!-- Header Info Panel -->
-      <div id="header-panel-main" style="flex-shrink:0;background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 16px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
+      <div id="header-panel-main" style="flex-shrink:0;background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 16px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px;position:relative;">
+        <!-- Toggle button -->
+        <button id="btn-header-toggle" onclick="toggleHeaderPanel()"
+          style="position:absolute;right:8px;top:8px;background:#f0f0f0;border:1px solid #ddd;border-radius:5px;padding:2px 8px;font-size:11px;cursor:pointer;color:#555;z-index:1;">▲</button>
+        <div id="header-fields-wrap" style="display:contents;">
         <div style="display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #f0f0f0;">
           <label style="font-size:11px;font-weight:700;color:#333;min-width:110px;">Hole_ID</label>
           <input type="text" id="h-holeid" name="hole_id" style="flex:1;border:none;border-bottom:1px solid #ddd;outline:none;font-size:11px;padding:2px 4px;background:transparent;">
@@ -688,6 +692,7 @@
           <label style="font-size:11px;font-weight:700;color:#333;min-width:110px;">Total Sample</label>
           <input type="text" id="h-total-sample" name="total_sample" readonly style="flex:1;border:none;border-bottom:1px solid #ddd;outline:none;font-size:11px;padding:2px 4px;background:transparent;color:#1a6b4a;font-weight:700;">
         </div>
+        </div><!-- end header-fields-wrap -->
       </div>
 
       <!-- Merge Banner -->
@@ -825,7 +830,9 @@
       } else {
         listView.style.display = 'none';
         tableWrap.style.display = '';
-        if (headerPanel) headerPanel.style.display = '';
+        if (headerPanel && !headerPanel.classList.contains('header-collapsed')) {
+          headerPanel.style.display = 'grid';
+        }
         if (btn) btn.innerHTML = '<span class="sb-icon">☰</span><span class="sb-label">List View</span>';
       }
     }
@@ -2190,8 +2197,40 @@
       highlightDuplicates();
     }
 
+    // ===== HEADER PANEL TOGGLE =====
+    function toggleHeaderPanel() {
+      const panel = document.getElementById('header-panel-main');
+      const wrap = document.getElementById('header-fields-wrap');
+      const btn = document.getElementById('btn-header-toggle');
+      if (!panel || !wrap || !btn) return;
+      const collapsed = panel.classList.toggle('header-collapsed');
+      if (collapsed) {
+        wrap.style.display = 'none';
+        panel.style.padding = '4px 16px';
+        btn.textContent = '▼';
+      } else {
+        wrap.style.display = 'contents';
+        panel.style.padding = '8px 16px';
+        btn.textContent = '▲';
+      }
+    }
+
     // ===== REFRESH ALL (manual trigger) =====
     function refreshAll() {
+      // Pastikan semua Q rows punya autoOrig = true sebelum recalc
+      document.querySelectorAll('#prep-tbody tr[data-row]').forEach(tr => {
+        const rn = tr.dataset.row;
+        const snEl = document.querySelector(`[name="samp_no_${rn}"]`);
+        if (snEl && /^Q\d+$/i.test(snEl.value.trim())) {
+          const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
+          if (sidEl) sidEl.dataset.autoOrig = 'true';
+        }
+        // S2+ juga auto
+        if (snEl && /^S\d+$/i.test(snEl.value.trim()) && snEl.value.trim().toUpperCase() !== 'S1') {
+          const sidEl = document.querySelector(`[name="sample_id_${rn}"]`);
+          if (sidEl) sidEl.dataset.autoOrig = 'true';
+        }
+      });
       recalcSamplingNo();
       recalcAllOriginalSIDs();
       highlightDuplicates();
