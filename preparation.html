@@ -1580,7 +1580,7 @@
         <td>${num('dry_wt', v.dry_wt)}</td>
         <td style="padding:0;vertical-align:top;">
           <input type="number" name="send_cum_${n}" id="send_cum_${n}" value="${v.send_cum != null ? v.send_cum : ''}" step="0.01" style="width:100%;border:none;border-bottom:1px dashed #ccc;outline:none;font-size:11px;text-align:center;padding:3px 2px 2px;background:transparent;display:block;">
-          <input type="text" name="send_cum_m06_disp_${n}" value="${v.m06_orig_sid || ''}" readonly style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:2px 2px 3px;background:transparent;color:#f57f17;display:block;" tabindex="-1">
+          <input type="text" name="send_cum_sub_${n}" value="" readonly tabindex="-1" style="width:100%;border:none;outline:none;font-size:10px;text-align:center;padding:2px 2px 3px;background:transparent;display:block;pointer-events:none;">
         </td>
         <td style="padding:0;vertical-align:top;">
           <input type="text" name="sample_id_${n}" id="sample_id_${n}" value="${v.sample_id || ''}" style="width:100%;border:none;border-bottom:1px dashed #ccc;outline:none;font-size:11px;text-align:center;padding:3px 2px 2px;background:transparent;text-transform:uppercase;display:block;">
@@ -2136,9 +2136,6 @@
               m06El.dataset.autoM06 = 'true';
             }
             gsCounter++; // m06 pakai 1 slot
-            // Sync display di Send Cum cell
-            const dispEl = document.querySelector(`[name="send_cum_m06_disp_${rn}"]`);
-            if (dispEl) dispEl.value = m06El.value;
           }
         } else if (isWSRow) {
           // Baris WS fisik (baris ke-2+ dalam grup): set GS berurutan
@@ -2157,9 +2154,6 @@
               m06El.dataset.autoM06 = 'true';
             }
             gsCounter++;
-            // Sync display di Send Cum cell
-            const dispElWS = document.querySelector(`[name="send_cum_m06_disp_${rn}"]`);
-            if (dispElWS) dispElWS.value = m06El.value;
           }
         } else if (isQ) {
           // Baris QAQC: set GS berurutan jika auto, tapi SELALU increment counter
@@ -2257,19 +2251,13 @@
       }
       const m06OrigEl_r = document.querySelector(`[name="m06_orig_sid_${n}"]`);
       if (m06OrigEl_r) {
-        const syncDisp = () => {
-          const dispEl = document.querySelector(`[name="send_cum_m06_disp_${n}"]`);
-          if (dispEl) dispEl.value = m06OrigEl_r.value;
-        };
         m06OrigEl_r.addEventListener('input', () => {
           updateTotalSample();
-          syncDisp();
           clearTimeout(m06OrigEl_r._recalcTimer);
           m06OrigEl_r._recalcTimer = setTimeout(() => recalcAllOriginalSIDs(n), 500);
         });
         m06OrigEl_r.addEventListener('change', () => {
           updateTotalSample();
-          syncDisp();
           recalcAllOriginalSIDs(n);
         });
       }
