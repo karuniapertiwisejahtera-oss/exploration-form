@@ -3,395 +3,350 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Sample Preparation Form</title>
+  <title>Preparation Form — PT Kasmar Poleang Raya</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-
-    /* ========== SHARED ========== */
-    .screen { display: none; height: 100vh; flex-direction: column; overflow-y: auto; }
-    .screen.active { display: flex; }
-
-    /* ========== WELCOME SCREEN ========== */
-    #welcome-screen {
-      background: #f0f2f4;
-      position: relative;
+    html, body {
+      height: 100%; min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f6f8;
+      overflow-y: auto;
     }
 
-    /* Contour wave background */
-    .bg-contour {
-      position: absolute; inset: 0; overflow: hidden; z-index: 0;
-      pointer-events: none;
-    }
-    .bg-contour svg { width: 100%; height: 100%; opacity: 0.07; }
+    /* ===== WELCOME SCREEN ===== */
+    #welcome-screen { display: none; }
+    #welcome-screen.active { display: block; }
 
-    /* Wave bottom */
-    .wave-bottom {
-      position: absolute; bottom: 0; left: 0; right: 0; z-index: 1;
-      pointer-events: none;
-    }
-    .wave-bottom svg { display: block; }
+    /* ===== MENU SCREEN ===== */
+    #menu-screen { display: none; min-height: 100vh; flex-direction: column; }
+    #menu-screen.active { display: flex; }
 
-    .welcome-content {
-      position: relative; z-index: 2;
-      flex: 1;
-      display: flex; flex-direction: column;
-      align-items: center;
-      padding: 48px 28px 20px;
-      max-width: 420px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* Logo hexagon */
-    .logo-hex {
-      width: 90px; height: 90px;
+    /* --- TOP BAR --- */
+    .topbar {
       background: #fff;
-      border: 2px solid #c8d0d8;
-      border-radius: 24px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 42px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-
-    .welcome-title {
-      font-size: 30px; font-weight: 900;
-      text-transform: uppercase;
-      color: #1a1a2e;
-      text-align: center;
-      line-height: 1.15;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-    .welcome-dot { width: 32px; height: 3px; background: #444; border-radius: 2px; margin: 8px auto 12px; }
-    .welcome-sub {
-      font-size: 13px; color: #666;
-      text-align: center; line-height: 1.6;
-      margin-bottom: 28px;
-      max-width: 300px;
-    }
-
-    /* Feature image placeholder area */
-    .feature-visual {
-      width: 100%;
-      background: linear-gradient(135deg, #dde2e8, #c8d0da);
-      border-radius: 16px;
-      height: 160px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 64px;
-      margin-bottom: 24px;
-      overflow: hidden;
-      position: relative;
-    }
-    .feature-visual::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(180deg, transparent 60%, rgba(240,242,244,0.4));
-    }
-
-    /* Feature cards row */
-    .features-row {
-      display: flex; gap: 10px;
-      width: 100%;
-      margin-bottom: 28px;
-    }
-    .feature-card {
-      flex: 1;
-      background: #fff;
-      border-radius: 12px;
-      padding: 14px 10px;
-      text-align: center;
-      border: 1px solid #e0e4e8;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .feature-card .f-icon { font-size: 22px; margin-bottom: 6px; }
-    .feature-card .f-title { font-size: 11px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
-    .feature-card .f-desc { font-size: 9px; color: #888; line-height: 1.3; }
-
-    /* Get Started button */
-    .btn-get-started {
-      width: 100%;
-      background: #1a1a2e;
-      color: #fff;
-      border: none;
-      padding: 16px 32px;
-      border-radius: 50px;
-      font-size: 14px; font-weight: 800;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      transition: transform 0.1s;
-    }
-    .btn-get-started:active { transform: scale(0.98); }
-    .btn-get-started .arrow-circle {
-      width: 28px; height: 28px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-
-    .welcome-footer {
-      position: relative; z-index: 2;
-      text-align: center;
-      padding: 16px 0 28px;
-      font-size: 10px; color: #999;
-      letter-spacing: 1px;
-    }
-    .welcome-footer .dots { display: flex; justify-content: center; gap: 6px; margin-top: 6px; }
-    .welcome-footer .dot { width: 4px; height: 4px; background: #bbb; border-radius: 50%; }
-
-    /* ========== MENU SCREEN ========== */
-    #menu-screen {
-      background: #f0f2f4;
-      position: relative;
-    }
-
-    .menu-top {
-      position: relative; z-index: 2;
-      text-align: center;
-      padding: 36px 20px 20px;
+      border-bottom: 1px solid #e8eaed;
+      padding: 10px 20px;
+      display: flex; align-items: center; gap: 12px;
       flex-shrink: 0;
     }
-    .menu-logo {
-      font-size: 40px; margin-bottom: 10px;
-    }
-    .menu-app-title {
-      font-size: 22px; font-weight: 900;
-      text-transform: uppercase; color: #1a1a2e;
-      letter-spacing: 0.5px; line-height: 1.2;
-      margin-bottom: 4px;
-    }
-    .menu-app-sub {
-      font-size: 10px; color: #888;
-      text-transform: uppercase; letter-spacing: 2px;
-    }
-    .menu-divider { width: 32px; height: 2px; background: #333; border-radius: 2px; margin: 10px auto 0; }
-
-    .menu-list {
-      position: relative; z-index: 2;
-      flex: 1;
-      padding: 16px 20px;
-      display: flex; flex-direction: column; gap: 10px;
-      max-width: 420px; margin: 0 auto; width: 100%;
-    }
-
-    .menu-item {
-      background: #fff;
-      border-radius: 16px;
-      padding: 16px;
-      display: flex; align-items: center; gap: 14px;
-      cursor: pointer;
-      border: 1px solid #e4e8ec;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      transition: transform 0.1s, box-shadow 0.1s;
-      text-decoration: none;
-    }
-    .menu-item:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-    .menu-item-icon {
-      width: 48px; height: 48px; flex-shrink: 0;
+    .topbar-logo {
+      width: 40px; height: 40px;
       border-radius: 50%;
-      background: #f0f2f4;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
+      overflow: hidden;
+      border: 1px solid #e0e0e0;
+      flex-shrink: 0;
+    }
+    .topbar-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .topbar-company { flex: 1; }
+    .topbar-company .tc-name {
+      font-size: 12px; font-weight: 800;
+      color: #1a1a2e; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .topbar-company .tc-sub {
+      font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .topbar-user {
+      display: flex; align-items: center; gap: 8px;
+      background: #f5f6f8;
       border: 1px solid #e0e4e8;
+      border-radius: 24px;
+      padding: 5px 10px 5px 5px;
+      cursor: pointer;
     }
-    .menu-item-text { flex: 1; }
-    .menu-item-text .mi-title {
-      font-size: 13px; font-weight: 800;
-      color: #1a1a2e; text-transform: uppercase;
-      letter-spacing: 0.5px; margin-bottom: 2px;
+    .topbar-avatar {
+      width: 28px; height: 28px;
+      background: #1a1a2e;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: #fff;
     }
-    .menu-item-text .mi-desc {
-      font-size: 11px; color: #888; line-height: 1.3;
+    .topbar-user-info .tu-name { font-size: 11px; font-weight: 700; color: #1a1a2e; }
+    .topbar-user-info .tu-role { font-size: 9px; color: #888; }
+
+    /* --- HERO BANNER --- */
+    .hero {
+      margin: 16px 16px 0;
+      background: linear-gradient(135deg, #f0f7f3 0%, #e8f5ee 60%, #d4ede0 100%);
+      border-radius: 16px;
+      padding: 20px 20px 0;
+      display: flex; align-items: flex-end;
+      overflow: hidden;
+      min-height: 130px;
+      position: relative;
+      flex-shrink: 0;
     }
-    .menu-item-arrow {
-      font-size: 18px; color: #aaa;
+    .hero-text { flex: 1; padding-bottom: 20px; }
+    .hero-text .hw { font-size: 12px; color: #4a8a6a; margin-bottom: 4px; }
+    .hero-text .ht { font-size: 22px; font-weight: 900; color: #1a1a2e; line-height: 1.2; margin-bottom: 6px; }
+    .hero-text .hs { font-size: 11px; color: #666; line-height: 1.4; max-width: 220px; }
+    .hero-img {
+      width: 140px; flex-shrink: 0;
+      display: flex; align-items: flex-end;
+      align-self: flex-end;
+    }
+    .hero-img img { width: 100%; object-fit: contain; }
+
+    /* --- MENU GRID --- */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px;
+      flex: 1;
+    }
+    .menu-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid #e8eaed;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      display: flex; flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .menu-card:active { transform: scale(0.97); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .menu-card::after {
+      content: '›';
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px; color: #ccc;
       font-weight: 300;
     }
-    .menu-item.exit .menu-item-text .mi-title { color: #c0392b; }
-    .menu-item.exit .menu-item-arrow { color: #e74c3c; }
-    .menu-item.exit .menu-item-icon { background: #fdf0f0; border-color: #f5c0c0; }
 
-    .menu-bottom {
-      position: relative; z-index: 2;
-      text-align: center;
-      padding: 12px 0 24px;
+    /* Card accent strip */
+    .menu-card.new::before    { content:''; position:absolute; top:0;left:0;right:0;height:3px; background:#1a6b4a; border-radius:14px 14px 0 0; }
+    .menu-card.dv::before     { content:''; position:absolute; top:0;left:0;right:0;height:3px; background:#2a5a9a; border-radius:14px 14px 0 0; }
+    .menu-card.arch::before   { content:''; position:absolute; top:0;left:0;right:0;height:3px; background:#6a3a9a; border-radius:14px 14px 0 0; }
+    .menu-card.exit::before   { content:''; position:absolute; top:0;left:0;right:0;height:3px; background:#c0392b; border-radius:14px 14px 0 0; }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
       flex-shrink: 0;
     }
-    .menu-bottom-text {
-      font-size: 9px; color: #bbb;
-      text-transform: uppercase; letter-spacing: 2px;
-    }
-    .quality-row {
-      display: flex; align-items: center; justify-content: center;
-      gap: 6px; margin-top: 4px;
-      font-size: 9px; color: #aaa;
-      text-transform: uppercase; letter-spacing: 1px;
-    }
-    .quality-dot { width: 3px; height: 3px; background: #bbb; border-radius: 50%; }
+    .card-icon.green  { background: #e8f5ee; }
+    .card-icon.blue   { background: #e8f0fa; }
+    .card-icon.purple { background: #f0e8fa; }
+    .card-icon.orange { background: #fef0e8; }
 
-    /* ========== WAVE SVG ========== */
-    .bg-wave {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      pointer-events: none; z-index: 1;
+    .card-title {
+      font-size: 12px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding-right: 20px;
     }
+    .card-title.green  { color: #1a6b4a; }
+    .card-title.blue   { color: #2a5a9a; }
+    .card-title.purple { color: #6a3a9a; }
+    .card-title.orange { color: #c0392b; }
+
+    .card-desc {
+      font-size: 10px; color: #888;
+      line-height: 1.4; padding-right: 20px;
+    }
+    .card-btn {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 10px; font-weight: 700;
+      border: none; cursor: pointer;
+      align-self: flex-start;
+      margin-top: 2px;
+    }
+    .card-btn.green  { background: #1a6b4a; color: #fff; }
+    .card-btn.blue   { background: #2a5a9a; color: #fff; }
+    .card-btn.purple { background: #6a3a9a; color: #fff; }
+    .card-btn.orange { background: #c0392b; color: #fff; }
+
+    /* --- STATS BAR --- */
+    .stats-bar {
+      margin: 0 16px 16px;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e8eaed;
+      padding: 14px 0;
+      display: flex;
+      flex-shrink: 0;
+    }
+    .stat-item {
+      flex: 1;
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 14px;
+      border-right: 1px solid #e8eaed;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-icon {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: #e8f5ee;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .stat-text .st-label { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-text .st-value { font-size: 14px; font-weight: 800; color: #1a1a2e; }
+    .stat-text .st-sub { font-size: 9px; color: #aaa; }
   </style>
 </head>
 <body>
 
   <!-- ===== WELCOME SCREEN ===== -->
-  <div id="welcome-screen" class="screen active">
-    <!-- Contour background -->
-    <div class="bg-contour">
-      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
-        <path d="M-50 200 Q100 150 200 200 Q300 250 450 180" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 240 Q100 190 200 240 Q300 290 450 220" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 280 Q100 230 200 280 Q300 330 450 260" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 320 Q100 270 200 320 Q300 370 450 300" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 360 Q100 310 200 360 Q300 410 450 340" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 400 Q100 350 200 400 Q300 450 450 380" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 440 Q100 390 200 440 Q300 490 450 420" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 480 Q100 430 200 480 Q300 530 450 460" fill="none" stroke="#000" stroke-width="1.5"/>
-      </svg>
-    </div>
-
-    <div class="welcome-content">
-      <div class="logo-hex">⚗️</div>
-      <div class="welcome-title">Preparation<br>Form App</div>
-      <div class="welcome-dot"></div>
-      <div class="welcome-sub">Digital form for sample preparation recording, monitoring, and quality control.</div>
-
-      <!-- Feature Visual -->
-      <div class="feature-visual">⚖️ &nbsp; 🔬 &nbsp; 📋</div>
-
-      <!-- Feature Cards -->
-      <div class="features-row">
-        <div class="feature-card">
-          <div class="f-icon">📝</div>
-          <div class="f-title">Digital Form</div>
-          <div class="f-desc">Record data accurately and systematically</div>
-        </div>
-        <div class="feature-card">
-          <div class="f-icon">📊</div>
-          <div class="f-title">Monitoring</div>
-          <div class="f-desc">Track preparation process in real-time</div>
-        </div>
-        <div class="feature-card">
-          <div class="f-icon">✅</div>
-          <div class="f-title">Quality Control</div>
-          <div class="f-desc">Ensure data quality and reliability</div>
-        </div>
+  <div id="welcome-screen" class="active">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:linear-gradient(160deg,#f0f2f4,#e8f0ec);padding:28px;text-align:center;">
+      <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;margin-bottom:16px;border:2px solid #d0d8d4;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+        <img src="img/logo-kpr.png" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerHTML='⚗️';this.parentElement.style.fontSize='36px';this.parentElement.style.display='flex';this.parentElement.style.alignItems='center';this.parentElement.style.justifyContent='center';">
       </div>
-
-      <button class="btn-get-started" onclick="showMenu()">
-        <div class="arrow-circle">→</div>
-        GET STARTED
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#4a8a6a;margin-bottom:6px;">PT Kasmar Poleang Raya</div>
+      <div style="font-size:26px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.5px;line-height:1.2;margin-bottom:4px;">Preparation<br>Form App</div>
+      <div style="width:28px;height:2px;background:#1a1a2e;border-radius:2px;margin:10px auto;"></div>
+      <div style="font-size:12px;color:#888;margin-bottom:36px;max-width:260px;line-height:1.5;">Digital form for sample preparation recording, monitoring, and quality control.</div>
+      <button onclick="showMenu()" style="background:#1a1a2e;color:#fff;border:none;padding:14px 40px;border-radius:50px;font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
+        Get Started &rarr;
       </button>
-    </div>
-
-    <div class="welcome-footer">
-      <div>Version 1.0.0</div>
-      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-    </div>
-
-    <!-- Wave bottom -->
-    <div class="bg-wave">
-      <svg viewBox="0 0 400 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="height:60px;width:100%;">
-        <path d="M0,40 Q100,10 200,40 Q300,70 400,30 L400,80 L0,80 Z" fill="#dde2e8" opacity="0.5"/>
-        <path d="M0,55 Q100,30 200,55 Q300,80 400,50 L400,80 L0,80 Z" fill="#c8d0da" opacity="0.4"/>
-      </svg>
+      <div style="margin-top:20px;font-size:10px;color:#bbb;">Version 1.0.0</div>
     </div>
   </div>
-
 
   <!-- ===== MENU SCREEN ===== -->
-  <div id="menu-screen" class="screen">
-    <!-- Contour background -->
-    <div class="bg-contour">
-      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
-        <path d="M-50 150 Q150 100 250 150 Q350 200 450 130" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 200 Q150 150 250 200 Q350 250 450 180" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 250 Q150 200 250 250 Q350 300 450 230" fill="none" stroke="#000" stroke-width="1.5"/>
-        <path d="M-50 600 Q150 560 250 600 Q350 640 450 580" fill="none" stroke="#000" stroke-width="1"/>
-        <path d="M-50 640 Q150 600 250 640 Q350 680 450 620" fill="none" stroke="#000" stroke-width="1"/>
-      </svg>
-    </div>
+  <div id="menu-screen">
 
-    <div class="menu-top">
-      <div class="menu-logo">⚗️</div>
-      <div class="menu-app-title">Preparation Form</div>
-      <div class="menu-app-sub">PT Kasmar Poleang Raya</div>
-      <div class="menu-divider"></div>
-    </div>
-
-    <div class="menu-list">
-
-      <div class="menu-item" onclick="openNewData()">
-        <div class="menu-item-icon">📄</div>
-        <div class="menu-item-text">
-          <div class="mi-title">New Data</div>
-          <div class="mi-desc">Create a new preparation form data</div>
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-logo">
+        <img src="img/logo-kpr.png" onerror="this.src='';this.parentElement.style.background='#1a1a2e';this.parentElement.innerHTML='<span style=color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;height:100%>K</span>'">
+      </div>
+      <div class="topbar-company">
+        <div class="tc-name">PT Kasmar Poleang Raya</div>
+        <div class="tc-sub">Preparation Data</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-user">
+          <div class="topbar-avatar">👤</div>
+          <div class="topbar-user-info">
+            <div class="tu-name">Admin</div>
+            <div class="tu-role">Preparation Team</div>
+          </div>
         </div>
-        <div class="menu-item-arrow">›</div>
+      </div>
+    </div>
+
+    <!-- HERO BANNER -->
+    <div class="hero">
+      <div class="hero-text">
+        <div class="hw">Welcome back,</div>
+        <div class="ht">Preparation<br>Sample Form</div>
+        <div class="hs">Manage and monitor your preparation sample data efficiently.</div>
+      </div>
+      <div class="hero-img">
+        <img src="img/Splashscreen-nobg.png" alt=""
+          onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <!-- MENU GRID -->
+    <div class="menu-grid">
+
+      <!-- NEW FORM -->
+      <div class="menu-card new" onclick="openNewData()">
+        <div class="card-icon green">
+          <img src="img/NEW FORM.png" style="width:26px;height:26px;object-fit:contain;" onerror="this.outerHTML='📄'">
+        </div>
+        <div class="card-title green">New Form</div>
+        <div class="card-desc">Create a new preparation data form</div>
+        <button class="card-btn green" onclick="event.stopPropagation();openNewData()">Create New Form</button>
       </div>
 
-      <div class="menu-item" onclick="openDataView()">
-        <div class="menu-item-icon">🔍</div>
-        <div class="menu-item-text">
-          <div class="mi-title">Data View</div>
-          <div class="mi-desc">View and search preparation data</div>
+      <!-- DATA VIEW -->
+      <div class="menu-card dv" onclick="openDataView()">
+        <div class="card-icon blue">
+          <img src="img/Data view.png" style="width:26px;height:26px;object-fit:contain;" onerror="this.outerHTML='🔍'">
         </div>
-        <div class="menu-item-arrow">›</div>
+        <div class="card-title blue">Data View</div>
+        <div class="card-desc">View and search saved preparation records</div>
+        <button class="card-btn blue" onclick="event.stopPropagation();openDataView()">View Data</button>
       </div>
 
-      <div class="menu-item" onclick="openArchive()">
-        <div class="menu-item-icon">📦</div>
-        <div class="menu-item-text">
-          <div class="mi-title">Archive Samples</div>
-          <div class="mi-desc">View archived and completed samples</div>
-        </div>
-        <div class="menu-item-arrow">›</div>
+      <!-- ARCHIVE SAMPLES -->
+      <div class="menu-card arch" onclick="openArchive()">
+        <div class="card-icon purple">📦</div>
+        <div class="card-title purple">Archive Samples</div>
+        <div class="card-desc">View archived and completed samples</div>
+        <button class="card-btn purple" onclick="event.stopPropagation();openArchive()">View Archive</button>
       </div>
 
-      <div class="menu-item exit" onclick="exitApp()">
-        <div class="menu-item-icon">🚪</div>
-        <div class="menu-item-text">
-          <div class="mi-title">Exit Application</div>
-          <div class="mi-desc">Close the application safely</div>
-        </div>
-        <div class="menu-item-arrow">›</div>
+      <!-- EXIT APPLICATION -->
+      <div class="menu-card exit" onclick="exitApp()">
+        <div class="card-icon orange">🚪</div>
+        <div class="card-title orange">Exit Application</div>
+        <div class="card-desc">Close the application safely</div>
+        <button class="card-btn orange" onclick="event.stopPropagation();exitApp()">Exit Now</button>
       </div>
 
     </div>
 
-    <div class="menu-bottom">
-      <div class="quality-row">
-        <span>Quality</span>
-        <div class="quality-dot"></div>
-        <span>Accuracy</span>
-        <div class="quality-dot"></div>
-        <span>Reliability</span>
+    <!-- STATS BAR -->
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat-item">
+        <div class="stat-icon">🗃️</div>
+        <div class="stat-text">
+          <div class="st-label">Total Records</div>
+          <div class="st-value" id="stat-total">—</div>
+          <div class="st-sub">Saved preparation data</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon">📅</div>
+        <div class="stat-text">
+          <div class="st-label">Last Updated</div>
+          <div class="st-value" id="stat-date">—</div>
+          <div class="st-sub" id="stat-time">—</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon">🔒</div>
+        <div class="stat-text">
+          <div class="st-label">Data Status</div>
+          <div class="st-value">Secure</div>
+          <div class="st-sub">All data is backed up</div>
+        </div>
       </div>
     </div>
 
-    <!-- Wave bottom -->
-    <div class="bg-wave">
-      <svg viewBox="0 0 400 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="height:60px;width:100%;">
-        <path d="M0,40 Q100,10 200,40 Q300,70 400,30 L400,80 L0,80 Z" fill="#dde2e8" opacity="0.5"/>
-        <path d="M0,55 Q100,30 200,55 Q300,80 400,50 L400,80 L0,80 Z" fill="#c8d0da" opacity="0.4"/>
-      </svg>
-    </div>
-  </div>
-
+  </div><!-- end menu-screen -->
 
   <script>
     function showMenu() {
       document.getElementById('welcome-screen').classList.remove('active');
       document.getElementById('menu-screen').classList.add('active');
+      loadStats();
+    }
+
+    function loadStats() {
+      try {
+        const records = JSON.parse(localStorage.getItem('preparation') || '[]');
+        document.getElementById('stat-total').textContent =
+          records.length.toLocaleString('id-ID');
+        if (records.length > 0) {
+          const last = records[records.length - 1];
+          const ts = last.timestamp || last.date_start || '';
+          if (ts) {
+            const d = new Date(ts);
+            document.getElementById('stat-date').textContent =
+              d.toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
+            document.getElementById('stat-time').textContent =
+              d.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'}) + ' WIB';
+          }
+        } else {
+          document.getElementById('stat-date').textContent = '—';
+          document.getElementById('stat-time').textContent = 'No records yet';
+        }
+      } catch(e) {
+        document.getElementById('stat-total').textContent = '0';
+      }
     }
 
     function openNewData() {
@@ -414,6 +369,12 @@
         history.back();
       }
     }
+
+    // Auto-show menu if already visited
+    if (sessionStorage.getItem('menu_visited')) {
+      showMenu();
+    }
+    sessionStorage.setItem('menu_visited', '1');
   </script>
 </body>
 </html>

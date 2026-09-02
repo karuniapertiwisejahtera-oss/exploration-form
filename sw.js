@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'exploration-form-v242';
+﻿const CACHE_NAME = 'exploration-form-v243';
 const ASSETS = [
   '/',
   '/index.html',
@@ -13,6 +13,11 @@ const ASSETS = [
   '/preparation.html',
   '/prep-welcome.html',
   '/prep-dataview.html',
+  '/img/logo-kpr.png',
+  '/img/logo-app.png',
+  '/img/Splashscreen-nobg.png',
+  '/img/NEW FORM.png',
+  '/img/Data view.png',
   '/css/style.css',
   '/js/app.js',
   '/js/drive.js',

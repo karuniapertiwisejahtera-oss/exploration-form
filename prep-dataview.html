@@ -267,17 +267,6 @@
     let _currentRecordId = null;
     let _currentRecord = null;
 
-    // ===== DB helper =====
-    const DB = window.DB || {
-      getAll: (store) => {
-        try { return JSON.parse(localStorage.getItem('db_' + store) || '[]'); } catch(e) { return []; }
-      },
-      delete: (store, id) => {
-        const all = DB.getAll(store).filter(r => String(r.id) !== String(id));
-        localStorage.setItem('db_' + store, JSON.stringify(all));
-      }
-    };
-
     function goBackToMenu() {
       window.location.href = 'prep-welcome.html';
     }
