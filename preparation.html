@@ -654,8 +654,13 @@
     <!-- MAIN CONTENT -->
     <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f5f5f5;">
 
-      <!-- Header Info Panel -->
-      <div id="header-panel-main" style="flex-shrink:0;background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 16px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
+      <!-- Header Info Panel (expandable) -->
+      <div id="header-panel-outer" style="flex-shrink:0;background:#fff;border-bottom:1px solid #e0e0e0;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:3px 16px;background:#f8f8f8;border-bottom:1px solid #eee;cursor:pointer;" onclick="toggleHeaderPanel()">
+          <span style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.5px;">Header Info</span>
+          <button id="btn-header-toggle" style="background:none;border:none;font-size:12px;cursor:pointer;color:#555;padding:0;">&#9650;</button>
+        </div>
+        <div id="header-panel-main" style="padding:8px 16px;display:grid;grid-template-columns:1fr 1fr;gap:0 24px;">
         <div style="display:flex;align-items:center;padding:4px 0;border-bottom:1px solid #f0f0f0;">
           <label style="font-size:11px;font-weight:700;color:#333;min-width:110px;">Hole_ID</label>
           <input type="text" id="h-holeid" name="hole_id" style="flex:1;border:none;border-bottom:1px solid #ddd;outline:none;font-size:11px;padding:2px 4px;background:transparent;">
@@ -688,7 +693,8 @@
           <label style="font-size:11px;font-weight:700;color:#333;min-width:110px;">Total Sample</label>
           <input type="text" id="h-total-sample" name="total_sample" readonly style="flex:1;border:none;border-bottom:1px solid #ddd;outline:none;font-size:11px;padding:2px 4px;background:transparent;color:#1a6b4a;font-weight:700;">
         </div>
-      </div>
+        </div><!-- end header-panel-main -->
+      </div><!-- end header-panel-outer -->
 
       <!-- Merge Banner -->
       <div class="merge-banner" id="merge-banner" style="border-radius:0;margin:0;">
@@ -819,19 +825,19 @@
       _expViewMode = !_expViewMode;
       const listView = document.getElementById('exp-list-view');
       const tableWrap = document.querySelector('.prep-wrap');
-      const headerPanel = document.getElementById('header-panel-main');
+      const headerPanel = document.getElementById('header-panel-outer') || document.getElementById('header-panel-main');
       const btn = document.getElementById('btn-toggle-explist');
       if (_expViewMode) {
         listView.style.display = 'flex';
         tableWrap.style.display = 'none';
         if (headerPanel) headerPanel.style.display = 'none';
-        if (btn) btn.innerHTML = '<span class="sb-icon">📋</span><span class="sb-label">Tabel</span>';
+        if (btn) btn.innerHTML = '<span class="sb-icon">&#128203;</span><span class="sb-label">Tabel</span>';
         renderExpList();
       } else {
         listView.style.display = 'none';
         tableWrap.style.display = '';
         if (headerPanel) headerPanel.style.display = '';
-        if (btn) btn.innerHTML = '<span class="sb-icon">☰</span><span class="sb-label">List View</span>';
+        if (btn) btn.innerHTML = '<span class="sb-icon">&#9776;</span><span class="sb-label">List View</span>';
       }
     }
 
@@ -3713,7 +3719,7 @@
             var iTo       = findCol('to','depthto','sampai','end');
             var iLen      = findCol('length','len','panjang','interval');
             var iRec      = findCol('corerec','core_rec','correcovery','corerecovery','recoverylength','recovlength','reclength','recovery','recov','rec');
-            var iGrain    = findCol('grainsize','grain','litho','lithology','jenis');
+            var iGrain    = findCol('grainsize','grain_size','grain','litho','lithology','jenis');
             var iHoleId   = findCol('holeid','hole_id','holename','hole','bhid','drillhole');
             var iDeposit  = findCol('deposit','area','lokasi','location');
 
@@ -3756,12 +3762,18 @@
               if (!cols[iFrom] && !cols[iTo]) return;
               var fv = parseFloat(cols[iFrom]) || 0;
               var tv = parseFloat(cols[iTo])   || 0;
+              // Length = To - From (always calculated)
+              var lenVal = (tv - fv).toFixed(2);
+              // Recovery from Core_rec column
+              var recVal = iRec >= 0 ? (cols[iRec] || '') : '';
+              // Grain from Grain_size column
+              var grainVal = iGrain >= 0 ? (cols[iGrain] || '').trim().toUpperCase() : '';
               addRow({
                 from:       cols[iFrom] || '',
                 to:         cols[iTo]   || '',
-                length:     iLen   >= 0 ? (cols[iLen]  || '') : (tv - fv).toFixed(2),
-                recovery:   iRec   >= 0 ? (cols[iRec]  || '') : '',
-                grain_size: iGrain >= 0 ? (cols[iGrain]|| '').trim().toUpperCase() : ''
+                length:     lenVal,
+                recovery:   recVal,
+                grain_size: grainVal
               });
               imported++;
             });

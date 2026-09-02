@@ -294,23 +294,29 @@
         const rowCount = parseInt(rec.row_count) || 0;
         const card = document.createElement('div');
         card.className = 'dv-card';
+        card.dataset.id = rec.id;
         card.innerHTML = `
-          <div class="dv-card-info" onclick="openPreview('${rec.id}')">
+          <div class="dv-card-info">
             <div class="dv-card-holeid">${holeId.toUpperCase()}</div>
             <div class="dv-card-meta">
-              <span>📅 ${date}</span>
-              <span>📊 ${rowCount} entries</span>
+              <span>&#128197; ${date}</span>
+              <span>&#128202; ${rowCount} entries</span>
             </div>
           </div>
-          <button class="btn-hapus" onclick="deleteRecord('${rec.id}', event)">HAPUS</button>
+          <button class="btn-hapus">HAPUS</button>
         `;
+        // Event listeners via JS (no inline onclick — avoids quote escaping issues)
+        card.querySelector('.dv-card-info').addEventListener('click', () => openPreview(rec.id));
+        card.querySelector('.btn-hapus').addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteRecord(rec.id);
+        });
         body.appendChild(card);
       });
     }
 
     // ===== DELETE =====
-    function deleteRecord(id, e) {
-      e.stopPropagation();
+    function deleteRecord(id) {
       if (!confirm('Hapus data ini?')) return;
       DB.delete('preparation', id);
       loadRecords();
@@ -438,32 +444,29 @@
           if (!text || !text.trim()) { alert('File kosong'); return; }
 
           // ======= COBA PARSE JSON =======
-          if (file.name.toLowerCase().endsWith('.json') || text.trim().startsWith('{')) {
-            const data = JSON.parse(text);
-            // Format: { preparation: [ {...record...} ] }
-            if (data.preparation && Array.isArray(data.preparation) && data.preparation.length > 0) {
-              const existing = DB.getAll('preparation');
-              let imported = 0;
-              data.preparation.forEach(rec => {
-                if (!rec.id) rec.id = Date.now() + Math.floor(Math.random() * 1000);
-                // Cek apakah sudah ada (by hole_id + date_start)
-                const dup = existing.find(r =>
-                  r.hole_id === rec.hole_id && r.date_start === rec.date_start
-                );
-                if (dup) {
-                  // Update record yang ada
-                  Object.assign(dup, rec);
-                } else {
-                  existing.push(rec);
-                }
-                imported++;
-              });
-              localStorage.setItem('db_preparation', JSON.stringify(existing));
-              loadRecords();
-              alert('Import berhasil: ' + imported + ' record diimpor/diperbarui.\n\nKlik card untuk melanjutkan input.');
-            } else {
-              alert('Format JSON tidak dikenali. Gunakan file hasil Export Data dari preparation form.');
-            }
+          if (file.name.toLowerCase().endsWith('.json') || text.trim().startsWith('{') || text.trim().startsWith('[')) {
+            let data;
+            try { data = JSON.parse(text); } catch(e) { alert('File JSON tidak valid'); return; }
+            // Format array langsung
+            const arr = Array.isArray(data) ? data : (data.preparation || []);
+            if (!arr.length) { alert('Tidak ada data dalam file'); return; }
+            const existing = DB.getAll('preparation');
+            let imported = 0;
+            arr.forEach(rec => {
+              if (!rec.id) rec.id = Date.now() + imported;
+              const dupIdx = existing.findIndex(r =>
+                r.hole_id && rec.hole_id && r.hole_id.trim().toUpperCase() === rec.hole_id.trim().toUpperCase()
+              );
+              if (dupIdx >= 0) {
+                existing[dupIdx] = { ...existing[dupIdx], ...rec };
+              } else {
+                existing.push(rec);
+              }
+              imported++;
+            });
+            localStorage.setItem('preparation', JSON.stringify(existing));
+            loadRecords();
+            alert('Import berhasil: ' + imported + ' record.\nKlik card untuk melanjutkan input.');
             return;
           }
 
@@ -545,7 +548,7 @@
 
           const existing = DB.getAll('preparation');
           existing.push(rec);
-          localStorage.setItem('db_preparation', JSON.stringify(existing));
+          localStorage.setItem('preparation', JSON.stringify(existing));
           loadRecords();
           if (confirm('Import berhasil: ' + dataRows.length + ' baris.\nBuka form untuk melanjutkan?')) {
             sessionStorage.setItem('form_mode', 'edit');
