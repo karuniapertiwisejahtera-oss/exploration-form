@@ -802,6 +802,11 @@
     setTimeout(resizeAll, 100);
 
     // ===== SIDEBAR TOGGLE =====
+    // Override goBack to navigate to Welcome/Menu screen
+    function goBack() {
+      window.location.href = 'prep-welcome.html';
+    }
+
     function toggleSidebar() {
       const sidebar = document.getElementById('prep-sidebar');
       sidebar.classList.toggle('collapsed');
