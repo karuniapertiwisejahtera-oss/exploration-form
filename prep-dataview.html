@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Data View — Sample Preparation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: 'Segoe UI', sans-serif; background: #f0f2f4; overflow: hidden; }
+
+    /* ===== HEADER ===== */
+    .dv-header {
+      background: #1a1a2e;
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+    .dv-back-btn {
+      width: 32px; height: 32px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #fff; font-size: 16px;
+      flex-shrink: 0;
+    }
+    .dv-header-text { flex: 1; }
+    .dv-header-text .dv-title {
+      font-size: 16px; font-weight: 800;
+      text-transform: uppercase; color: #fff;
+      letter-spacing: 1px;
+    }
+    .dv-header-text .dv-sub {
+      font-size: 10px; color: rgba(255,255,255,0.5);
+      margin-top: 1px;
+    }
+    .btn-import-csv {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-import-csv:active { background: rgba(255,255,255,0.2); }
+    #csv-import-input { display: none; }
+
+    /* ===== BODY ===== */
+    .dv-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      height: calc(100vh - 60px);
+    }
+    .dv-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #aaa;
+      font-size: 13px;
+    }
+    .dv-empty .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+
+    /* ===== CARD ===== */
+    .dv-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      border: 1px solid #e4e8ec;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: box-shadow 0.12s, transform 0.1s;
+      gap: 12px;
+    }
+    .dv-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.09); }
+    .dv-card:active { transform: scale(0.99); }
+    .dv-card-info { flex: 1; min-width: 0; }
+    .dv-card-holeid {
+      font-size: 15px; font-weight: 800;
+      color: #1a1a2e; letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .dv-card-meta {
+      font-size: 11px; color: #888;
+      display: flex; gap: 14px; flex-wrap: wrap;
+    }
+    .dv-card-meta span { display: flex; align-items: center; gap: 4px; }
+    .btn-hapus {
+      background: #c0392b;
+      color: white; border: none;
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-hapus:active { background: #a93226; }
+
+    /* ===== MODAL OVERLAY ===== */
+    #preview-modal {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 9999;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-end;
+    }
+    #preview-modal.show { display: flex; }
+
+    .modal-container {
+      background: #fff;
+      border-radius: 16px 16px 0 0;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+      overflow: hidden;
+    }
+
+    /* Modal header */
+    .modal-header {
+      background: #1a1a2e;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .modal-header-left .modal-hole {
+      font-size: 14px; font-weight: 800;
+      color: #fff; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .modal-header-left .modal-meta {
+      font-size: 10px; color: rgba(255,255,255,0.5);
+      margin-top: 2px;
+    }
+    .modal-close {
+      background: rgba(255,255,255,0.15);
+      border: none; color: #fff;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Modal table */
+    .modal-table-wrap {
+      flex: 1;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .modal-table {
+      border-collapse: collapse;
+      font-size: 10px;
+      white-space: nowrap;
+      width: max-content;
+      min-width: 100%;
+    }
+    .modal-table th {
+      background: #1a1a2e;
+      color: #ccc;
+      padding: 7px 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 9px;
+      text-transform: uppercase;
+      position: sticky; top: 0; z-index: 2;
+      border-right: 1px solid #2a2a40;
+    }
+    .modal-table td {
+      padding: 6px 10px;
+      text-align: center;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+      border-right: 1px solid #f0f0f0;
+    }
+    .modal-table tr:nth-child(even) td { background: #f8f8f8; }
+    .modal-table tr:hover td { background: #f0f4f8; }
+    .modal-table td.td-sid { color: #1a1a2e; font-weight: 600; }
+    .modal-table td.td-orange { color: #e67e22; font-weight: 600; }
+    .modal-table td.td-samp { color: #1a1a2e; font-weight: 800; }
+
+    /* Modal footer buttons */
+    .modal-footer {
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      border-top: 1px solid #eee;
+      flex-shrink: 0;
+      background: #fafafa;
+    }
+    .modal-footer button {
+      flex: 1;
+      padding: 11px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn-close-modal { background: #f0f2f4; color: #555; border-color: #ddd; }
+    .btn-continue { background: #1a1a2e; color: #fff; }
+    .btn-export { background: #f0f2f4; color: #1a1a2e; border-color: #ccc; }
+    .btn-close-modal:active { background: #e0e2e4; }
+    .btn-continue:active { background: #2a2a3e; }
+    .btn-export:active { background: #e0e2e4; }
+  </style>
+</head>
+<body style="display:flex;flex-direction:column;height:100vh;">
+
+  <!-- HEADER -->
+  <div class="dv-header">
+    <div class="dv-back-btn" onclick="goBackToMenu()">←</div>
+    <div class="dv-header-text">
+      <div class="dv-title">Data View</div>
+      <div class="dv-sub" id="dv-record-count">Memuat data...</div>
+    </div>
+    <label class="btn-import-csv" for="csv-import-input">Import CSV</label>
+    <input type="file" id="csv-import-input" accept=".json,.csv">
+  </div>
+
+  <!-- BODY: LIST CARDS -->
+  <div class="dv-body" id="dv-body">
+    <div class="dv-empty">
+      <div class="empty-icon">📂</div>
+      <div>Belum ada data tersimpan</div>
+    </div>
+  </div>
+
+  <!-- PREVIEW MODAL -->
+  <div id="preview-modal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="modal-hole" id="modal-hole-title">HOLE: —</div>
+          <div class="modal-meta" id="modal-hole-meta">—</div>
+        </div>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-table-wrap">
+        <table class="modal-table" id="modal-table">
+          <thead id="modal-thead"></thead>
+          <tbody id="modal-tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-close-modal" onclick="closeModal()">Close</button>
+        <button class="btn-continue" onclick="continueRecord()">Continue</button>
+        <button class="btn-export" onclick="exportRecordCSV()">Export</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP.JS for DB access -->
+  <script src="js/app.js"></script>
+  <script>
+    let _currentRecordId = null;
+    let _currentRecord = null;
+
+    // ===== DB helper =====
+    const DB = window.DB || {
+      getAll: (store) => {
+        try { return JSON.parse(localStorage.getItem('db_' + store) || '[]'); } catch(e) { return []; }
+      },
+      delete: (store, id) => {
+        const all = DB.getAll(store).filter(r => String(r.id) !== String(id));
+        localStorage.setItem('db_' + store, JSON.stringify(all));
+      }
+    };
+
+    function goBackToMenu() {
+      window.location.href = 'prep-welcome.html';
+    }
+
+    // ===== LOAD RECORDS =====
+    function loadRecords() {
+      const records = DB.getAll('preparation');
+      const countEl = document.getElementById('dv-record-count');
+      const body = document.getElementById('dv-body');
+
+      countEl.textContent = records.length + ' record tersimpan';
+
+      if (!records.length) {
+        body.innerHTML = `<div class="dv-empty"><div class="empty-icon">📂</div><div>Belum ada data tersimpan</div></div>`;
+        return;
+      }
+
+      // Sort: newest first
+      const sorted = [...records].sort((a, b) => (b.id || 0) - (a.id || 0));
+
+      body.innerHTML = '';
+      sorted.forEach(rec => {
+        const holeId = rec.hole_id || '—';
+        const date = rec.date_start || rec.date_finish || '—';
+        const rowCount = parseInt(rec.row_count) || 0;
+        const card = document.createElement('div');
+        card.className = 'dv-card';
+        card.innerHTML = `
+          <div class="dv-card-info" onclick="openPreview('${rec.id}')">
+            <div class="dv-card-holeid">${holeId.toUpperCase()}</div>
+            <div class="dv-card-meta">
+              <span>📅 ${date}</span>
+              <span>📊 ${rowCount} entries</span>
+            </div>
+          </div>
+          <button class="btn-hapus" onclick="deleteRecord('${rec.id}', event)">HAPUS</button>
+        `;
+        body.appendChild(card);
+      });
+    }
+
+    // ===== DELETE =====
+    function deleteRecord(id, e) {
+      e.stopPropagation();
+      if (!confirm('Hapus data ini?')) return;
+      DB.delete('preparation', id);
+      loadRecords();
+    }
+
+    // ===== OPEN PREVIEW =====
+    function openPreview(id) {
+      const records = DB.getAll('preparation');
+      const rec = records.find(r => String(r.id) === String(id));
+      if (!rec) return;
+      _currentRecordId = id;
+      _currentRecord = rec;
+
+      document.getElementById('modal-hole-title').textContent = 'HOLE: ' + (rec.hole_id || '—').toUpperCase();
+      document.getElementById('modal-hole-meta').textContent =
+        (rec.date_start || '—') + '  |  Total Rows: ' + (rec.row_count || 0);
+
+      buildTable(rec);
+      document.getElementById('preview-modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('preview-modal').classList.remove('show');
+      _currentRecordId = null;
+      _currentRecord = null;
+    }
+
+    // ===== BUILD TABLE =====
+    function buildTable(rec) {
+      const rc = parseInt(rec.row_count) || 0;
+      const thead = document.getElementById('modal-thead');
+      const tbody = document.getElementById('modal-tbody');
+
+      thead.innerHTML = `<tr>
+        <th>From</th><th>To</th><th>Len</th><th>Rec</th><th>Grain</th>
+        <th>Core Wt</th><th>Samp No</th><th>Dry Wt</th><th>Send Cum</th>
+        <th>Sample ID</th>
+        <th>+10 Tot</th><th>+10 Rec</th><th>+10 SID</th>
+        <th>+2 Tot</th><th>+2 Rec</th><th>+2 SID</th>
+        <th>+0.6 Tot</th><th>+0.6 Rec</th><th>+0.6 SID</th>
+        <th>+0.3 Tot</th><th>+0.3 Rec</th><th>+0.3 SID</th>
+        <th>-0.3 Tot</th><th>-0.3 Rec</th><th>-0.3 SID</th>
+        <th>Remarks</th>
+      </tr>`;
+
+      tbody.innerHTML = '';
+      for (let i = 1; i <= rc; i++) {
+        const g = (f) => rec[f + '_' + i] || '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${g('from')}</td><td>${g('to')}</td><td>${g('len')}</td><td>${g('rec')}</td>
+          <td>${g('grain')}</td><td>${g('core_wt')}</td>
+          <td class="td-samp">${g('samp_no')}</td>
+          <td>${g('dry_wt')}</td><td>${g('send_cum')}</td>
+          <td class="td-sid">${g('sample_id')}<br><span class="td-orange">${g('m06_orig_sid')}</span></td>
+          <td>${g('a10_tot')}</td><td>${g('a10_rec')}</td><td class="td-sid">${g('a10_sid')}</td>
+          <td>${g('a2_tot')}</td><td>${g('a2_rec')}</td><td class="td-sid">${g('a2_sid')}</td>
+          <td>${g('a06_tot')}</td><td>${g('a06_rec')}</td><td class="td-sid">${g('a06_sid')}</td>
+          <td>${g('m06_tot')}</td><td>${g('m06_rec')}</td><td class="td-sid">${g('m06_sid')}</td>
+          <td>${g('p03_tot')}</td><td>${g('p03_rec')}</td><td class="td-sid">${g('p03_sid')}</td>
+          <td>${g('remarks')}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    // ===== CONTINUE =====
+    function continueRecord() {
+      if (!_currentRecordId) return;
+      sessionStorage.setItem('form_mode', 'edit');
+      sessionStorage.setItem('edit_record_id', _currentRecordId);
+      window.location.href = 'preparation.html';
+    }
+
+    // ===== EXPORT CSV =====
+    function exportRecordCSV() {
+      if (!_currentRecord) return;
+      const rec = _currentRecord;
+      const rc = parseInt(rec.row_count) || 0;
+      const FIELDS = [
+        'from','to','len','rec','grain','core_wt','samp_no','dry_wt','send_cum',
+        'sample_id','m06_orig_sid',
+        'a10_tot','a10_rec','a10_sid',
+        'a2_tot','a2_rec','a2_sid',
+        'a06_tot','a06_rec','a06_sid',
+        'm06_tot','m06_rec','m06_sid',
+        'p03_tot','p03_rec','p03_sid',
+        'remarks'
+      ];
+      const HEADERS = [
+        'From','To','Length','Rec','Grain','Core_Wt','Samp_No','Dry_Wt','Send_Cum',
+        'Sample_ID','Orig_SID_+0.3',
+        '+10_Tot','+10_Rec','+10_SID',
+        '+2_Tot','+2_Rec','+2_SID',
+        '+0.6_Tot','+0.6_Rec','+0.6_SID',
+        '+0.3_Tot','+0.3_Rec','+0.3_SID',
+        '-0.3_Tot','-0.3_Rec','-0.3_SID',
+        'Remarks'
+      ];
+      let csv = HEADERS.join(',') + '\r\n';
+      for (let i = 1; i <= rc; i++) {
+        const row = FIELDS.map(f => {
+          const v = rec[f + '_' + i] || '';
+          return String(v).includes(',') ? '"' + v + '"' : v;
+        });
+        csv += row.join(',') + '\r\n';
+      }
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Prep_' + (rec.hole_id || 'data').toUpperCase() + '_' + (rec.date_start || '').replace(/\//g,'-') + '.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== IMPORT CSV / JSON =====
+    document.getElementById('csv-import-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          // Try JSON import
+          const data = JSON.parse(ev.target.result);
+          if (data.preparation && Array.isArray(data.preparation)) {
+            const existing = DB.getAll('preparation');
+            data.preparation.forEach(rec => {
+              if (!rec.id) rec.id = Date.now() + Math.random();
+              existing.push(rec);
+            });
+            localStorage.setItem('db_preparation', JSON.stringify(existing));
+            loadRecords();
+            alert('Import berhasil: ' + data.preparation.length + ' record');
+          } else {
+            alert('Format file tidak dikenal');
+          }
+        } catch(err) {
+          alert('Gagal membaca file: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+      this.value = '';
+    });
+
+    // Close modal on overlay click
+    document.getElementById('preview-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    // Init
+    loadRecords();
+  </script>
+</body>
+</html>
