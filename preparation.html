@@ -31,10 +31,27 @@
       background: linear-gradient(180deg,#2d2d2d 0%,#1a1a1a 100%) !important;
       color: #c0d8c0 !important;
     }
-    /* Sidebar collapsed styles */
-    #prep-sidebar.collapsed { width: 44px !important; min-width: 44px !important; }
+    /* Sidebar button style */
+    .sb-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 6px;
+      padding: 6px 8px; cursor: pointer; color: #d0d0d0;
+      font-size: 10px; font-weight: 600; width: 100%; text-align: left;
+      white-space: nowrap; overflow: hidden;
+    }
+    .sb-btn:hover { background: #333; border-color: #555; }
+    .sb-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+    .sb-btn.sb-blue { background: #1a3a4a; border-color: #2a5a6a; color: #7dd3fc; }
+    .sb-btn.sb-green { background: #1a3a1a; border-color: #2a5a2a; color: #86efac; }
+    .sb-btn.sb-red { background: #3a1a1a; border-color: #5a2a2a; color: #fca5a5; }
+    .sb-btn.sb-purple { background: #2a2a3a; border-color: #4a4a7a; color: #c4b5fd; }
+    .sb-icon { font-size: 13px; line-height: 1; flex-shrink: 0; }
+    .sb-sep { height: 1px; background: #333; margin: 3px 0; }
+    /* Sidebar collapsed */
+    #prep-sidebar.collapsed { width: 40px !important; min-width: 40px !important; }
     #prep-sidebar.collapsed .sb-label { display: none !important; }
-    #prep-sidebar.collapsed .sb-divider { display: none !important; }
+    #prep-sidebar.collapsed .sb-sep { display: none !important; }
+    #prep-sidebar.collapsed .sb-btn { padding: 6px; justify-content: center; }
     /* Prep wrap: fill remaining space */
     .prep-wrap {
       width: 100%; overflow: auto; -webkit-overflow-scrolling: touch;
@@ -367,8 +384,8 @@
       flex: 1; padding: 6px 4px; border: none; border-radius: 6px;
       font-size: 10px; font-weight: 700; cursor: pointer;
     }
-    #merge-popup .mp-apply { background: #1a6b4a; color: white; }
-    #merge-popup .mp-cancel { background: #3a1a1a; color: #fca5a5; border: 1px solid #6b2a2a !important; }
+    #merge-popup .mp-apply { background: #e65100; color: white; }
+    #merge-popup .mp-cancel { background: #e65100; color: white; opacity: 0.7; }
     /* Checkbox merge 2x lebih besar */
     .merge-check {
       width: 20px !important;
@@ -555,79 +572,76 @@
   <!-- ===== SIDEBAR + MAIN LAYOUT ===== -->
   <div style="display:flex;height:100vh;overflow:hidden;">
 
-    <!-- SIDEBAR -->
-    <div id="prep-sidebar" style="width:130px;min-width:130px;background:linear-gradient(180deg,#1a1a1a 0%,#2d2d2d 100%);display:flex;flex-direction:column;padding:8px 6px;gap:2px;overflow-y:auto;flex-shrink:0;box-shadow:2px 0 8px rgba(0,0,0,0.4);transition:width 0.2s,min-width 0.2s;">
-      <!-- Back + Hide toggle -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <button onclick="goBack()" style="background:none;border:none;color:#aaa;font-size:14px;cursor:pointer;padding:4px 6px;border-radius:6px;display:flex;align-items:center;gap:4px;" title="Kembali">← <span class="sb-label" style="font-size:10px;color:#888;">Back</span></button>
-        <button onclick="toggleSidebar()" id="btn-sidebar-toggle" style="background:#333;border:1px solid #555;color:#aaa;font-size:12px;cursor:pointer;padding:3px 6px;border-radius:6px;" title="Sembunyikan sidebar">◀</button>
+    <!-- SIDEBAR (separated, no form header) -->
+    <div id="prep-sidebar" style="width:150px;min-width:150px;background:linear-gradient(180deg,#111 0%,#222 100%);display:flex;flex-direction:column;padding:6px;gap:2px;overflow-y:auto;flex-shrink:0;box-shadow:2px 0 6px rgba(0,0,0,0.5);transition:width 0.2s,min-width 0.2s;">
+
+      <!-- Sidebar header row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 2px 6px;border-bottom:1px solid #333;margin-bottom:4px;">
+        <button onclick="goBack()" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:3px 5px;border-radius:5px;display:flex;align-items:center;gap:4px;">
+          <span>←</span><span class="sb-label" style="font-size:10px;">Back</span>
+        </button>
+        <button onclick="toggleSidebar()" id="btn-sidebar-toggle" style="background:#333;border:1px solid #555;color:#aaa;font-size:11px;cursor:pointer;padding:3px 6px;border-radius:5px;" title="Sembunyikan">◀</button>
       </div>
-      <!-- Title -->
-      <div class="sb-label" style="color:#666;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 6px 2px;">DATA</div>
-      <!-- Import Logging -->
-      <label for="csv-input" style="display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:8px 10px;cursor:pointer;color:#e0e0e0;font-size:10px;font-weight:600;" title="Import Logging">
-        <span style="font-size:20px;line-height:1;flex-shrink:0;">📂</span><span class="sb-label">Import<br>Logging</span>
+
+      <!-- Section label -->
+      <div class="sb-label" style="color:#555;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 4px;">Data</div>
+
+      <!-- Buttons: icon (14px) + label inline -->
+      <label for="csv-input" class="sb-btn">
+        <span class="sb-icon">📂</span><span class="sb-label">Import Logging</span>
       </label>
       <input type="file" id="csv-input" accept=".csv,.txt" style="display:none;">
-      <!-- Export -->
-      <button onclick="exportFormData()" style="display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:8px 10px;cursor:pointer;color:#e0e0e0;font-size:10px;font-weight:600;width:100%;text-align:left;" title="Export Data">
-        <span style="font-size:20px;line-height:1;flex-shrink:0;">📤</span><span class="sb-label">Export</span>
+
+      <button onclick="exportFormData()" class="sb-btn">
+        <span class="sb-icon">📤</span><span class="sb-label">Export</span>
       </button>
-      <!-- Import JSON -->
-      <label for="import-form-input" style="display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:8px 10px;cursor:pointer;color:#e0e0e0;font-size:10px;font-weight:600;" title="Import JSON">
-        <span style="font-size:20px;line-height:1;flex-shrink:0;">📥</span><span class="sb-label">Import</span>
+
+      <label for="import-form-input" class="sb-btn">
+        <span class="sb-icon">📥</span><span class="sb-label">Import JSON</span>
       </label>
       <input type="file" id="import-form-input" accept=".json" style="display:none;" onchange="importFormData(this)">
 
-      <div class="sb-divider" style="height:1px;background:#444;margin:4px 0;"></div>
-      <div class="sb-label" style="color:#666;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 6px 2px;">AKSI</div>
+      <div class="sb-sep"></div>
+      <div class="sb-label" style="color:#555;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 4px;">Aksi</div>
 
-      <!-- Undo/Redo -->
-      <div style="display:flex;gap:4px;">
-        <button id="btn-undo" onclick="UndoManager.undo()" title="Undo" style="flex:1;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:7px 4px;color:#aaa;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;" disabled>↩</button>
-        <button id="btn-redo" onclick="UndoManager.redo()" title="Redo" style="flex:1;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:7px 4px;color:#aaa;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;" disabled>↪</button>
+      <div style="display:flex;gap:3px;">
+        <button id="btn-undo" onclick="UndoManager.undo()" title="Undo" class="sb-btn" style="flex:1;justify-content:center;" disabled>↩</button>
+        <button id="btn-redo" onclick="UndoManager.redo()" title="Redo" class="sb-btn" style="flex:1;justify-content:center;" disabled>↪</button>
       </div>
 
-      <!-- Input Weight -->
-      <button onclick="openWeightInput()" style="display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:8px 10px;cursor:pointer;color:#e0e0e0;font-size:10px;font-weight:600;width:100%;text-align:left;">
-        <span style="font-size:20px;line-height:1;flex-shrink:0;">⚖️</span><span class="sb-label">Input<br>Weight</span>
+      <button onclick="openWeightInput()" class="sb-btn">
+        <span class="sb-icon">⚖️</span><span class="sb-label">Input Weight</span>
       </button>
 
-      <div class="sb-divider" style="height:1px;background:#444;margin:4px 0;"></div>
-      <div class="sb-label" style="color:#666;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 6px 2px;">SIMPAN</div>
+      <div class="sb-sep"></div>
+      <div class="sb-label" style="color:#555;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 4px;">Simpan</div>
 
-      <!-- Save -->
-      <button onclick="saveData()" style="display:flex;align-items:center;gap:8px;background:#1a3a4a;border:1px solid #2a6b8a;border-radius:8px;padding:8px 10px;cursor:pointer;color:#7dd3fc;font-size:10px;font-weight:700;width:100%;text-align:left;">
-        <span style="font-size:20px;line-height:1;flex-shrink:0;">💾</span><span class="sb-label">Save Data</span>
+      <button onclick="saveData()" class="sb-btn sb-blue">
+        <span class="sb-icon">💾</span><span class="sb-label">Save Data</span>
       </button>
-      <!-- Submit -->
-      <button onclick="submitData()" style="display:flex;align-items:center;gap:8px;background:#1a3a1a;border:1px solid #2a6b2a;border-radius:8px;padding:8px 10px;cursor:pointer;color:#86efac;font-size:10px;font-weight:700;width:100%;text-align:left;">
-        <span style="font-size:20px;line-height:1;flex-shrink:0;">📨</span><span class="sb-label">Submit</span>
+      <button onclick="submitData()" class="sb-btn sb-green">
+        <span class="sb-icon">📨</span><span class="sb-label">Submit</span>
       </button>
-      <!-- Clear -->
-      <button onclick="clearData()" style="display:flex;align-items:center;gap:8px;background:#3a1a1a;border:1px solid #6b2a2a;border-radius:8px;padding:8px 10px;cursor:pointer;color:#fca5a5;font-size:10px;font-weight:600;width:100%;text-align:left;">
-        <span style="font-size:20px;line-height:1;flex-shrink:0;">🗑️</span><span class="sb-label">Clear</span>
+      <button onclick="clearData()" class="sb-btn sb-red">
+        <span class="sb-icon">🗑️</span><span class="sb-label">Clear</span>
       </button>
 
-      <div class="sb-divider" style="height:1px;background:#444;margin:4px 0;"></div>
-
-      <!-- List View -->
-      <button id="btn-toggle-explist" onclick="toggleExpList()" style="display:flex;align-items:center;gap:8px;background:#2a2a3a;border:1px solid #4a4a8a;border-radius:8px;padding:8px 10px;cursor:pointer;color:#c4b5fd;font-size:10px;font-weight:700;width:100%;text-align:left;">
-        <span style="font-size:20px;line-height:1;flex-shrink:0;">☰</span><span class="sb-label">List View</span>
+      <div class="sb-sep"></div>
+      <button id="btn-toggle-explist" onclick="toggleExpList()" class="sb-btn sb-purple">
+        <span class="sb-icon">☰</span><span class="sb-label">List View</span>
       </button>
     </div>
 
     <!-- MAIN CONTENT -->
     <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f0f2f5;">
 
-      <!-- Form Title Bar -->
-      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);padding:6px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.3);">
+      <!-- Form Title Bar (separate from sidebar) -->
+      <div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);padding:5px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
         <div>
-          <div style="color:#a0a0a0;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;line-height:1.2;">PT Kasmar Poleang Raya</div>
-          <div style="color:#ffffff;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;line-height:1.3;">Sample Preparation Form</div>
+          <div style="color:#888;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;">PT Kasmar Poleang Raya</div>
+          <div style="color:#fff;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">Sample Preparation Form</div>
         </div>
-        <!-- Unhide sidebar button (visible when sidebar hidden) -->
-        <button id="btn-sidebar-show" onclick="toggleSidebar()" style="display:none;background:#333;border:1px solid #555;color:#aaa;font-size:12px;cursor:pointer;padding:4px 8px;border-radius:6px;" title="Tampilkan sidebar">▶</button>
+        <button id="btn-sidebar-show" onclick="toggleSidebar()" style="display:none;background:#333;border:1px solid #555;color:#aaa;font-size:11px;cursor:pointer;padding:3px 8px;border-radius:5px;">▶ Menu</button>
       </div>
 
       <!-- Header Info Panel -->
@@ -4809,6 +4823,9 @@
   <!-- ROW MENU POPOVER -->
   <div id="row-menu-popover">
     <button class="qaqc"  onclick="rowMenuQAQC()">✚ Tambah QAQC</button>
+    <button class="danger" onclick="rowMenuDeleteData()">🗑 Delete Data</button>
+    <button class="danger" onclick="rowMenuDeleteRow()">✕ Delete Baris</button>
+  </div>
 
   <!-- MERGE FLOATING POPUP -->
   <div id="merge-popup">
@@ -4818,9 +4835,6 @@
       <button class="mp-apply" onclick="applyMerge()">✓ Terapkan</button>
       <button class="mp-cancel" onclick="cancelMerge()">✕ Batal</button>
     </div>
-  </div>
-    <button class="danger" onclick="rowMenuDeleteData()">🗑 Delete Data</button>
-    <button class="danger" onclick="rowMenuDeleteRow()">✕ Delete Baris</button>
   </div>
 
   <!-- MODAL: INPUT QAQC SAMPLE ID -->
