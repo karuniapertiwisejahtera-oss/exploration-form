@@ -2138,6 +2138,22 @@
       highlightDuplicates();
     }
 
+    // ===== FORMAT 2 DESIMAL =====
+    function fmt2(v) {
+      if (v === '' || v === null || v === undefined) return '';
+      const n = parseFloat(String(v).replace(',', '.'));
+      if (!isFinite(n)) return v;
+      return n.toFixed(2);
+    }
+
+    // Format semua input number di tabel ke 2 desimal saat blur
+    function attachNumFormat(el) {
+      if (!el || el.readOnly) return;
+      el.addEventListener('blur', function() {
+        if (this.value !== '') this.value = fmt2(this.value);
+      });
+    }
+
     function attachRowListeners(n) {
       const fcEl = document.getElementById('from_cum_' + n);
       if (fcEl) fcEl.addEventListener('change', recalcSamplingNo);
@@ -2396,8 +2412,16 @@
     }
 
     function attachTotListeners(n) {
+      // Format 2 desimal untuk semua field numerik di baris
+      ['from','to','len','rec','core_wt','dry_wt','send_cum',
+       'a10_tot','a10_rec','a2_tot','a2_rec','a06_tot','a06_rec',
+       'm06_tot','m06_rec','p03_tot','p03_rec'].forEach(field => {
+        const el = document.querySelector(`[name="${field}_${n}"]`);
+        if (el) attachNumFormat(el);
+      });
       ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(field => {
         const el = document.querySelector(`[name="${field}_${n}"]`);
+        if (el) attachNumFormat(el);  // format 2 desimal on blur
         if (!el) return;
         el.addEventListener('change', () => calcRec(n));
         el.addEventListener('input',  () => { calcRec(n); });
@@ -4070,17 +4094,27 @@
       // Build XLS HTML
       let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
       html += '<head><meta charset="UTF-8"><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Sheet1</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body><table>';
+
+      // Kolom yang berisi teks (Sample_ID, Samp_No, dll) — gunakan format text
+      // Semua kolom numerik pakai 2 desimal
+      const TEXT_COLS_HEADER = ['sample_id','samp_no','grain','jenis','remarks','original','sid','id'];
       rows.forEach((row, ri) => {
         html += '<tr>';
         row.forEach((cell, ci) => {
           if (ri === 0) {
             html += '<th>' + cell + '</th>';
-          } else if (TWO_DEC_COLS.has(ci)) {
-            html += '<td style="mso-number-format:"0.00">' + cell + '</td>';
-          } else if (ci === FRAKSI_COL) {
-            html += '<td style="mso-number-format:\\@">' + cell + '</td>';
           } else {
-            html += '<td>' + cell + '</td>';
+            // Cek apakah cell adalah angka
+            const numVal = parseFloat(cell);
+            const isNum = cell !== '' && !isNaN(numVal) && isFinite(numVal);
+            if (isNum) {
+              // Format angka dengan 2 desimal
+              html += '<td style="mso-number-format:&quot;0.00&quot;;">' + numVal.toFixed(2) + '</td>';
+            } else if (ci === FRAKSI_COL || (rows[0] && rows[0][ci] && /id|no|grain|jenis|remark/i.test(rows[0][ci]))) {
+              html += '<td style="mso-number-format:\\@">' + cell + '</td>';
+            } else {
+              html += '<td>' + cell + '</td>';
+            }
           }
         });
         html += '</tr>';
@@ -4281,15 +4315,16 @@
       domRows.forEach((tr, ri) => {
         const n = tr.dataset.row;
         const g = (name) => { const el = document.querySelector('[name="'+name+'_'+n+'"]'); return el ? (el.value || '') : ''; };
+        const fmtN = (v) => { if (v === '' || v === null) return ''; const n2 = parseFloat(v); return isFinite(n2) ? n2.toFixed(2) : v; };
         const vals = [
-          g('from'), g('to'), g('len'), g('rec'), g('grain'), g('core_wt'),
-          g('from_cum'), g('to_cum'), g('samp_no'), g('dry_wt'),
+          fmtN(g('from')), fmtN(g('to')), fmtN(g('len')), fmtN(g('rec')), g('grain'), fmtN(g('core_wt')),
+          fmtN(g('from_cum')), fmtN(g('to_cum')), g('samp_no'), fmtN(g('dry_wt')),
           g('sample_id') + (g('m06_orig_sid') ? '\n' + g('m06_orig_sid') : ''),
-          g('a10_tot'), g('a10_rec'), g('a10_sid'),
-          g('a2_tot'),  g('a2_rec'),  g('a2_sid'),
-          g('a06_tot'), g('a06_rec'), g('a06_sid'),
-          g('m06_tot'), g('m06_rec'), g('m06_sid'),
-          g('p03_tot'), g('p03_rec'), g('p03_sid'),
+          fmtN(g('a10_tot')), fmtN(g('a10_rec')), g('a10_sid'),
+          fmtN(g('a2_tot')),  fmtN(g('a2_rec')),  g('a2_sid'),
+          fmtN(g('a06_tot')), fmtN(g('a06_rec')), g('a06_sid'),
+          fmtN(g('m06_tot')), fmtN(g('m06_rec')), g('m06_sid'),
+          fmtN(g('p03_tot')), fmtN(g('p03_rec')), g('p03_sid'),
           g('remarks')
         ];
 
