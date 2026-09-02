@@ -1008,13 +1008,26 @@
       `;
       card.appendChild(hdr);
 
+      // Hitung Sieve WT = jumlah semua fraksi tot
+      let sieveWt = 0;
+      ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(field => {
+        const el = document.querySelector(`[name="${field}_${n}"]`);
+        if (el && el.value) sieveWt += parseFloat(el.value) || 0;
+      });
+      const sieveWtStr = sieveWt > 0 ? sieveWt.toFixed(2) : '';
+      // H2O = (Core WT - Sieve WT) / Core WT * 100
+      const coreWtNum = parseFloat(aggCoreWtStr) || 0;
+      const h2oStr = (coreWtNum > 0 && sieveWt > 0)
+        ? ((coreWtNum - sieveWt) / coreWtNum * 100).toFixed(2) + '%'
+        : '';
+
       let fracHtml = '';
       if (!isQ) {
         fracHtml = `<div style="font-size:10px;font-weight:700;color:#1a6b4a;text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px;border-bottom:1.5px solid #e8f5e9;padding-bottom:2px;">Fraksi (Total | Rec | Sample ID)</div>`;
         EXP_FRAC_DEFS.forEach(f => {
           fracHtml += `<div class="exp-frac-row">
             <span class="frac-label">${f.label}</span>
-            <input type="number" data-expfield="${f.key}_tot" data-exprow="${n}" value="${d[f.key+'_tot']||''}" placeholder="Total" step="0.01">
+            <input type="number" data-expfield="${f.key}_tot" data-exprow="${n}" value="${d[f.key+'_tot']||''}" placeholder="Total" step="1">
             <input type="number" data-expfield="${f.key}_rec" data-exprow="${n}" value="${d[f.key+'_rec']||''}" placeholder="Rec" readonly>
             <input type="text" data-expfield="${f.key}_sid" data-exprow="${n}" value="${d[f.key+'_sid']||''}" placeholder="Sample ID">
           </div>`;
@@ -1024,9 +1037,9 @@
       const body = document.createElement('div');
       if (isQ) {
         body.innerHTML = `
-          <div class="exp-detail-grid">
+          <div class="exp-detail-grid" style="grid-template-columns:repeat(3,1fr);">
             ${inp('Send Cum','send_cum','number',false,d.send_cum)}
-            ${inp('Original Sample ID','sample_id','text',false,d.sample_id)}
+            ${inp('Sample ID','sample_id','text',false,d.sample_id)}
             ${inp('Remarks','remarks','text',false,d.remarks)}
           </div>
           <div class="exp-detail-actions" style="margin-top:8px;">
@@ -1034,18 +1047,24 @@
           </div>`;
       } else {
         body.innerHTML = `
-          <div class="exp-detail-grid">
+          <div class="exp-detail-grid" style="grid-template-columns:repeat(3,1fr);gap:8px 12px;">
             ${inp('From (m)','from_cum','number',true,d.from_cum)}
             ${inp('To (m)','to_cum','number',true,d.to_cum)}
             ${inp('Rec Length','rec','number',true,aggRecStr)}
-            <div class="exp-detail-field" style="grid-column:span 1;"><label>GRAIN</label>
-              <input type="text" value="${aggGrain}" readonly style="background:#f5f5f5;color:#888;">
-            </div>
-            ${inp('Core Wt (g)','core_wt','number',true,aggCoreWtStr)}
-            ${inp('Dry Wt (g)','dry_wt','number',false,d.dry_wt)}
+            ${inp('Grain','grain','text',true,aggGrain)}
+            ${inp('Core WT (g)','core_wt','number',true,aggCoreWtStr)}
+            ${inp('Dry WT (g)','dry_wt','number',false,d.dry_wt)}
             ${inp('Send Cum','send_cum','number',false,d.send_cum)}
-            ${inp('Original SID','sample_id','text',false,d.sample_id)}
-            ${inp('+0.3 SID','m06_orig_sid','text',false,d.m06_orig_sid)}
+            ${inp('Sample ID','sample_id','text',false,d.sample_id)}
+            <div class="exp-detail-field"><label>SIEVE WT (G)</label>
+              <input type="text" id="exp-sieve-wt-${n}" value="${sieveWtStr}" readonly
+                style="background:#e8f5e9;color:#1a6b4a;font-weight:700;border-color:#a8d5b5;text-align:center;">
+            </div>
+            <div class="exp-detail-field"><label>H2O (%)</label>
+              <input type="text" id="exp-h2o-${n}" value="${h2oStr}" readonly
+                style="background:#e3f2fd;color:#1565c0;font-weight:700;border-color:#90caf9;text-align:center;">
+            </div>
+            ${inp('Orig SID','m06_orig_sid','text',false,d.m06_orig_sid)}
             ${inp('Remarks','remarks','text',false,d.remarks)}
           </div>
           ${fracHtml}
@@ -1058,6 +1077,20 @@
 
       // Listeners
       body.querySelectorAll('[data-expfield]').forEach(el => {
+        const recalcSieveH2O = () => {
+          let sw = 0;
+          ['a10_tot','a2_tot','a06_tot','m06_tot','p03_tot'].forEach(f => {
+            const domEl = document.querySelector(`[name="${f}_${n}"]`);
+            if (domEl && domEl.value) sw += parseFloat(domEl.value) || 0;
+          });
+          const sieveEl = document.getElementById('exp-sieve-wt-' + n);
+          const h2oEl = document.getElementById('exp-h2o-' + n);
+          if (sieveEl) sieveEl.value = sw > 0 ? sw.toFixed(2) : '';
+          if (h2oEl) {
+            const cw = parseFloat(aggCoreWtStr) || 0;
+            h2oEl.value = (cw > 0 && sw > 0) ? ((cw - sw) / cw * 100).toFixed(2) + '%' : '';
+          }
+        };
         const sync = () => {
           const fld = el.dataset.expfield, rn = el.dataset.exprow;
           const dom = document.querySelector(`[name="${fld}_${rn}"]`);
@@ -1068,7 +1101,13 @@
           });
         };
         el.addEventListener('change', sync);
-        el.addEventListener('input', () => { sync(); if (el.dataset.expfield?.endsWith('_tot')) calcRec(parseInt(el.dataset.exprow)); });
+        el.addEventListener('input', () => {
+          sync();
+          if (el.dataset.expfield?.endsWith('_tot')) {
+            calcRec(parseInt(el.dataset.exprow));
+            recalcSieveH2O();
+          }
+        });
       });
 
       // Append card S/Q ke container
