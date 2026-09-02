@@ -3,197 +3,395 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Sample Preparation</title>
+  <title>Sample Preparation Form</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: 'Segoe UI', sans-serif; }
+    html, body { height: 100%; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
 
-    /* ===== WELCOME SCREEN ===== */
+    /* ========== SHARED ========== */
+    .screen { display: none; height: 100vh; flex-direction: column; overflow-y: auto; }
+    .screen.active { display: flex; }
+
+    /* ========== WELCOME SCREEN ========== */
     #welcome-screen {
-      display: flex;
-      flex-direction: column;
+      background: #f0f2f4;
+      position: relative;
+    }
+
+    /* Contour wave background */
+    .bg-contour {
+      position: absolute; inset: 0; overflow: hidden; z-index: 0;
+      pointer-events: none;
+    }
+    .bg-contour svg { width: 100%; height: 100%; opacity: 0.07; }
+
+    /* Wave bottom */
+    .wave-bottom {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 1;
+      pointer-events: none;
+    }
+    .wave-bottom svg { display: block; }
+
+    .welcome-content {
+      position: relative; z-index: 2;
+      flex: 1;
+      display: flex; flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: linear-gradient(160deg, #0d1f14 0%, #1a3a26 50%, #0d1f14 100%);
-      color: white;
-      text-align: center;
-      padding: 20px;
+      padding: 48px 28px 20px;
+      max-width: 420px;
+      margin: 0 auto;
+      width: 100%;
     }
-    .welcome-logo {
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg, #1a6b4a, #2da068);
-      border-radius: 20px;
+
+    /* Logo hexagon */
+    .logo-hex {
+      width: 90px; height: 90px;
+      background: #fff;
+      border: 2px solid #c8d0d8;
+      border-radius: 24px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
-      margin-bottom: 24px;
-      box-shadow: 0 8px 32px rgba(26,107,74,0.5);
+      font-size: 42px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
-    .welcome-company {
-      font-size: 11px; font-weight: 600; letter-spacing: 3px;
-      text-transform: uppercase; color: #6dbf8a;
-      margin-bottom: 8px;
-    }
+
     .welcome-title {
-      font-size: 28px; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 1px;
-      color: #ffffff; line-height: 1.2;
+      font-size: 30px; font-weight: 900;
+      text-transform: uppercase;
+      color: #1a1a2e;
+      text-align: center;
+      line-height: 1.15;
+      letter-spacing: 0.5px;
       margin-bottom: 6px;
     }
+    .welcome-dot { width: 32px; height: 3px; background: #444; border-radius: 2px; margin: 8px auto 12px; }
     .welcome-sub {
-      font-size: 13px; color: #8abfa0;
-      margin-bottom: 48px;
-    }
-    .btn-get-started {
-      background: linear-gradient(135deg, #1a6b4a, #2da068);
-      color: white; border: none;
-      padding: 16px 48px; border-radius: 50px;
-      font-size: 15px; font-weight: 700;
-      cursor: pointer; letter-spacing: 0.5px;
-      box-shadow: 0 6px 24px rgba(26,107,74,0.4);
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .btn-get-started:active {
-      transform: scale(0.97);
-      box-shadow: 0 3px 12px rgba(26,107,74,0.3);
-    }
-    .welcome-version {
-      position: absolute; bottom: 16px;
-      font-size: 10px; color: #3a6a4a;
+      font-size: 13px; color: #666;
+      text-align: center; line-height: 1.6;
+      margin-bottom: 28px;
+      max-width: 300px;
     }
 
-    /* ===== MENU SCREEN ===== */
-    #menu-screen {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-      background: #0d1f14;
+    /* Feature image placeholder area */
+    .feature-visual {
+      width: 100%;
+      background: linear-gradient(135deg, #dde2e8, #c8d0da);
+      border-radius: 16px;
+      height: 160px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 64px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      position: relative;
     }
-    .menu-header {
-      background: linear-gradient(135deg, #111, #222);
-      padding: 16px 20px;
-      display: flex; align-items: center; gap: 12px;
-      border-bottom: 1px solid #1a3a26;
+    .feature-visual::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(240,242,244,0.4));
+    }
+
+    /* Feature cards row */
+    .features-row {
+      display: flex; gap: 10px;
+      width: 100%;
+      margin-bottom: 28px;
+    }
+    .feature-card {
+      flex: 1;
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+      border: 1px solid #e0e4e8;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .feature-card .f-icon { font-size: 22px; margin-bottom: 6px; }
+    .feature-card .f-title { font-size: 11px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+    .feature-card .f-desc { font-size: 9px; color: #888; line-height: 1.3; }
+
+    /* Get Started button */
+    .btn-get-started {
+      width: 100%;
+      background: #1a1a2e;
+      color: #fff;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-size: 14px; font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: transform 0.1s;
+    }
+    .btn-get-started:active { transform: scale(0.98); }
+    .btn-get-started .arrow-circle {
+      width: 28px; height: 28px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    .welcome-footer {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 16px 0 28px;
+      font-size: 10px; color: #999;
+      letter-spacing: 1px;
+    }
+    .welcome-footer .dots { display: flex; justify-content: center; gap: 6px; margin-top: 6px; }
+    .welcome-footer .dot { width: 4px; height: 4px; background: #bbb; border-radius: 50%; }
+
+    /* ========== MENU SCREEN ========== */
+    #menu-screen {
+      background: #f0f2f4;
+      position: relative;
+    }
+
+    .menu-top {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 36px 20px 20px;
       flex-shrink: 0;
     }
-    .menu-header-icon {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #1a6b4a, #2da068);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
+    .menu-logo {
+      font-size: 40px; margin-bottom: 10px;
     }
-    .menu-header-title { flex: 1; }
-    .menu-header-title .company { font-size: 9px; color: #6dbf8a; text-transform: uppercase; letter-spacing: 1.5px; }
-    .menu-header-title .app { font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
-    .menu-body {
-      flex: 1; overflow-y: auto;
-      padding: 24px 20px;
-      display: flex; flex-direction: column; gap: 12px;
+    .menu-app-title {
+      font-size: 22px; font-weight: 900;
+      text-transform: uppercase; color: #1a1a2e;
+      letter-spacing: 0.5px; line-height: 1.2;
+      margin-bottom: 4px;
     }
-    .menu-card {
-      background: linear-gradient(135deg, #1a2a20, #162219);
-      border: 1px solid #2a4a30;
+    .menu-app-sub {
+      font-size: 10px; color: #888;
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+    .menu-divider { width: 32px; height: 2px; background: #333; border-radius: 2px; margin: 10px auto 0; }
+
+    .menu-list {
+      position: relative; z-index: 2;
+      flex: 1;
+      padding: 16px 20px;
+      display: flex; flex-direction: column; gap: 10px;
+      max-width: 420px; margin: 0 auto; width: 100%;
+    }
+
+    .menu-item {
+      background: #fff;
       border-radius: 16px;
-      padding: 20px;
-      display: flex; align-items: center; gap: 16px;
+      padding: 16px;
+      display: flex; align-items: center; gap: 14px;
       cursor: pointer;
-      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+      border: 1px solid #e4e8ec;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: transform 0.1s, box-shadow 0.1s;
       text-decoration: none;
     }
-    .menu-card:active { transform: scale(0.98); }
-    .menu-card:hover { background: linear-gradient(135deg, #223228, #1a2a20); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-    .menu-card.danger { border-color: #4a2020; background: linear-gradient(135deg, #2a1a1a, #1e1212); }
-    .menu-card.danger:hover { background: linear-gradient(135deg, #341f1f, #2a1a1a); }
-    .menu-icon {
-      width: 52px; height: 52px; flex-shrink: 0;
-      border-radius: 14px;
+    .menu-item:active { transform: scale(0.98); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .menu-item-icon {
+      width: 48px; height: 48px; flex-shrink: 0;
+      border-radius: 50%;
+      background: #f0f2f4;
       display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
+      font-size: 22px;
+      border: 1px solid #e0e4e8;
     }
-    .menu-icon.green { background: linear-gradient(135deg, #1a6b4a22, #1a6b4a44); border: 1px solid #1a6b4a66; }
-    .menu-icon.blue  { background: linear-gradient(135deg, #1a4a6b22, #1a4a6b44); border: 1px solid #1a4a6b66; }
-    .menu-icon.orange{ background: linear-gradient(135deg, #6b4a1a22, #6b4a1a44); border: 1px solid #6b4a1a66; }
-    .menu-icon.red   { background: linear-gradient(135deg, #6b1a1a22, #6b1a1a44); border: 1px solid #6b1a1a66; }
-    .menu-text { flex: 1; }
-    .menu-text .title { font-size: 15px; font-weight: 700; color: #e8f5e9; margin-bottom: 3px; }
-    .menu-text .desc  { font-size: 11px; color: #6dbf8a; line-height: 1.4; }
-    .menu-card.danger .menu-text .title { color: #ffaaaa; }
-    .menu-card.danger .menu-text .desc  { color: #cc8888; }
-    .menu-arrow { font-size: 18px; color: #3a6a4a; }
-    .menu-card.danger .menu-arrow { color: #8a4a4a; }
+    .menu-item-text { flex: 1; }
+    .menu-item-text .mi-title {
+      font-size: 13px; font-weight: 800;
+      color: #1a1a2e; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 2px;
+    }
+    .menu-item-text .mi-desc {
+      font-size: 11px; color: #888; line-height: 1.3;
+    }
+    .menu-item-arrow {
+      font-size: 18px; color: #aaa;
+      font-weight: 300;
+    }
+    .menu-item.exit .menu-item-text .mi-title { color: #c0392b; }
+    .menu-item.exit .menu-item-arrow { color: #e74c3c; }
+    .menu-item.exit .menu-item-icon { background: #fdf0f0; border-color: #f5c0c0; }
+
+    .menu-bottom {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 12px 0 24px;
+      flex-shrink: 0;
+    }
+    .menu-bottom-text {
+      font-size: 9px; color: #bbb;
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+    .quality-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-top: 4px;
+      font-size: 9px; color: #aaa;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .quality-dot { width: 3px; height: 3px; background: #bbb; border-radius: 50%; }
+
+    /* ========== WAVE SVG ========== */
+    .bg-wave {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      pointer-events: none; z-index: 1;
+    }
   </style>
 </head>
 <body>
 
-  <!-- WELCOME SCREEN -->
-  <div id="welcome-screen">
-    <div class="welcome-logo">🧪</div>
-    <div class="welcome-company">PT Kasmar Poleang Raya</div>
-    <div class="welcome-title">Sample<br>Preparation Form</div>
-    <div class="welcome-sub">Sistem pencatatan dan pengolahan data sampel</div>
-    <button class="btn-get-started" onclick="showMenu()">Get Started →</button>
-    <div class="welcome-version">v1.0 — Exploration Field App</div>
+  <!-- ===== WELCOME SCREEN ===== -->
+  <div id="welcome-screen" class="screen active">
+    <!-- Contour background -->
+    <div class="bg-contour">
+      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
+        <path d="M-50 200 Q100 150 200 200 Q300 250 450 180" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 240 Q100 190 200 240 Q300 290 450 220" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 280 Q100 230 200 280 Q300 330 450 260" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 320 Q100 270 200 320 Q300 370 450 300" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 360 Q100 310 200 360 Q300 410 450 340" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 400 Q100 350 200 400 Q300 450 450 380" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 440 Q100 390 200 440 Q300 490 450 420" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 480 Q100 430 200 480 Q300 530 450 460" fill="none" stroke="#000" stroke-width="1.5"/>
+      </svg>
+    </div>
+
+    <div class="welcome-content">
+      <div class="logo-hex">⚗️</div>
+      <div class="welcome-title">Preparation<br>Form App</div>
+      <div class="welcome-dot"></div>
+      <div class="welcome-sub">Digital form for sample preparation recording, monitoring, and quality control.</div>
+
+      <!-- Feature Visual -->
+      <div class="feature-visual">⚖️ &nbsp; 🔬 &nbsp; 📋</div>
+
+      <!-- Feature Cards -->
+      <div class="features-row">
+        <div class="feature-card">
+          <div class="f-icon">📝</div>
+          <div class="f-title">Digital Form</div>
+          <div class="f-desc">Record data accurately and systematically</div>
+        </div>
+        <div class="feature-card">
+          <div class="f-icon">📊</div>
+          <div class="f-title">Monitoring</div>
+          <div class="f-desc">Track preparation process in real-time</div>
+        </div>
+        <div class="feature-card">
+          <div class="f-icon">✅</div>
+          <div class="f-title">Quality Control</div>
+          <div class="f-desc">Ensure data quality and reliability</div>
+        </div>
+      </div>
+
+      <button class="btn-get-started" onclick="showMenu()">
+        <div class="arrow-circle">→</div>
+        GET STARTED
+      </button>
+    </div>
+
+    <div class="welcome-footer">
+      <div>Version 1.0.0</div>
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+
+    <!-- Wave bottom -->
+    <div class="bg-wave">
+      <svg viewBox="0 0 400 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="height:60px;width:100%;">
+        <path d="M0,40 Q100,10 200,40 Q300,70 400,30 L400,80 L0,80 Z" fill="#dde2e8" opacity="0.5"/>
+        <path d="M0,55 Q100,30 200,55 Q300,80 400,50 L400,80 L0,80 Z" fill="#c8d0da" opacity="0.4"/>
+      </svg>
+    </div>
   </div>
 
-  <!-- MENU SCREEN -->
-  <div id="menu-screen">
-    <div class="menu-header">
-      <div class="menu-header-icon">🧪</div>
-      <div class="menu-header-title">
-        <div class="company">PT Kasmar Poleang Raya</div>
-        <div class="app">Sample Preparation</div>
+
+  <!-- ===== MENU SCREEN ===== -->
+  <div id="menu-screen" class="screen">
+    <!-- Contour background -->
+    <div class="bg-contour">
+      <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
+        <path d="M-50 150 Q150 100 250 150 Q350 200 450 130" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 200 Q150 150 250 200 Q350 250 450 180" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 250 Q150 200 250 250 Q350 300 450 230" fill="none" stroke="#000" stroke-width="1.5"/>
+        <path d="M-50 600 Q150 560 250 600 Q350 640 450 580" fill="none" stroke="#000" stroke-width="1"/>
+        <path d="M-50 640 Q150 600 250 640 Q350 680 450 620" fill="none" stroke="#000" stroke-width="1"/>
+      </svg>
+    </div>
+
+    <div class="menu-top">
+      <div class="menu-logo">⚗️</div>
+      <div class="menu-app-title">Preparation Form</div>
+      <div class="menu-app-sub">PT Kasmar Poleang Raya</div>
+      <div class="menu-divider"></div>
+    </div>
+
+    <div class="menu-list">
+
+      <div class="menu-item" onclick="openNewData()">
+        <div class="menu-item-icon">📄</div>
+        <div class="menu-item-text">
+          <div class="mi-title">New Data</div>
+          <div class="mi-desc">Create a new preparation form data</div>
+        </div>
+        <div class="menu-item-arrow">›</div>
+      </div>
+
+      <div class="menu-item" onclick="openDataView()">
+        <div class="menu-item-icon">🔍</div>
+        <div class="menu-item-text">
+          <div class="mi-title">Data View</div>
+          <div class="mi-desc">View and search preparation data</div>
+        </div>
+        <div class="menu-item-arrow">›</div>
+      </div>
+
+      <div class="menu-item" onclick="openArchive()">
+        <div class="menu-item-icon">📦</div>
+        <div class="menu-item-text">
+          <div class="mi-title">Archive Samples</div>
+          <div class="mi-desc">View archived and completed samples</div>
+        </div>
+        <div class="menu-item-arrow">›</div>
+      </div>
+
+      <div class="menu-item exit" onclick="exitApp()">
+        <div class="menu-item-icon">🚪</div>
+        <div class="menu-item-text">
+          <div class="mi-title">Exit Application</div>
+          <div class="mi-desc">Close the application safely</div>
+        </div>
+        <div class="menu-item-arrow">›</div>
+      </div>
+
+    </div>
+
+    <div class="menu-bottom">
+      <div class="quality-row">
+        <span>Quality</span>
+        <div class="quality-dot"></div>
+        <span>Accuracy</span>
+        <div class="quality-dot"></div>
+        <span>Reliability</span>
       </div>
     </div>
-    <div class="menu-body">
 
-      <!-- NEW DATA -->
-      <div class="menu-card" onclick="openNewData()">
-        <div class="menu-icon green">➕</div>
-        <div class="menu-text">
-          <div class="title">New Data</div>
-          <div class="desc">Buka form preparation baru untuk Hole ID baru</div>
-        </div>
-        <div class="menu-arrow">›</div>
-      </div>
-
-      <!-- DATA VIEW -->
-      <div class="menu-card" onclick="openDataView()">
-        <div class="menu-icon blue">📋</div>
-        <div class="menu-text">
-          <div class="title">Data View</div>
-          <div class="desc">Lihat semua data yang tersimpan, edit atau lanjutkan pengisian</div>
-        </div>
-        <div class="menu-arrow">›</div>
-      </div>
-
-      <!-- ARCHIVE SAMPLES -->
-      <div class="menu-card" onclick="openArchive()">
-        <div class="menu-icon orange">📦</div>
-        <div class="menu-text">
-          <div class="title">Archive Samples</div>
-          <div class="desc">Arsip data sampel yang telah disubmit</div>
-        </div>
-        <div class="menu-arrow">›</div>
-      </div>
-
-      <!-- EXIT -->
-      <div class="menu-card danger" onclick="exitApp()">
-        <div class="menu-icon red">✕</div>
-        <div class="menu-text">
-          <div class="title">Exit Application</div>
-          <div class="desc">Keluar dari aplikasi</div>
-        </div>
-        <div class="menu-arrow">›</div>
-      </div>
-
+    <!-- Wave bottom -->
+    <div class="bg-wave">
+      <svg viewBox="0 0 400 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="height:60px;width:100%;">
+        <path d="M0,40 Q100,10 200,40 Q300,70 400,30 L400,80 L0,80 Z" fill="#dde2e8" opacity="0.5"/>
+        <path d="M0,55 Q100,30 200,55 Q300,80 400,50 L400,80 L0,80 Z" fill="#c8d0da" opacity="0.4"/>
+      </svg>
     </div>
   </div>
+
 
   <script>
     function showMenu() {
-      document.getElementById('welcome-screen').style.display = 'none';
-      document.getElementById('menu-screen').style.display = 'flex';
+      document.getElementById('welcome-screen').classList.remove('active');
+      document.getElementById('menu-screen').classList.add('active');
     }
 
     function openNewData() {
@@ -203,20 +401,17 @@
     }
 
     function openDataView() {
-      // Open preparation.html in continue mode — shows saved records list
       sessionStorage.setItem('form_mode', 'list');
       window.location.href = 'preparation.html';
     }
 
     function openArchive() {
-      // Future: archive page
       alert('Archive Samples — Coming soon');
     }
 
     function exitApp() {
       if (confirm('Keluar dari aplikasi?')) {
         window.close();
-        // Fallback jika window.close() tidak berhasil
         history.back();
       }
     }
