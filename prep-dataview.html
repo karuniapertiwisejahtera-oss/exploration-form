@@ -225,8 +225,8 @@
       <div class="dv-title">Data View</div>
       <div class="dv-sub" id="dv-record-count">Memuat data...</div>
     </div>
-    <label class="btn-import-csv" for="csv-import-input">Import CSV</label>
-    <input type="file" id="csv-import-input" accept=".csv,.txt">
+    <label class="btn-import-csv" for="csv-import-input">Import Data</label>
+    <input type="file" id="csv-import-input" accept=".json,.csv">
   </div>
 
   <!-- BODY: LIST CARDS -->
@@ -438,7 +438,7 @@
       URL.revokeObjectURL(url);
     }
 
-    // ===== IMPORT CSV (Logging) =====
+    // ===== IMPORT DATA (JSON dari Export Data preparation form) =====
     document.getElementById('csv-import-input').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -448,6 +448,38 @@
           const text = ev.target.result;
           if (!text || !text.trim()) { alert('File kosong'); return; }
 
+          // ======= COBA PARSE JSON =======
+          if (file.name.toLowerCase().endsWith('.json') || text.trim().startsWith('{')) {
+            const data = JSON.parse(text);
+            // Format: { preparation: [ {...record...} ] }
+            if (data.preparation && Array.isArray(data.preparation) && data.preparation.length > 0) {
+              const existing = DB.getAll('preparation');
+              let imported = 0;
+              data.preparation.forEach(rec => {
+                if (!rec.id) rec.id = Date.now() + Math.floor(Math.random() * 1000);
+                // Cek apakah sudah ada (by hole_id + date_start)
+                const dup = existing.find(r =>
+                  r.hole_id === rec.hole_id && r.date_start === rec.date_start
+                );
+                if (dup) {
+                  // Update record yang ada
+                  Object.assign(dup, rec);
+                } else {
+                  existing.push(rec);
+                }
+                imported++;
+              });
+              localStorage.setItem('db_preparation', JSON.stringify(existing));
+              loadRecords();
+              alert('Import berhasil: ' + imported + ' record diimpor/diperbarui.\n\nKlik card untuk melanjutkan input.');
+            } else {
+              alert('Format JSON tidak dikenali. Gunakan file hasil Export Data dari preparation form.');
+            }
+            return;
+          }
+
+          // ======= COBA PARSE CSV EXPORT PREPARATION =======
+          // CSV dari tombol Export/Submit preparation form
           const lines = text.trim().split(/\r?\n/);
           if (lines.length < 2) { alert('CSV harus punya header + minimal 1 baris data'); return; }
 
@@ -461,92 +493,80 @@
           else if (semiCount > commaCount) sep = ';';
 
           const rawHeaders = lines[0].split(sep).map(h => h.trim().replace(/^"|"$/g,''));
-          const headers    = rawHeaders.map(h => h.toLowerCase().replace(/[^a-z0-9]/g,''));
+          const headers    = rawHeaders.map(h => h.toLowerCase().replace(/[^a-z0-9_]/g,''));
 
-          function findCol(...names) {
-            for (const n of names) {
-              let idx = headers.indexOf(n);
-              if (idx >= 0) return idx;
-            }
-            for (const n of names) {
-              let idx = headers.findIndex(h => h.startsWith(n));
-              if (idx >= 0) return idx;
-            }
-            return -1;
-          }
+          // Map kolom CSV ke field DB
+          const COL_MAP = {
+            'from': 'from', 'to': 'to', 'length': 'len', 'lengthm': 'len',
+            'reclength': 'rec', 'recovery': 'rec', 'recoverylength': 'rec',
+            'grainsize': 'grain', 'grain': 'grain',
+            'corewt': 'core_wt', 'coreweight': 'core_wt',
+            'fromcum': 'from_cum', 'tocum': 'to_cum',
+            'sampno': 'samp_no', 'samplingno': 'samp_no',
+            'drywt': 'dry_wt', 'dryweight': 'dry_wt',
+            'sendcumulative': 'send_cum', 'sendcum': 'send_cum',
+            'sampleid': 'sample_id', 'sample_id': 'sample_id',
+            'originalsampleid': 'm06_orig_sid',
+            'a10tot': 'a10_tot', '10mmtotal': 'a10_tot',
+            'a10rec': 'a10_rec', '10mmrec': 'a10_rec',
+            'a10sid': 'a10_sid', '10mmsampleid': 'a10_sid',
+            'a2tot': 'a2_tot', '210mmtotal': 'a2_tot',
+            'a2rec': 'a2_rec', 'a2sid': 'a2_sid',
+            'a06tot': 'a06_tot', 'a06rec': 'a06_rec', 'a06sid': 'a06_sid',
+            'm06tot': 'm06_tot', 'm06rec': 'm06_rec', 'm06sid': 'm06_sid',
+            'p03tot': 'p03_tot', 'p03rec': 'p03_rec', 'p03sid': 'p03_sid',
+            'remarks': 'remarks'
+          };
 
-          const iFrom   = findCol('from','depthfrom','dari','start');
-          const iTo     = findCol('to','depthto','sampai','end');
-          const iLen    = findCol('length','len','panjang','interval');
-          const iRec    = findCol('corerec','core_rec','corerecovery','recoverylength','reclength','recovery','rec');
-          const iGrain  = findCol('grainsize','grain','litho','lithology','jenis');
-          const iHoleId = findCol('holeid','hole_id','holename','hole','bhid');
-          const iDeposit= findCol('deposit','area','lokasi');
+          const colIdx = {};
+          headers.forEach((h, i) => {
+            const mapped = COL_MAP[h];
+            if (mapped && !(mapped in colIdx)) colIdx[mapped] = i;
+          });
 
-          if (iFrom < 0 || iTo < 0) {
-            alert('Kolom From/To tidak ditemukan. Header: ' + rawHeaders.slice(0,6).join(' | '));
+          if (!('from' in colIdx) && !('to' in colIdx)) {
+            alert('Kolom From/To tidak ditemukan.\nHeader: ' + rawHeaders.slice(0,6).join(' | '));
             return;
           }
 
           const dataRows = lines.slice(1).filter(l => l.trim());
-          const rows = [];
-          let holeId = '', deposit = '', totalDepth = '';
+          if (!dataRows.length) { alert('Tidak ada data di CSV'); return; }
 
-          dataRows.forEach((line, idx) => {
-            const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g,'').replace(/,/g,'.'));
-            if (!cols[iFrom] && !cols[iTo]) return;
-            const fv = parseFloat(cols[iFrom]) || 0;
-            const tv = parseFloat(cols[iTo]) || 0;
-            if (idx === 0) {
-              if (iHoleId >= 0) holeId = cols[iHoleId] || '';
-              if (iDeposit >= 0) deposit = cols[iDeposit] || '';
-            }
-            if (idx === dataRows.length - 1) {
-              if (iTo >= 0) totalDepth = cols[iTo] || '';
-            }
-            rows.push({
-              from: cols[iFrom] || '',
-              to: cols[iTo] || '',
-              len: iLen >= 0 ? (cols[iLen] || '') : (tv - fv).toFixed(2),
-              rec: iRec >= 0 ? (cols[iRec] || '') : '',
-              grain: iGrain >= 0 ? (cols[iGrain] || '').trim().toUpperCase() : ''
+          // Cari hole_id dari nama file
+          const holeId = file.name.replace(/^Prep_/i,'').replace(/_.*$/,'').toUpperCase();
+
+          // Build record
+          const rec = {
+            id: Date.now(),
+            hole_id: holeId,
+            date_start: new Date().toISOString().slice(0,10),
+            row_count: dataRows.length
+          };
+
+          dataRows.forEach((line, i) => {
+            const pos = i + 1;
+            const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g,''));
+            Object.keys(colIdx).forEach(field => {
+              const ci = colIdx[field];
+              if (ci !== undefined && cols[ci] !== undefined) {
+                rec[field + '_' + pos] = cols[ci];
+              }
             });
           });
 
-          if (!rows.length) { alert('Tidak ada data ditemukan'); return; }
-
-          // Simpan sebagai record baru di DB
-          const data = {
-            id: Date.now(),
-            hole_id: holeId,
-            deposit: deposit,
-            total_depth: totalDepth,
-            date_start: new Date().toISOString().slice(0,10),
-            row_count: rows.length
-          };
-          rows.forEach((r, i) => {
-            const p = i + 1;
-            data['from_' + p] = r.from;
-            data['to_' + p] = r.to;
-            data['len_' + p] = r.len;
-            data['rec_' + p] = r.rec;
-            data['grain_' + p] = r.grain;
-          });
-
           const existing = DB.getAll('preparation');
-          existing.push(data);
+          existing.push(rec);
           localStorage.setItem('db_preparation', JSON.stringify(existing));
-
-          // Redirect ke preparation.html untuk melengkapi data
-          sessionStorage.setItem('form_mode', 'edit');
-          sessionStorage.setItem('edit_record_id', String(data.id));
-          if (confirm('CSV berhasil diimport (' + rows.length + ' baris).\nBuka form preparation sekarang?')) {
+          loadRecords();
+          if (confirm('Import berhasil: ' + dataRows.length + ' baris.\nBuka form untuk melanjutkan?')) {
+            sessionStorage.setItem('form_mode', 'edit');
+            sessionStorage.setItem('edit_record_id', String(rec.id));
             window.location.href = 'preparation.html';
-          } else {
-            loadRecords();
           }
+
         } catch(err) {
-          alert('Error parsing CSV: ' + err.message);
+          alert('Error membaca file: ' + err.message);
+          console.error(err);
         }
       };
       reader.readAsText(file, 'UTF-8');
