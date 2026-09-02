@@ -2424,9 +2424,21 @@
       selectedRows = new Set([rowNum]); // sumber otomatis terpilih
 
       document.body.classList.add('merge-mode');
-      // Tampilkan checkbox di semua baris
-      document.querySelectorAll('.merge-check').forEach(function(cb) {
-        cb.style.display = 'inline-block'; cb.checked = false;
+      // Mode merge aktif: hide btn-merge untuk baris belum tergabung, show checkbox
+      document.querySelectorAll('#prep-tbody tr[data-row]').forEach(function(tr) {
+        const rn = tr.dataset.row;
+        const btn = tr.querySelector('.btn-merge');
+        const cb = document.getElementById('merge-check-' + rn);
+        const isMerged = !!tr.dataset.mergeGroup;
+        if (isMerged) {
+          // Baris sudah tergabung: tetap tampil 🔒, sembunyikan checkbox
+          if (btn) btn.style.display = 'inline-block';
+          if (cb) { cb.style.display = 'none'; cb.checked = false; }
+        } else {
+          // Baris belum tergabung: sembunyikan btn, tampilkan checkbox
+          if (btn) btn.style.display = 'none';
+          if (cb) { cb.style.display = 'inline-block'; cb.checked = false; }
+        }
       });
       // Centang checkbox baris sumber
       const srcCb = document.getElementById('merge-check-' + rowNum);
@@ -2484,9 +2496,13 @@
 
     function cancelMerge() {
       document.body.classList.remove('merge-mode');
-      // Sembunyikan semua checkbox
-      document.querySelectorAll('.merge-check').forEach(function(cb) {
-        cb.style.display = 'none'; cb.checked = false;
+      // Restore: sembunyikan checkbox, tampilkan btn-merge
+      document.querySelectorAll('#prep-tbody tr[data-row]').forEach(function(tr) {
+        const rn = tr.dataset.row;
+        const btn = tr.querySelector('.btn-merge');
+        const cb = document.getElementById('merge-check-' + rn);
+        if (btn) btn.style.display = 'inline-block';
+        if (cb) { cb.style.display = 'none'; cb.checked = false; }
       });
       document.getElementById('merge-banner').classList.remove('show');
       // Hide merge popup
