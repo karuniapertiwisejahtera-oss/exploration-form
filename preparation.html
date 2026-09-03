@@ -2670,9 +2670,24 @@
       // Centang checkbox baris sumber
       const srcCb = document.getElementById('merge-check-' + rowNum);
       if (srcCb) srcCb.checked = true;
-      // Sembunyikan popup merge (tidak perlu popup)
+      // Show floating popup di sebelah kanan checkbox aktif
       const popup = document.getElementById('merge-popup');
-      if (popup) popup.classList.remove('show');
+      if (popup) {
+        popup.classList.add('show');
+        const cbEl = document.getElementById('merge-check-' + rowNum);
+        const anchorEl = cbEl || btn;
+        if (anchorEl) {
+          const rect = anchorEl.getBoundingClientRect();
+          let top = rect.top + (rect.height / 2) - 40;
+          let left = rect.right + 10;
+          const pw = 170, ph = 110;
+          if (left + pw > window.innerWidth - 8) left = rect.left - pw - 8;
+          if (top + ph > window.innerHeight - 8) top = window.innerHeight - ph - 8;
+          if (top < 8) top = 8;
+          popup.style.top  = top  + 'px';
+          popup.style.left = left + 'px';
+        }
+      }
       btn.classList.add('active');
 
       // Highlight baris sumber
